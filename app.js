@@ -2,6 +2,11 @@
 
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -11,11 +16,40 @@ const calendarRouter = require('./routes/calendarRoutes');
 
 const app = express();
 
+//Set HTTP Security Headers
+app.use(helmet());
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(express.json());
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP.',
+});
+app.use('/api', limiter);
+
+//Body parser and limit data size for requests
+app.use(
+  express.json({
+    limit: '10kb',
+  })
+);
+
+// Data Sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data Sanitizatoin against XSS
+app.use(xss());
+
+//Prevent parameter pollution
+//white list for parameters you want multiple of
+app.use(hpp({
+  whitelist: [
+    'duration'
+  ]
+}));
 
 const missionaryCalendars = {
   'Arslanian.Zachary':
@@ -118,22 +152,6 @@ const missionaryCalendars = {
     '85ef219a5a1a9c89708ba6af5dadab3aed1b75247445f2f469347cd93cedebff@group.calendar.google.com',
   'Ulrich.Connelly':
     '5bf1a363f5ec2f60ed7f467d3e477459ef7b4ef5d2dcdb4ca45783e438038ca2@group.calendar.google.com',
-};
-
-const sitesCalendars = {
-  'Family Search Center':
-    '75b9d30b6b0cec6a0520f6d14ebbd6471c89843ac3d16f30fccfac0070f6893c@group.calendar.google.com',
-  ROC: '8a99c1fead30e610aae0f02b8f54dcd170ed2b045911c700799725aec774ad25@group.calendar.google.com',
-};
-
-const districtsCalendars = {
-  'Saint George South District':
-    'db0d6158cbb2ed33229ba1fafa458dd60275d644c6cb25e08642c351794d44e6@group.calendar.google.com',
-};
-
-const zonesCalendars = {
-  'Saint George Zone':
-    '8ff1bcceb35c8742d9cd320da2f8a41bc9e10c7a63cffaf5d6b55ad81f337abe@group.calendar.google.com',
 };
 
 const { google } = require('googleapis');
