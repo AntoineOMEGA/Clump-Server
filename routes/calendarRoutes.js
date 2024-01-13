@@ -1,25 +1,27 @@
 const express = require(`express`);
 
 const calendarController = require(`./../controllers/calendarController`);
+const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
 router
   .route('/missionaries')
   .get(
+    authController.protect, 
     calendarController.aliasMissionaryCalendars,
     calendarController.getCalendars
   );
 
 router
   .route(`/`)
-  .get(calendarController.getCalendars)
-  .post(calendarController.createCalendar);
+  .get(authController.protect, calendarController.getCalendars)
+  .post(authController.protect, calendarController.createCalendar);
 
 router
   .route(`/:id`)
-  .get(calendarController.getCalendar)
-  .patch(calendarController.updateCalendar)
-  .delete(calendarController.deleteCalendar);
+  .get(authController.protect, calendarController.getCalendar)
+  .patch(authController.protect, calendarController.updateCalendar)
+  .delete(authController.protect, authController.restrictTo('admin', 'site'), calendarController.deleteCalendar);
 
 module.exports = router;
