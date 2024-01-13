@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
+const userRouter = require('./routes/userRoutes');
 const calendarRouter = require('./routes/calendarRoutes');
 
 const app = express();
@@ -186,9 +187,6 @@ calendar.events.list({
   }
 });
 */
-
-//CALENDAR ROUTER
-const userRouter = express.Router();
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/calendars', calendarRouter);

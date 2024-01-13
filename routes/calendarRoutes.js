@@ -1,9 +1,8 @@
 const express = require(`express`);
 
 const calendarController = require(`./../controllers/calendarController`);
-const router = express.Router();
 
-//router.param(`id`, calendarController.checkID);
+const router = express.Router();
 
 router
   .route('/missionaries')

@@ -127,4 +127,4 @@ dist
 .pnp.*
 
 #custom
-.env
+*.env
