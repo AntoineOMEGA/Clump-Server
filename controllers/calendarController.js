@@ -7,23 +7,23 @@ const { google } = require('googleapis');
 
 const { OAuth2 } = google.auth;
 const oAuth2Client = new OAuth2(
-  '933929627925-m6tpcp0pe9an96roko74618efkgrt1nn.apps.googleusercontent.com',
-  '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'
+  process.env.OAUTH_ID,
+  process.env.OAUTH_SECRET
 );
 
 oAuth2Client.setCredentials({
-  refresh_token:
-    '1//04BPmiCS6VomlCgYIARAAGAQSNwF-L9IrOXD5gQnB7O4qA404_iRWL7hTXuThhnwSwRWS53sMj2orCeWhBofsiQgN812p9og3A0Y',
+  refresh_token: process.env.OAUTH_REFRESH_TOKEN,
 });
 
 const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
+/*
 //Alias route for regularly used queries
 exports.aliasMissionaryCalendars = (req, res, next) => {
   req.query.limit = '1';
   req.query.type = 'person';
   next();
 };
+*/
 
 exports.getCalendars = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Calendar.find(), req.query)
@@ -58,21 +58,23 @@ exports.getCalendar = catchAsync(async (req, res, next) => {
 });
 
 exports.createCalendar = catchAsync(async (req, res, next) => {
+  const newCalendar = await Calendar.create({
+    name: req.body.name,
+    googleID: 'undefined',
+  });
+  
   //Probably need to share the calendar here too
   const newGoogleCalendar = await gCalendar.calendars.insert({
     requestBody: { summary: req.body.name },
   });
 
-  const newGoogleCalendarId = await Calendar.create({
-    name: req.body.name,
-    type: req.body.type,
-    googleID: newGoogleCalendar.data.id,
-  });
-
+  newCalendar.googleID = newGoogleCalendar.data.id;
+  await newCalendar.save();
+  
   res.status(201).json({
     status: 'success',
     data: {
-      calendar: newGoogleCalendarId,
+      calendar: newCalendar,
     },
   });
 });

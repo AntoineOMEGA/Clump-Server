@@ -7,18 +7,8 @@ const calendarSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
-  type: {
-    type: String,
-    required: true,
-    enum: {
-      values: ['missionary', 'site', 'district', 'zone'],
-      message: 'Not a valid type!',
-    },
-  },
   googleID: {
     type: String,
-    required: true,
-    unique: true,
   },
 });
 
