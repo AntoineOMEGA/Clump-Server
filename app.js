@@ -5,7 +5,8 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
-const cors = require('cors');
+const cookieParser = require('cookie-parser');
+var history = require('connect-history-api-fallback');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -16,8 +17,9 @@ const eventRouter = require('./routes/eventRoutes');
 
 const app = express();
 
-//Implement CORS
-app.use(cors());
+app.use(history({
+  htmlAcceptHeaders: ['text/html', 'application/xhtml+xml']
+}));
 
 //Set HTTP Security Headers
 app.use(helmet());
@@ -39,6 +41,12 @@ app.use(
     limit: '10kb',
   })
 );
+app.use(cookieParser());
+
+const path = `${__dirname}/views`;
+app.use(express.static(path));
+
+
 
 // Data Sanitization against NoSQL query injection
 app.use(mongoSanitize());
