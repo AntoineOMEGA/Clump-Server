@@ -1,20 +1,24 @@
 const mongoose = require('mongoose');
 
-const calendarSchema = new mongoose.Schema({
+const missionarySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     unique: true,
     trim: true,
   },
-  googleID: {
+  googleCalendarID: {
     type: String,
   },
+  districtID: {
+    type: String,
+    required: true,
+  }
 });
 
-const Calendar = mongoose.model('Calendar', calendarSchema);
+const Missionary = mongoose.model('Missionary', missionarySchema);
 
-module.exports = Calendar;
+module.exports = Missionary;
 
 //COME BACK TO DO VIRTUAL (TEMPORARY DATA THAT DOESN'T GET ADDED TO THE DB) Video 104
 

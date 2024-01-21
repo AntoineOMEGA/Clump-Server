@@ -12,8 +12,9 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
 const userRouter = require('./routes/userRoutes');
-const calendarRouter = require('./routes/calendarRoutes');
 const eventRouter = require('./routes/eventRoutes');
+const missionaryRouter = require('./routes/missionaryRoutes');
+const assignmentRouter = require('./routes/assignmentRoutes');
 
 const app = express();
 
@@ -63,8 +64,9 @@ app.use(hpp({
 }));
 
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/calendars', calendarRouter);
 app.use('/api/v1/events', eventRouter);
+app.use('/api/v1/missionaries', missionaryRouter);
+app.use('/api/v1/assignments', assignmentRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
