@@ -15,6 +15,8 @@ const userRouter = require('./routes/userRoutes');
 const eventRouter = require('./routes/eventRoutes');
 const missionaryRouter = require('./routes/missionaryRoutes');
 const assignmentRouter = require('./routes/assignmentRoutes');
+const areaRouter = require('./routes/areaRoutes');
+const districtRouter = require('./routes/districtRoutes');
 
 const app = express();
 
@@ -67,6 +69,8 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/events', eventRouter);
 app.use('/api/v1/missionaries', missionaryRouter);
 app.use('/api/v1/assignments', assignmentRouter);
+app.use('/api/v1/areas', areaRouter);
+app.use('/api/v1/districts', districtRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
