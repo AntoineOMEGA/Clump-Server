@@ -19,12 +19,12 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     missionaryController.getMissionaries
   )
   .post(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     missionaryController.createMissionary
   );
 
@@ -32,17 +32,17 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     missionaryController.getMissionary
   )
   .patch(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     missionaryController.updateMissionary
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     missionaryController.deleteMissionary
   );
 

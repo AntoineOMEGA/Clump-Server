@@ -10,7 +10,7 @@ router
   .get(authController.protect, districtController.getDistricts)
   .post(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     districtController.createDistrict
   );
 
@@ -19,12 +19,12 @@ router
   .get(authController.protect, districtController.getDistrict)
   .patch(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     districtController.updateDistrict
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     districtController.deleteDistrict
   );
 

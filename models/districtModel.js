@@ -10,6 +10,9 @@ const districtSchema = new mongoose.Schema({
   area: {
     type: String,
   },
+  color: {
+    type: String,
+  },
 });
 
 const District = mongoose.model('District', districtSchema);

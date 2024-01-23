@@ -10,7 +10,7 @@ router
   .get(authController.protect, areaController.getAreas)
   .post(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     areaController.createArea
   );
 
@@ -19,12 +19,12 @@ router
   .get(authController.protect, areaController.getArea)
   .patch(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     areaController.updateArea
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     areaController.deleteArea
   );
 

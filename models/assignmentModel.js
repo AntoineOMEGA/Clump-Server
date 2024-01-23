@@ -13,6 +13,12 @@ const assignmentSchema = new mongoose.Schema({
   contact: {
     type: String,
   },
+  district: {
+    type: String,
+  },
+  area: {
+    type: String,
+  },
 });
 
 const Assignment = mongoose.model('Assignment', assignmentSchema);

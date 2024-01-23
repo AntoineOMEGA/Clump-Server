@@ -9,12 +9,12 @@ router
   .route('/')
   .get(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     assignmentController.getAssignments
   )
   .post(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     assignmentController.createAssignment
   );
 
@@ -22,17 +22,17 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     assignmentController.getAssignment
   )
   .patch(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     assignmentController.updateAssignment
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin', 'leader'),
     assignmentController.deleteAssignment
   );
 

@@ -1,4 +1,4 @@
-const Calendar = require('../models/missionaryModel');
+const Missionary = require('../models/missionaryModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
