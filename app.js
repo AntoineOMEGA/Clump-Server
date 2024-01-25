@@ -13,7 +13,8 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const userRouter = require('./routes/userRoutes');
 const eventRouter = require('./routes/eventRoutes');
-const missionaryRouter = require('./routes/missionaryRoutes');
+const memberRouter = require('./routes/memberRoutes');
+const roleRouter = require('./routes/roleRoutes');
 const assignmentRouter = require('./routes/assignmentRoutes');
 
 const app = express();
@@ -65,7 +66,8 @@ app.use(hpp({
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/events', eventRouter);
-app.use('/api/v1/missionaries', missionaryRouter);
+app.use('/api/v1/members', memberRouter);
+app.use('/api/v1/roles', roleRouter);
 app.use('/api/v1/assignments', assignmentRouter);
 
 app.all('*', (req, res, next) => {

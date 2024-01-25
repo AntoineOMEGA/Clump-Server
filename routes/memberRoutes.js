@@ -1,31 +1,21 @@
 const express = require('express');
 
-const missionaryController = require('../controllers/missionaryController');
+const memberController = require('../controllers/memberController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
-
-/*
-router
-  .route('/missionaries')
-  .get(
-    authController.protect, 
-    calendarController.aliasMissionaryCalendars,
-    calendarController.getCalendars
-  );
-  */
 
 router
   .route('/')
   .get(
     authController.protect,
     //authController.restrictTo('admin', 'leader'),
-    missionaryController.getMissionaries
+    memberController.getMissionaries
   )
   .post(
     authController.protect,
     //authController.restrictTo('admin', 'leader'),
-    missionaryController.createMissionary
+    memberController.createMember
   );
 
 router
@@ -33,17 +23,17 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin', 'leader'),
-    missionaryController.getMissionary
+    memberController.getMember
   )
   .patch(
     authController.protect,
     //authController.restrictTo('admin', 'leader'),
-    missionaryController.updateMissionary
+    memberController.updateMember
   )
   .delete(
     authController.protect,
     //authController.restrictTo('admin', 'leader'),
-    missionaryController.deleteMissionary
+    memberController.deleteMember
   );
 
 module.exports = router;

@@ -1,22 +1,19 @@
 const mongoose = require('mongoose');
 
 const assignmentSchema = new mongoose.Schema({
+  clumpID: {
+    type: String,
+  },
   title: {
     type: String,
     require: true,
     unique: true,
     trim: true,
   },
-  dressCode: {
+  description: {
     type: String,
   },
-  contact: {
-    type: String,
-  },
-  district: {
-    type: String,
-  },
-  area: {
+  location: {
     type: String,
   },
 });
