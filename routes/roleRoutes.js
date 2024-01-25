@@ -9,12 +9,12 @@ router
   .route('/')
   .get(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     roleController.getMissionaries
   )
   .post(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     roleController.createRole
   );
 
@@ -22,17 +22,17 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     roleController.getRole
   )
   .patch(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     roleController.updateRole
   )
   .delete(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     roleController.deleteRole
   );
 

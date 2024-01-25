@@ -10,7 +10,7 @@ router
   .get(authController.protect, eventController.getEvents)
   .post(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     eventController.createEvent
   );
 
@@ -19,12 +19,12 @@ router
   .get(authController.protect, eventController.getEvent)
   .patch(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     eventController.updateEvent
   )
   .delete(
     authController.protect,
-    //authController.restrictTo('admin', 'leader'),
+    //authController.restrictTo('admin'),
     eventController.deleteEvent
   );
 

@@ -1,8 +1,13 @@
 const mongoose = require('mongoose');
 
 const roleSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    require: true,
+  },
   clumpID: {
     type: String,
+    require: true,
   },
   canViewAssignments: {
     type: Array,

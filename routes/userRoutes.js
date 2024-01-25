@@ -25,7 +25,7 @@ router
   .get(authController.protect, userController.getUsers)
   .post(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    authController.restrictTo('admin'),
     userController.createUser
   );
 
@@ -34,12 +34,12 @@ router
   .get(authController.protect, userController.getUser)
   .patch(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    authController.restrictTo('admin'),
     userController.updateUser
   )
   .delete(
     authController.protect,
-    authController.restrictTo('admin', 'leader'),
+    authController.restrictTo('admin'),
     userController.deleteUser
   );
 

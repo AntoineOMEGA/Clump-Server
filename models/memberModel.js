@@ -3,12 +3,15 @@ const mongoose = require('mongoose');
 const memberSchema = new mongoose.Schema({
   clumpID: {
     type: String,
+    require: true,
   },
   userID: {
     type: String,
+    require: true,
   },
-  role: {
+  roleID: {
     type: String,
+    require: true,
   }
 });
 
