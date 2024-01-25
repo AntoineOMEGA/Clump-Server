@@ -12,10 +12,12 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
 const userRouter = require('./routes/userRoutes');
-const eventRouter = require('./routes/eventRoutes');
+const clumpRouter = require('./routes/clumpRoutes');
 const memberRouter = require('./routes/memberRoutes');
 const roleRouter = require('./routes/roleRoutes');
 const assignmentRouter = require('./routes/assignmentRoutes');
+const eventRouter = require('./routes/eventRoutes');
+
 
 const app = express();
 
@@ -65,10 +67,11 @@ app.use(hpp({
 }));
 
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/events', eventRouter);
+app.use('/api/v1/clumps', clumpRouter);
 app.use('/api/v1/members', memberRouter);
 app.use('/api/v1/roles', roleRouter);
 app.use('/api/v1/assignments', assignmentRouter);
+app.use('/api/v1/events', eventRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
