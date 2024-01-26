@@ -7,12 +7,18 @@ const AppError = require('./../utils/appError');
 const crypto = require('crypto');
 
 exports.getClumps = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Event.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const clumps = await features.query;
+  const memberInClumps = await Member.find({
+    userID: req.cookies.currentUserID,
+  });
+
+  const clumps = [];
+
+  memberInClumps.forEach(async function (memberInClump) {
+    let clump = await Clump.findOne({
+      _id: memberInClump.clumpID
+    })
+    clumps.push(clump);
+  })
 
   res.status(200).json({
     status: 'success',
@@ -41,7 +47,7 @@ exports.getClump = catchAsync(async (req, res, next) => {
 exports.createClump = catchAsync(async (req, res, next) => {
   //Add Clump to Clumps Doc
   const newClump = await Clump.create({
-    name: req.body.title,
+    title: req.body.title,
     inviteToken: crypto.randomBytes(16).toString('hex'),
   });
 
@@ -49,20 +55,20 @@ exports.createClump = catchAsync(async (req, res, next) => {
   const newOwnerRole = await Role.create({
     title: 'Owner',
     clumpID: newClump._id,
-  })
+  });
 
-  //Add Requestor Role to the Roles Doc
-  const newRequestorRole = await Role.create({
-    title: 'Requestor',
+  //Add InvitedMember Role to the Roles Doc
+  const newInvitedMemberRole = await Role.create({
+    title: 'InvitedMember',
     clumpID: newClump._id,
-  })
+  });
 
   //Add User to Members with Owner Role
   const newMember = await Member.create({
     clumpID: newClump._id,
-    userID: 'NEED TO GET THIS',
+    userID: req.cookies.currentUserID,
     roleID: newOwnerRole._id,
-  })
+  });
 
   res.status(201).json({
     status: 'success',

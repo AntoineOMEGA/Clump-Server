@@ -1,4 +1,6 @@
 const Member = require('../models/memberModel');
+const Clump = require('../models/clumpModel');
+const Role = require('../models/roleModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -36,6 +38,17 @@ exports.getMember = catchAsync(async (req, res, next) => {
 });
 
 exports.createMember = catchAsync(async (req, res, next) => {
+  const clump = await Clump.findOne({"inviteToken": req.body.inviteToken});
+  const role = await Role.findOne({"title": "InvitedMember", "clumpID": clump._id});
+
+  console.log(req.cookies);
+
+  const newMember = await Member.create({
+    clumpID: clump._id,
+    userID: req.cookies.currentUserID,
+    roleID: role._id,
+  })
+
   res.status(201).json({
     status: 'success',
     data: {
