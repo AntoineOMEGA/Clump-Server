@@ -10,11 +10,10 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    memberController.getMissionaries
+    memberController.getMembers
   )
   .post(
     authController.protect,
-    //authController.restrictTo('admin'),
     memberController.createMember
   );
 

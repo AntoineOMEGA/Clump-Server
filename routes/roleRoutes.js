@@ -10,7 +10,7 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    roleController.getMissionaries
+    roleController.getRoles
   )
   .post(
     authController.protect,
