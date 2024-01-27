@@ -6,25 +6,48 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const crypto = require('crypto');
 
+const getClumps = async (members) => {
+  const clumps = [];
+
+  for await (member of members) {
+    var clump = await Clump.findOne({
+      _id: member.clumpID
+    })
+    clumps.push(clump);
+  }
+  return clumps;
+}
+
+const getRoles = async (clumps, members) => {
+  const roles = {};
+
+  for await (clump of clumps) {
+    var role = await Role.findOne({
+      clumpID: clump._id
+    })
+    for (member of members) {
+      if (member.roleID == role._id) {
+        roles[clump._id] = role;
+      }
+    }
+  }
+  return roles;
+}
+
 exports.getClumps = catchAsync(async (req, res, next) => {
-  const memberInClumps = await Member.find({
+  const members = await Member.find({
     userID: req.cookies.currentUserID,
   });
 
-  const clumps = [];
-
-  memberInClumps.forEach(async function (memberInClump) {
-    let clump = await Clump.findOne({
-      _id: memberInClump.clumpID
-    })
-    clumps.push(clump);
-  })
+  const clumps = await getClumps(members);
+  const roles = await getRoles(clumps, members);
 
   res.status(200).json({
     status: 'success',
     results: clumps.length,
     data: {
       clumps,
+      roles,
     },
   });
 });

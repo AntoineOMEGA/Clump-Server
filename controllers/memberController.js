@@ -38,16 +38,26 @@ exports.getMember = catchAsync(async (req, res, next) => {
 });
 
 exports.createMember = catchAsync(async (req, res, next) => {
-  const clump = await Clump.findOne({"inviteToken": req.body.inviteToken});
-  const role = await Role.findOne({"title": "InvitedMember", "clumpID": clump._id});
+  const clump = await Clump.findOne({ inviteToken: req.body.inviteToken });
+  const role = await Role.findOne({
+    title: 'InvitedMember',
+    clumpID: clump._id,
+  });
 
-  console.log(req.cookies);
+  const member = await Member.findOne({
+    clumpID: clump._id,
+    userID: req.cookies.currentUserID,
+  });
+
+  if (member) {
+    return next(new AppError('User has already joined this Clump', 400));
+  }
 
   const newMember = await Member.create({
     clumpID: clump._id,
     userID: req.cookies.currentUserID,
     roleID: role._id,
-  })
+  });
 
   res.status(201).json({
     status: 'success',
