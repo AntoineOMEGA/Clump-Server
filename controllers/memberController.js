@@ -9,7 +9,7 @@ const User = require('../models/userModel');
 const getUsers = async (members) => {
   const users = {};
   for await (member of members) {
-    var user = await User.find({ _id: member.userID });
+    var user = await User.findOne({ _id: member.userID });
     if (user) {
       users[member.userID] = user;
     }
@@ -39,7 +39,8 @@ const getRoles = async (clumps, members) => {
 exports.getMembers = catchAsync(async (req, res, next) => {
   const members = await Member.find({ clumpID: req.cookies.currentClumpID });
   const users = await getUsers(members);
-  const roles = await getRoles(members);
+  const clumps = await Clump.find({ _id: req.cookies.currentClumpID })
+  const roles = await getRoles(clumps, members);
 
   res.status(200).json({
     status: 'success',
@@ -47,6 +48,7 @@ exports.getMembers = catchAsync(async (req, res, next) => {
     data: {
       members,
       users,
+      roles,
     },
   });
 });

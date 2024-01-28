@@ -3,7 +3,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
 exports.getRoles = catchAsync(async (req, res, next) => {
-  const roles = await Role.find();
+  const roles = await Role.find({clumpID: req.cookies.currentClumpID});
 
   res.status(200).json({
     status: 'success',
