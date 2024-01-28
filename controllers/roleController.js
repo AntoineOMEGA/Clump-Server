@@ -1,15 +1,9 @@
 const Role = require('../models/roleModel');
-const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
 exports.getRoles = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Event.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const roles = await features.query;
+  const roles = await Role.find();
 
   res.status(200).json({
     status: 'success',

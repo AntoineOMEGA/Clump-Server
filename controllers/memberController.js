@@ -4,20 +4,49 @@ const Role = require('../models/roleModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const User = require('../models/userModel');
+
+const getUsers = async (members) => {
+  const users = {};
+  for await (member of members) {
+    var user = await User.find({ _id: member.userID });
+    if (user) {
+      users[member.userID] = user;
+    }
+  }
+  return users;
+}
+
+const getRoles = async (clumps, members) => {
+  let roles = [];
+  const refinedRoles = {};
+
+  for await (clump of clumps) {
+    roles = await Role.find({
+      clumpID: clump._id,
+    })
+    for (role of roles) {
+      for (member of members) {
+        if (member.roleID == role._id) {
+          refinedRoles[clump._id] = role;
+        }
+      }
+    }
+  }
+  return refinedRoles;
+}
 
 exports.getMembers = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Event.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const members = await features.query;
+  const members = await Member.find({ clumpID: req.cookies.currentClumpID });
+  const users = await getUsers(members);
+  const roles = await getRoles(members);
 
   res.status(200).json({
     status: 'success',
     results: members.length,
     data: {
       members,
+      users,
     },
   });
 });
@@ -58,6 +87,7 @@ exports.createMember = catchAsync(async (req, res, next) => {
     userID: req.cookies.currentUserID,
     roleID: role._id,
   });
+  console.log(newMember.roleID);
 
   res.status(201).json({
     status: 'success',
@@ -77,6 +107,32 @@ exports.updateMember = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMember = catchAsync(async (req, res, next) => {
+  //Check if Member is Owner and whether there are other Members with Admin role
+  const member = await Member.findOne({ _id: req.params.id });
+
+  const role = await Role.findOne({
+    clumpID: member.clumpID,
+    _id: member.roleID,
+  });
+
+  if (role.title !== "Owner") {
+    await Member.findByIdAndDelete(req.params.id);
+    console.log(role, " in IF");
+  } else {
+    const ownerMembers = await Member.find({
+      roleID: role._id
+    })
+
+    if (ownerMembers.length > 1) {
+      console.log(ownerMembers);
+      await Member.findByIdAndDelete(req.params.id);
+    } else {
+      return next(new AppError('You can not leave unless someone else has the Owner role!', 400));
+    }
+  }
+
+
+
   res.status(204).json({
     status: 'success',
   });

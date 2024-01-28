@@ -19,19 +19,22 @@ const getClumps = async (members) => {
 }
 
 const getRoles = async (clumps, members) => {
-  const roles = {};
+  let roles = [];
+  const refinedRoles = {};
 
   for await (clump of clumps) {
-    var role = await Role.findOne({
-      clumpID: clump._id
+    roles = await Role.find({
+      clumpID: clump._id,
     })
-    for (member of members) {
-      if (member.roleID == role._id) {
-        roles[clump._id] = role;
+    for (role of roles) {
+      for (member of members) {
+        if (member.roleID == role._id) {
+          refinedRoles[clump._id] = role;
+        }
       }
     }
   }
-  return roles;
+  return refinedRoles;
 }
 
 exports.getClumps = catchAsync(async (req, res, next) => {
@@ -41,6 +44,10 @@ exports.getClumps = catchAsync(async (req, res, next) => {
 
   const clumps = await getClumps(members);
   const roles = await getRoles(clumps, members);
+  const membersObj = {};
+  for await (member of members) {
+    membersObj[member._id] = member;
+  }
 
   res.status(200).json({
     status: 'success',
@@ -48,6 +55,7 @@ exports.getClumps = catchAsync(async (req, res, next) => {
     data: {
       clumps,
       roles,
+      members: membersObj,
     },
   });
 });
@@ -58,6 +66,17 @@ exports.getClump = catchAsync(async (req, res, next) => {
   if (!clump) {
     return next(new AppError('No clump found with that ID', 404));
   }
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  res.cookie('currentClumpID', req.params.id, cookieOptions);
 
   res.status(200).json({
     status: 'success',
@@ -82,7 +101,7 @@ exports.createClump = catchAsync(async (req, res, next) => {
 
   //Add InvitedMember Role to the Roles Doc
   const newInvitedMemberRole = await Role.create({
-    title: 'InvitedMember',
+    title: 'Invited Member',
     clumpID: newClump._id,
   });
 
