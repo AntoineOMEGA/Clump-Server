@@ -1,15 +1,12 @@
 const Assignment = require('../models/assignmentModel');
+const Member = require('../models/memberModel');
+const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 exports.getAssignments = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Assignment.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const assignments = await features.query;
+  const assignments = await Assignment.find({clumpID: req.cookies.currentClumpID});
 
   res.status(200).json({
     status: 'success',
@@ -36,11 +33,22 @@ exports.getAssignment = catchAsync(async (req, res, next) => {
 });
 
 exports.createAssignment = catchAsync(async (req, res, next) => {
-  const newAssignment = await Assignment.create({
-    title: req.body.title,
-    dressCode: req.body.dressCode,
-    contact: req.body.contact,
-  });
+  const member = await Member.findOne({userID: req.cookies.currentUserID, clumpID: req.cookies.currentClumpID});
+  const role = await Role.findOne({_id: member.roleID});
+  let newAssignment = undefined;
+
+  if (role.canCreateAssignments) {
+    newAssignment = await Assignment.create({
+      clumpID: req.cookies.currentClumpID,
+      title: req.body.title,
+      description: req.body.description,
+      location: req.body.location,
+    });
+    // and propogate permissions to self and above roles
+  } else {
+    return next(new AppError('You are not authorized to Create Assignments', 401));
+  }
+  
 
   res.status(201).json({
     status: 'success',

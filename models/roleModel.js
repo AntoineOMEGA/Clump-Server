@@ -42,6 +42,11 @@ const roleSchema = new mongoose.Schema({
     required: true,
     default: false
   },
+  canCreateSchedules: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
   parentRole: {
     type: String,
   },
