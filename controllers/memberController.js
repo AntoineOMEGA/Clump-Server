@@ -71,7 +71,7 @@ exports.getMember = catchAsync(async (req, res, next) => {
 exports.createMember = catchAsync(async (req, res, next) => {
   const clump = await Clump.findOne({ inviteToken: req.body.inviteToken });
   const role = await Role.findOne({
-    title: 'InvitedMember',
+    title: 'Invited Member',
     clumpID: clump._id,
   });
 

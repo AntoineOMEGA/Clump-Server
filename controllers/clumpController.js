@@ -97,12 +97,18 @@ exports.createClump = catchAsync(async (req, res, next) => {
   const newOwnerRole = await Role.create({
     title: 'Owner',
     clumpID: newClump._id,
+    canCreateAssignments: true,
+    canCreateEvents: true,
+    canCreateRoles: true,
+    canCreateSchedules: true,
+    canBeModified: false,
   });
 
   //Add InvitedMember Role to the Roles Doc
   const newInvitedMemberRole = await Role.create({
     title: 'Invited Member',
     clumpID: newClump._id,
+    canBeModified: false,
   });
 
   //Add User to Members with Owner Role

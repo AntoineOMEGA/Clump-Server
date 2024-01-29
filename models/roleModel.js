@@ -15,16 +15,10 @@ const roleSchema = new mongoose.Schema({
   canEditAssignments: {
     type: Array,
   },
-  canShareAssignments: {
-    type: Array,
-  },
   canViewSchedules: {
     type: Array,
   },
   canEditSchedules: {
-    type: Array,
-  },
-  canShareSchedules: {
     type: Array,
   },
   canCreateAssignments: {
@@ -50,13 +44,10 @@ const roleSchema = new mongoose.Schema({
   parentRole: {
     type: String,
   },
-  childrenRoles: {
-    type: Array,
-  },
   canBeModified: {
     type: Boolean,
     required: true,
-    default: false
+    default: true
   }
 });
 

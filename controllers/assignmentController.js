@@ -45,6 +45,18 @@ exports.createAssignment = catchAsync(async (req, res, next) => {
       location: req.body.location,
     });
     // and propogate permissions to self and above roles
+
+    role.canViewAssignments.push(newAssignment._id);
+    role.canEditAssignments.push(newAssignment._id);
+    await role.save();
+
+    let parentRoleID = role.parentRole;
+    while (parentRoleID !== undefined) {
+      let parentRole = await Role.findOne({_id: parentRoleID});
+      parentRole.canViewAssignments.push(newAssignment._id);
+      parentRole.canEditAssignments.push(newAssignment._id);
+      await parentRole.save();
+    }
   } else {
     return next(new AppError('You are not authorized to Create Assignments', 401));
   }
