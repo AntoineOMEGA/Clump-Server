@@ -49,7 +49,7 @@ exports.createRole = catchAsync(async (req, res, next) => {
   }
 
   //Filter Can View Assignments
-  for (assignment in newRoleFormData.canViewAssignments) {
+  for (assignment in newRoleFormData.canViewAssignments || newRoleFormData.parentRole.title == "Owner") {
     let filteredCanViewAssignments = [];
     if (creatorRole.canViewAssignments.includes(assignment)) {
       filteredCanViewAssignments.push(assignment);
@@ -58,7 +58,7 @@ exports.createRole = catchAsync(async (req, res, next) => {
   }
 
   //Filter Can Edit Assignments
-  for (assignment in newRoleFormData.canEditAssignments) {
+  for (assignment in newRoleFormData.canEditAssignments || newRoleFormData.parentRole.title == "Owner") {
     let filteredCanEditAssignments = [];
     if (creatorRole.canEditAssignments.includes(assignment)) {
       filteredCanEditAssignments.push(assignment);
@@ -67,7 +67,7 @@ exports.createRole = catchAsync(async (req, res, next) => {
   }
 
   //Filter Can View Schedules
-  for (schedule in newRoleFormData.canViewSchedules) {
+  for (schedule in newRoleFormData.canViewSchedules || newRoleFormData.parentRole.title == "Owner") {
     let filteredCanViewSchedules = [];
     if (creatorRole.canViewSchedules.includes(schedule)) {
       filteredCanViewSchedules.push(schedule);
@@ -76,7 +76,7 @@ exports.createRole = catchAsync(async (req, res, next) => {
   }
 
   //Filter Can Edit Schedules
-  for (schedule in newRoleFormData.canEditSchedules) {
+  for (schedule in newRoleFormData.canEditSchedules || newRoleFormData.parentRole.title == "Owner") {
     let filteredCanEditSchedules = [];
     if (creatorRole.canEditSchedules.includes(schedule)) {
       filteredCanEditSchedules.push(schedule);
