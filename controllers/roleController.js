@@ -48,41 +48,45 @@ exports.createRole = catchAsync(async (req, res, next) => {
     parentRole: req.body.parentRole,
   }
 
-  //Filter Can View Assignments
-  for (assignment in newRoleFormData.canViewAssignments || newRoleFormData.parentRole.title == "Owner") {
+  newRoleFormData.canViewAssignments.forEach(assignment => {
+    console.log(assignment);
     let filteredCanViewAssignments = [];
-    if (creatorRole.canViewAssignments.includes(assignment)) {
+    if (creatorRole.canViewAssignments.includes() || creatorRole.title == 'Owner') {
+      console.log(assignment);
       filteredCanViewAssignments.push(assignment);
     }
     newRoleFormData.canViewAssignments = filteredCanViewAssignments;
-  }
+  })
 
-  //Filter Can Edit Assignments
-  for (assignment in newRoleFormData.canEditAssignments || newRoleFormData.parentRole.title == "Owner") {
+  newRoleFormData.canEditAssignments.forEach(assignment => {
+    console.log(assignment);
     let filteredCanEditAssignments = [];
-    if (creatorRole.canEditAssignments.includes(assignment)) {
+    if (creatorRole.canEditAssignments.includes() || creatorRole.title == 'Owner') {
+      console.log(assignment);
       filteredCanEditAssignments.push(assignment);
     }
     newRoleFormData.canEditAssignments = filteredCanEditAssignments;
-  }
+  })
 
-  //Filter Can View Schedules
-  for (schedule in newRoleFormData.canViewSchedules || newRoleFormData.parentRole.title == "Owner") {
+  newRoleFormData.canViewSchedules.forEach(assignment => {
+    console.log(assignment);
     let filteredCanViewSchedules = [];
-    if (creatorRole.canViewSchedules.includes(schedule)) {
-      filteredCanViewSchedules.push(schedule);
+    if (creatorRole.canViewSchedules.includes() || creatorRole.title == 'Owner') {
+      console.log(assignment);
+      filteredCanViewSchedules.push(assignment);
     }
     newRoleFormData.canViewSchedules = filteredCanViewSchedules;
-  }
+  })
 
-  //Filter Can Edit Schedules
-  for (schedule in newRoleFormData.canEditSchedules || newRoleFormData.parentRole.title == "Owner") {
+  newRoleFormData.canEditSchedules.forEach(assignment => {
+    console.log(assignment);
     let filteredCanEditSchedules = [];
-    if (creatorRole.canEditSchedules.includes(schedule)) {
-      filteredCanEditSchedules.push(schedule);
+    if (creatorRole.canEditSchedules.includes() || creatorRole.title == 'Owner') {
+      console.log(assignment);
+      filteredCanEditSchedules.push(assignment);
     }
     newRoleFormData.canEditSchedules = filteredCanEditSchedules;
-  }
+  })
 
   if (!creatorRole.canCreateAssignments) {
     newRoleFormData.canCreateAssignments = false;
