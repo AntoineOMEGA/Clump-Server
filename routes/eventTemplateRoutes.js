@@ -1,6 +1,6 @@
 const express = require('express');
 
-const assignmentController = require('../controllers/assignmentController');
+const eventTemplateController = require('../controllers/eventTemplateController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
@@ -10,12 +10,12 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    assignmentController.getAssignments
+    eventTemplateController.getEventTemplates
   )
   .post(
     authController.protect,
     //authController.restrictTo('admin'),
-    assignmentController.createAssignment
+    eventTemplateController.createEventTemplate
   );
 
 router
@@ -23,17 +23,17 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    assignmentController.getAssignment
+    eventTemplateController.getEventTemplate
   )
   .patch(
     authController.protect,
     //authController.restrictTo('admin'),
-    assignmentController.updateAssignment
+    eventTemplateController.updateEventTemplate
   )
   .delete(
     authController.protect,
     //authController.restrictTo('admin'),
-    assignmentController.deleteAssignment
+    eventTemplateController.deleteEventTemplate
   );
 
 module.exports = router;

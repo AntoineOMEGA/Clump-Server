@@ -15,7 +15,7 @@ const userRouter = require('./routes/userRoutes');
 const clumpRouter = require('./routes/clumpRoutes');
 const memberRouter = require('./routes/memberRoutes');
 const roleRouter = require('./routes/roleRoutes');
-const assignmentRouter = require('./routes/assignmentRoutes');
+const eventTemplateRouter = require('./routes/eventTemplateRoutes');
 const eventRouter = require('./routes/eventRoutes');
 
 
@@ -70,7 +70,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/clumps', clumpRouter);
 app.use('/api/v1/members', memberRouter);
 app.use('/api/v1/roles', roleRouter);
-app.use('/api/v1/assignments', assignmentRouter);
+app.use('/api/v1/event-templates', eventTemplateRouter);
 app.use('/api/v1/events', eventRouter);
 
 app.all('*', (req, res, next) => {

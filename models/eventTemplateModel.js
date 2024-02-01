@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const assignmentSchema = new mongoose.Schema({
+const eventTemplateSchema = new mongoose.Schema({
   clumpID: {
     type: String,
   },
@@ -18,6 +18,6 @@ const assignmentSchema = new mongoose.Schema({
   },
 });
 
-const Assignment = mongoose.model('Assignment', assignmentSchema);
+const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema);
 
-module.exports = Assignment;
+module.exports = EventTemplate;
