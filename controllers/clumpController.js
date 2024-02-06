@@ -97,7 +97,7 @@ exports.createClump = catchAsync(async (req, res, next) => {
   const newOwnerRole = await Role.create({
     title: 'Owner',
     clumpID: newClump._id,
-    canCreateAssignments: true,
+    canCreateEventTemplates: true,
     canCreateEvents: true,
     canCreateRoles: true,
     canCreateSchedules: true,

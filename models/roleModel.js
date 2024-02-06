@@ -21,7 +21,7 @@ const roleSchema = new mongoose.Schema({
   canEditSchedules: {
     type: Array,
   },
-  canCreateAssignments: {
+  canCreateEventTemplates: {
     type: Boolean,
     required: true,
     default: false

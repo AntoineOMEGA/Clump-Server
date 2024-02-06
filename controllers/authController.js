@@ -46,6 +46,14 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
+  if (!newUser.name || !newUser.email || !newUser.password || !newUser.passwordConfirm) {
+    return next(new AppError('Please provide name, email, password, and confirm your password!', 400));
+  }
+
+  if (newUser.password !== newUser.passwordConfirm) {
+    return next(new AppError('Please ensure that your password and confirmed password are the same!', 400));
+  }
+
   createSendToken(newUser, 201, res);
 });
 
