@@ -6,6 +6,12 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const crypto = require('crypto');
 
+const { google } = require('googleapis');
+const app = require('../app');
+
+const { OAuth2 } = google.auth;
+const oAuth2Client = new OAuth2(process.env.OAUTH_ID, process.env.OAUTH_SECRET, process.env.OAUTH_REDIRECT_URL);
+
 const getClumps = async (members) => {
   const clumps = [];
 
@@ -86,11 +92,45 @@ exports.getClump = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.assignToken = catchAsync(async (req, res, next) => {
+  console.log(req);
+})
+
 exports.createClump = catchAsync(async (req, res, next) => {
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar'
+  ]
+
+  const url = await oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: scopes
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      redirectURL: url,
+    },
+  });
+
+  
+
+/*
+  oAuth2Client.setCredentials({
+    refresh_token: process.env.OAUTH_REFRESH_TOKEN,
+  });
+  
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  //Generate Google Token
+  const googleToken = 'Something';
+
+
   //Add Clump to Clumps Doc
   const newClump = await Clump.create({
     title: req.body.title,
     inviteToken: crypto.randomBytes(16).toString('hex'),
+    googleToken: googleToken
   });
 
   //Add Owner(Creator) Role to the Roles Doc
@@ -124,6 +164,7 @@ exports.createClump = catchAsync(async (req, res, next) => {
       clump: newClump,
     },
   });
+  */
 });
 
 exports.updateClump = catchAsync(async (req, res, next) => {

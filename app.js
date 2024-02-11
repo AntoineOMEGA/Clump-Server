@@ -17,6 +17,7 @@ const memberRouter = require('./routes/memberRoutes');
 const roleRouter = require('./routes/roleRoutes');
 const eventTemplateRouter = require('./routes/eventTemplateRoutes');
 const eventRouter = require('./routes/eventRoutes');
+const googleRouter = require('./routes/googleRoutes');
 
 
 const app = express();
@@ -72,6 +73,7 @@ app.use('/api/v1/members', memberRouter);
 app.use('/api/v1/roles', roleRouter);
 app.use('/api/v1/event-templates', eventTemplateRouter);
 app.use('/api/v1/events', eventRouter);
+app.use('/google/redirect', googleRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
