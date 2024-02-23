@@ -225,6 +225,16 @@ var event = {
 
 gCalendar.calendars.get({calendarId: 'antoinemflorian@gmail.com'});
 
+
+const calendar = {
+    'summary': 'calendarSummary',
+    'timeZone': 'America/Los_Angeles'
+};
+
+gCalendar.calendars.insert({
+  calendar
+});
+
 gCalendar.events.insert({
   auth: oAuth2Client,
   calendarId: 'primary',
@@ -237,9 +247,17 @@ gCalendar.events.insert({
   }
   console.log('Event created: %s', event.data);
 });
-/*
+
+
 gCalendar.events.delete({
   auth: oAuth2Client,
   calendarId: 'primary',
   eventId: "test"
-});*/
+});
+
+gCalendar.events.update({
+  auth: oAuth2Client,
+  calendarId: 'primary',
+  eventId: 'test',
+  resource: event
+});
