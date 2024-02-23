@@ -237,3 +237,9 @@ gCalendar.events.insert({
   }
   console.log('Event created: %s', event.data);
 });
+/*
+gCalendar.events.delete({
+  auth: oAuth2Client,
+  calendarId: 'primary',
+  eventId: "test"
+});*/
