@@ -18,7 +18,7 @@ exports.getEventTemplates = catchAsync(async (req, res, next) => {
 });
 
 exports.getEventTemplate = catchAsync(async (req, res, next) => {
-  const eventTemplate = await EventTemplate.findById(req.params.id);
+  const eventTemplate = await EventTemplate.find({_id: req.params.id, clumpID: req.cookies.currentClumpID});
 
   if (!eventTemplate) {
     return next(new AppError('No eventTemplate found with that ID', 404));
@@ -33,11 +33,12 @@ exports.getEventTemplate = catchAsync(async (req, res, next) => {
 });
 
 exports.createEventTemplate = catchAsync(async (req, res, next) => {
-  const member = await Member.findOne({userID: req.cookies.currentUserID, clumpID: req.cookies.currentClumpID});
-  const role = await Role.findOne({_id: member.roleID});
-  let newEventTemplate = undefined;
+  //const member = await Member.findOne({userID: req.cookies.currentUserID, clumpID: req.cookies.currentClumpID});
+  //const role = await Role.findOne({_id: member.roleID});
+  let newEventTemplate;
 
-  if (role.canCreateEventTemplates) {
+  //if (role.canCreateEventTemplates) {
+  if (true) {
     newEventTemplate = await EventTemplate.create({
       clumpID: req.cookies.currentClumpID,
       title: req.body.title,
@@ -46,17 +47,17 @@ exports.createEventTemplate = catchAsync(async (req, res, next) => {
     });
     // and propogate permissions to self and above roles
 
-    role.canViewEventTemplates.push(newEventTemplate._id);
-    role.canEditEventTemplates.push(newEventTemplate._id);
-    await role.save();
+    //role.canViewEventTemplates.push(newEventTemplate._id);
+    //role.canEditEventTemplates.push(newEventTemplate._id);
+    //await role.save();
 
-    let parentRoleID = role.parentRole;
-    while (parentRoleID !== undefined) {
-      let parentRole = await Role.findOne({_id: parentRoleID});
-      parentRole.canViewEventTemplates.push(newEventTemplate._id);
-      parentRole.canEditEventTemplates.push(newEventTemplate._id);
-      await parentRole.save();
-    }
+    //let parentRoleID = role.parentRole;
+    //while (parentRoleID !== undefined) {
+      //let parentRole = await Role.findOne({_id: parentRoleID});
+      //parentRole.canViewEventTemplates.push(newEventTemplate._id);
+      //parentRole.canEditEventTemplates.push(newEventTemplate._id);
+      //await parentRole.save();
+    //}
   } else {
     return next(new AppError('You are not authorized to Create Event Templates', 401));
   }
