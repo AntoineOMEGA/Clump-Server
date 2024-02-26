@@ -13,6 +13,9 @@ const scheduleSchema = new mongoose.Schema({
   clumpID: {
     type: String,
   },
+  googleCalendarID: {
+    type: String,
+  },
 });
 
 const Schedule = mongoose.model('schedule', scheduleSchema);
