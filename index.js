@@ -1,4 +1,5 @@
 const { google } = require('googleapis');
+const { oauth2 } = require('googleapis/build/src/apis/oauth2');
 
 
 
@@ -187,7 +188,7 @@ const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
   "eventType": string
 }
 **/
-
+/*
 var event = {
   'summary': 'Mission Conference',
   'location': 'St. George',
@@ -261,3 +262,18 @@ gCalendar.events.update({
   eventId: 'test',
   resource: event
 });
+*/
+
+/*
+CALENDARS
+
+EVENT TEMPLATES
+
+EVENTS
+
+
+*/
+
+let testList = gCalendar.calendarList.list({auth: oAuth2Client}).then(function (response) {
+  console.log(response.data);
+})
