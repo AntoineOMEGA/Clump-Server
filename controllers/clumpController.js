@@ -96,14 +96,28 @@ exports.assignToken = catchAsync(async (req, res, next) => {
   console.log(req);
 })
 
+exports.getRefreshToken = catchAsync(async (req, res, next) => {
+  const {tokens} = await oauth2Client.getToken(req.body.code)
+  oAuth2Client.setCredentials(tokens);
+
+  oAuth2Client.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+      // store the refresh_token in my database!
+      console.log("RT ", tokens.refresh_token);
+    }
+    console.log("AT ", tokens.access_token);
+  });
+})
+
 exports.createClump = catchAsync(async (req, res, next) => {
   const scopes = [
     'https://www.googleapis.com/auth/calendar'
   ]
 
   const url = await oAuth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: scopes
+    access_type: 'offline',
+    scope: scopes,
+    prompt: 'consent'
   });
 
   res.status(201).json({
