@@ -97,8 +97,18 @@ exports.assignToken = catchAsync(async (req, res, next) => {
 })
 
 exports.getRefreshToken = catchAsync(async (req, res, next) => {
-  const {tokens} = await oauth2Client.getToken(req.body.code)
+  const {tokens} = await oAuth2Client.getToken(req.body.code)
   oAuth2Client.setCredentials(tokens);
+  console.log(tokens);
+
+  oAuth2Client.setCredentials({
+    refresh_token: tokens.refresh_token,
+  });
+  
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+  let testList = gCalendar.calendarList.list({auth: oAuth2Client}).then(function (response) {
+    console.log(response.data);
+  })
 
   oAuth2Client.on('tokens', (tokens) => {
     if (tokens.refresh_token) {
