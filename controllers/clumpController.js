@@ -101,22 +101,9 @@ exports.getRefreshToken = catchAsync(async (req, res, next) => {
   oAuth2Client.setCredentials(tokens);
   console.log(tokens);
 
-  oAuth2Client.setCredentials({
-    refresh_token: tokens.refresh_token,
-  });
-  
-  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-  let testList = gCalendar.calendarList.list({auth: oAuth2Client}).then(function (response) {
-    console.log(response.data);
-  })
-
-  oAuth2Client.on('tokens', (tokens) => {
-    if (tokens.refresh_token) {
-      // store the refresh_token in my database!
-      console.log("RT ", tokens.refresh_token);
-    }
-    console.log("AT ", tokens.access_token);
-  });
+  let currentClump = await Clump.findById(req.cookies.currentClumpID);
+  currentClump.googleToken = tokens.refresh_token;
+  currentClump.save();
 })
 
 exports.createClump = catchAsync(async (req, res, next) => {
@@ -130,32 +117,31 @@ exports.createClump = catchAsync(async (req, res, next) => {
     prompt: 'consent'
   });
 
+  /*
   res.status(201).json({
     status: 'success',
     data: {
       redirectURL: url,
     },
   });
-
-  
-
-/*
-  oAuth2Client.setCredentials({
-    refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-  });
-  
-  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
-  //Generate Google Token
-  const googleToken = 'Something';
-
+  */
 
   //Add Clump to Clumps Doc
   const newClump = await Clump.create({
     title: req.body.title,
-    inviteToken: crypto.randomBytes(16).toString('hex'),
-    googleToken: googleToken
+    inviteToken: crypto.randomBytes(16).toString('hex')
   });
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  res.cookie('currentClumpID', newClump._id, cookieOptions);
 
   //Add Owner(Creator) Role to the Roles Doc
   const newOwnerRole = await Role.create({
@@ -185,10 +171,10 @@ exports.createClump = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
+      redirectURL: url,
       clump: newClump,
     },
   });
-  */
 });
 
 exports.updateClump = catchAsync(async (req, res, next) => {
