@@ -97,13 +97,33 @@ exports.assignToken = catchAsync(async (req, res, next) => {
 })
 
 exports.getRefreshToken = catchAsync(async (req, res, next) => {
-  const {tokens} = await oAuth2Client.getToken(req.body.code)
+  const { tokens } = await oAuth2Client.getToken(req.body.code)
   oAuth2Client.setCredentials(tokens);
   console.log(tokens);
 
   let currentClump = await Clump.findById(req.cookies.currentClumpID);
   currentClump.googleToken = tokens.refresh_token;
   currentClump.save();
+})
+
+exports.getGoogleCalendars = catchAsync(async (req, res, next) => {
+  const refreshToken = await Clump.findById(req.cookies.currentClumpID);
+  oAuth2Client.setCredentials({
+    refresh_token: refreshToken.googleToken,
+  });
+
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  const gCalendarList = await gCalendar.calendarList.list({auth: oAuth2Client});
+
+  console.log(gCalendarList);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      googleCalendars: gCalendarList
+    },
+  });
 })
 
 exports.createClump = catchAsync(async (req, res, next) => {
