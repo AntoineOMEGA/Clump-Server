@@ -16,13 +16,13 @@ const oAuth2Client = new OAuth2(
 );
 
 exports.getSchedules = catchAsync(async (req, res, next) => {
-  const schedule = await Schedule.find({ clumpID: req.cookies.currentClumpID });
+  const schedules = await Schedule.find({ clumpID: req.cookies.currentClumpID });
 
   res.status(200).json({
     status: 'success',
-    results: schedule.length,
+    results: schedules.length,
     data: {
-      schedule: schedule,
+      schedules: schedules,
     },
   });
 });
