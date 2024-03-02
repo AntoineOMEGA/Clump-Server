@@ -7,7 +7,6 @@ const AppError = require('./../utils/appError');
 const crypto = require('crypto');
 
 const { google } = require('googleapis');
-const app = require('../app');
 
 const { OAuth2 } = google.auth;
 const oAuth2Client = new OAuth2(process.env.OAUTH_ID, process.env.OAUTH_SECRET, process.env.OAUTH_REDIRECT_URL);
