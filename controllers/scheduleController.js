@@ -33,31 +33,31 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
 });
 
 exports.createSchedule = catchAsync(async (req, res, next) => {
-  //const member = await Member.findOne({userID: req.cookies.currentUserID, clumpID: req.cookies.currentClumpID});
-  //const role = await Role.findOne({_id: member.roleID});
+  const member = await Member.findOne({userID: req.cookies.currentUserID, clumpID: req.cookies.currentClumpID});
+  const role = await Role.findOne({_id: member.roleID});
   let newSchedule;
 
-  //if (role.canCreateSchedules) {
-  if (true) {
+  console.log(req.body.googleCalendarID);
+
+  if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
-      clumpID: req.cookies.currentClumpID,
       title: req.body.title,
-      description: req.body.description,
-      location: req.body.location,
+      clumpID: req.cookies.currentClumpID,
+      googleCalendarID: req.body.googleCalendarID,
     });
     // and propogate permissions to self and above roles
 
-    //role.canViewSchedules.push(newSchedule._id);
-    //role.canEditSchedules.push(newSchedule._id);
-    //await role.save();
+    role.canViewSchedules.push(newSchedule._id);
+    role.canEditSchedules.push(newSchedule._id);
+    await role.save();
 
-    //let parentRoleID = role.parentRole;
-    //while (parentRoleID !== undefined) {
-      //let parentRole = await Role.findOne({_id: parentRoleID});
-      //parentRole.canViewSchedules.push(newSchedule._id);
-      //parentRole.canEditSchedules.push(newSchedule._id);
-      //await parentRole.save();
-    //}
+    let parentRoleID = role.parentRole;
+    while (parentRoleID !== undefined) {
+      let parentRole = await Role.findOne({_id: parentRoleID});
+      parentRole.canViewSchedules.push(newSchedule._id);
+      parentRole.canEditSchedules.push(newSchedule._id);
+      await parentRole.save();
+    }
   } else {
     return next(new AppError('You are not authorized to Create Event Templates', 401));
   }
