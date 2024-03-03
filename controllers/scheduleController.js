@@ -54,28 +54,33 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   let newSchedule;
   let newGoogleCalendar;
   let googleCalendarID = req.body.googleCalendarID;
+  let googleCalendarTitle = req.body.title;
 
-  if (!googleCalendarID) {
-    const refreshToken = await Clump.findById(req.cookies.currentClumpID);
+  const refreshToken = await Clump.findById(req.cookies.currentClumpID);
     oAuth2Client.setCredentials({
       refresh_token: refreshToken.googleToken,
     });
 
     const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
+  if (googleCalendarID) {
+    const existingGoogleCalendar = await gCalendar.calendars.get({calendarId: googleCalendarID});
+    googleCalendarTitle = existingGoogleCalendar.data.summary;
+  }
+
+  if (!googleCalendarID) {
     const newCalendar = {
-      summary: req.body.title,
+      summary: googleCalendarTitle,
       timeZone: 'America/Denver',
     };
 
-    newGoogleCalendar = await gCalendar.calendars.insert(newCalendar);
+    newGoogleCalendar = await gCalendar.calendars.insert({resource: newCalendar});
+    googleCalendarID = newGoogleCalendar.data.id;
   }
-
-  
 
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
-      title: req.body.title,
+      title: googleCalendarTitle,
       clumpID: req.cookies.currentClumpID,
       googleCalendarID: googleCalendarID,
     });

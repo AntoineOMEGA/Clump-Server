@@ -5,7 +5,9 @@ const scheduleCategorySchema = new mongoose.Schema({
     type: String,
     require: true,
     unique: true,
-    trim: true,
+  },
+  subtitle: {
+    type: String,
   },
   color: {
     type: String,
