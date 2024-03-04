@@ -6,12 +6,15 @@ const scheduleCategorySchema = new mongoose.Schema({
     require: true,
     unique: true,
   },
-  subtitle: {
+  description: {
     type: String,
   },
   color: {
     type: String,
   },
+  clumpID: {
+    type: String,
+  }
 });
 
 const ScheduleCategory = mongoose.model('scheduleCategory', scheduleCategorySchema);

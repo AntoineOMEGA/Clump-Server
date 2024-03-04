@@ -81,6 +81,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
       title: googleCalendarTitle,
+      scheduleCategories: req.body.scheduleCategories,
       clumpID: req.cookies.currentClumpID,
       googleCalendarID: googleCalendarID,
     });

@@ -10,7 +10,7 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    scheduleCategoryController.getScheduleCategorys
+    scheduleCategoryController.getScheduleCategories
   )
   .post(
     authController.protect,

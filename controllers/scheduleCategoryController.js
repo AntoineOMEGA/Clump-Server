@@ -41,7 +41,7 @@ exports.createScheduleCategory = catchAsync(async (req, res, next) => {
       clumpID: req.cookies.currentClumpID,
       title: req.body.title,
       description: req.body.description,
-      location: req.body.location,
+      color: req.body.color,
     });
   } else {
     return next(new AppError('You are not authorized to Create Event Templates', 401));

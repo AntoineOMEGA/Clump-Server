@@ -7,6 +7,9 @@ const scheduleSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
+  scheduleCategories: {
+    type: Array
+  },
   clumpID: {
     type: String,
   },
