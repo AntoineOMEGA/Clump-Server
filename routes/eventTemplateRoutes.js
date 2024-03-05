@@ -25,7 +25,7 @@ router
     //authController.restrictTo('admin'),
     eventTemplateController.getEventTemplate
   )
-  .patch(
+  .put(
     authController.protect,
     //authController.restrictTo('admin'),
     eventTemplateController.updateEventTemplate
