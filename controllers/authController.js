@@ -39,20 +39,22 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
+  let proposedUser = {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
-  });
+  }
 
-  if (!newUser.name || !newUser.email || !newUser.password || !newUser.passwordConfirm) {
+  if (!proposedUser.name || !proposedUser.email || !proposedUser.password || !proposedUser.passwordConfirm) {
     return next(new AppError('Please provide name, email, password, and confirm your password!', 400));
   }
 
-  if (newUser.password !== newUser.passwordConfirm) {
+  if (proposedUser.password !== proposedUser.passwordConfirm) {
     return next(new AppError('Please ensure that your password and confirmed password are the same!', 400));
   }
+
+  const newUser = await User.create(proposedUser);
 
   createSendToken(newUser, 201, res);
 });

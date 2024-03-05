@@ -4,7 +4,6 @@ const scheduleSchema = new mongoose.Schema({
   title: {
     type: String,
     require: true,
-    unique: true,
     trim: true,
   },
   scheduleCategories: {
@@ -16,6 +15,11 @@ const scheduleSchema = new mongoose.Schema({
   googleCalendarID: {
     type: String,
   },
+  active: {
+    type: Boolean,
+    require: true,
+    default: true,
+  }
 });
 
 const Schedule = mongoose.model('schedule', scheduleSchema);

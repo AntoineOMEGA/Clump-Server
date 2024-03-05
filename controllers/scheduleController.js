@@ -16,7 +16,10 @@ const oAuth2Client = new OAuth2(
 );
 
 exports.getSchedules = catchAsync(async (req, res, next) => {
-  const schedules = await Schedule.find({ clumpID: req.cookies.currentClumpID });
+  const schedules = await Schedule.find({
+    clumpID: req.cookies.currentClumpID,
+    active: true,
+  });
 
   res.status(200).json({
     status: 'success',
@@ -57,14 +60,16 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   let googleCalendarTitle = req.body.title;
 
   const refreshToken = await Clump.findById(req.cookies.currentClumpID);
-    oAuth2Client.setCredentials({
-      refresh_token: refreshToken.googleToken,
-    });
+  oAuth2Client.setCredentials({
+    refresh_token: refreshToken.googleToken,
+  });
 
-    const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
   if (googleCalendarID) {
-    const existingGoogleCalendar = await gCalendar.calendars.get({calendarId: googleCalendarID});
+    const existingGoogleCalendar = await gCalendar.calendars.get({
+      calendarId: googleCalendarID,
+    });
     googleCalendarTitle = existingGoogleCalendar.data.summary;
   }
 
@@ -74,7 +79,9 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
       timeZone: 'America/Denver',
     };
 
-    newGoogleCalendar = await gCalendar.calendars.insert({resource: newCalendar});
+    newGoogleCalendar = await gCalendar.calendars.insert({
+      resource: newCalendar,
+    });
     googleCalendarID = newGoogleCalendar.data.id;
   }
 
@@ -113,12 +120,29 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 });
 
 exports.updateSchedule = catchAsync(async (req, res, next) => {
-  //Needs Google Integration
+  let updatedSchedule = {
+    title: req.body.title,
+    scheduleCategories: req.body.scheduleCategories,
+  };
 
-  const schedule = await Schedule.findByIdAndUpdate(req.params.id, req.body, {
+  const schedule = await Schedule.findByIdAndUpdate(req.params.id, updatedSchedule, {
     new: true,
     runValidators: true,
   });
+
+  //ONLY UPDATE GOOGLE CALENDAR IF THE INFO FOR IT HAS CHANGED
+  const refreshToken = await Clump.findById(req.cookies.currentClumpID);
+  oAuth2Client.setCredentials({
+    refresh_token: refreshToken.googleToken,
+  });
+
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  const updatedCalendar = {
+    summary: schedule.title,
+  };
+
+  gCalendar.calendars.update({calendarId: schedule.googleCalendarID, resource: updatedCalendar});
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
@@ -133,8 +157,14 @@ exports.updateSchedule = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteSchedule = catchAsync(async (req, res, next) => {
+  let deletedSchedule = {
+    active: false,
+  };
   //Needs Google Integration ???
-  const schedule = await Schedule.findByIdAndDelete(req.params.id);
+  const schedule = await Schedule.findByIdAndUpdate(req.params.id, deletedSchedule, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
@@ -142,8 +172,5 @@ exports.deleteSchedule = catchAsync(async (req, res, next) => {
 
   res.status(204).json({
     status: 'success',
-    data: {
-      scheduleId: req.params.id,
-    },
   });
 });
