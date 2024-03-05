@@ -25,7 +25,7 @@ router
     //authController.restrictTo('admin'),
     scheduleCategoryController.getScheduleCategory
   )
-  .patch(
+  .put(
     authController.protect,
     //authController.restrictTo('admin'),
     scheduleCategoryController.updateScheduleCategory

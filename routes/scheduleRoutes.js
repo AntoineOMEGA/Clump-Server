@@ -25,7 +25,7 @@ router
     //authController.restrictTo('admin'),
     scheduleController.getSchedule
   )
-  .patch(
+  .put(
     authController.protect,
     //authController.restrictTo('admin'),
     scheduleController.updateSchedule

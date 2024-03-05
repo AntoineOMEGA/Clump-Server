@@ -59,7 +59,7 @@ exports.createScheduleCategory = catchAsync(async (req, res, next) => {
 exports.updateScheduleCategory = catchAsync(async (req, res, next) => {
   //Needs Google Integration
 
-  const eventTemplate = await ScheduleCategory.findByIdAndUpdate(
+  const scheduleCategory = await ScheduleCategory.findByIdAndUpdate(
     req.params.id,
     req.body,
     {
@@ -68,8 +68,8 @@ exports.updateScheduleCategory = catchAsync(async (req, res, next) => {
     }
   );
 
-  if (!eventTemplate) {
-    return next(new AppError('No eventTemplate found with that ID', 404));
+  if (!scheduleCategory) {
+    return next(new AppError('No scheduleCategory found with that ID', 404));
   }
 
   res.status(200).json({
@@ -83,6 +83,28 @@ exports.updateScheduleCategory = catchAsync(async (req, res, next) => {
 exports.deleteScheduleCategory = catchAsync(async (req, res, next) => {
   //Needs Google Integration ???
   const scheduleCategory = await ScheduleCategory.findByIdAndDelete(req.params.id);
+
+  if (scheduleCategory) {
+    const schedules = await Schedule.find({clumpID: req.cookies.currentClumpID});
+    schedules.forEach( async function (schedule) {
+      let validScheduleCategories = [];
+      schedule.scheduleCategories.forEach(function (scheduleCategoryId) {
+        if (scheduleCategoryId !== req.params.id) {
+          validScheduleCategories.push(scheduleCategoryId);
+        }
+      })
+
+      let validSchedule = schedule;
+      schedule.scheduleCategories = validScheduleCategories;
+
+      await Schedule.findByIdAndUpdate(schedule._id,
+        validSchedule,
+        {
+          new: true,
+          runValidators: true,
+        })
+    })
+  }
 
   if (!scheduleCategory) {
     return next(new AppError('No scheduleCategory found with that ID', 404));

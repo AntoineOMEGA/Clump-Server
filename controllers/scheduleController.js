@@ -142,5 +142,8 @@ exports.deleteSchedule = catchAsync(async (req, res, next) => {
 
   res.status(204).json({
     status: 'success',
+    data: {
+      scheduleId: req.params.id,
+    },
   });
 });
