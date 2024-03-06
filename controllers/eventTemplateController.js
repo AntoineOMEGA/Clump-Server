@@ -73,10 +73,15 @@ exports.createEventTemplate = catchAsync(async (req, res, next) => {
 
 exports.updateEventTemplate = catchAsync(async (req, res, next) => {
   //Needs Google Integration
+  let updatedEventTemplate = {
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location,
+  };
 
   const eventTemplate = await EventTemplate.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    updatedEventTemplate,
     {
       new: true,
       runValidators: true,

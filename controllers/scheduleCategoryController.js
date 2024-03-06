@@ -58,10 +58,15 @@ exports.createScheduleCategory = catchAsync(async (req, res, next) => {
 
 exports.updateScheduleCategory = catchAsync(async (req, res, next) => {
   //Needs Google Integration
+  let updatedScheduleCategory = {
+    title: req.body.title,
+    description: req.body.description,
+    color: req.body.color,
+  };
 
   const scheduleCategory = await ScheduleCategory.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    updatedScheduleCategory,
     {
       new: true,
       runValidators: true,
