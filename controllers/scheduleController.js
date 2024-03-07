@@ -5,6 +5,8 @@ const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Clump = require('../models/clumpModel');
+const Event = require('../models/eventModel');
+const EventTemplate = require('../models/eventTemplateModel');
 
 const { google } = require('googleapis');
 
@@ -48,6 +50,51 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
   });
 });
 
+copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, scheduleID) => {
+
+  let calendarQuery = {
+    calendarId: googleCalendarID,
+    //timeMin: (new Date()).toISOString(),
+    singleEvents: true,
+    orderBy: 'startTime',
+  }
+
+  if (pageToken != 0) {
+    calendarQuery.pageToken = pageToken;
+  } else if (pageToken === undefined) {
+    return
+  }
+
+  let result = await gCalendar.events.list(calendarQuery);
+  let events = result.data.items;
+  let eventTemplates = await EventTemplate.find({ clumpID: req.cookies.currentClumpID });
+
+  for await (let event of createEvent()) {
+    let newEvent = {
+      title: event.summary,
+      googleEventID: event.id,
+      description: event.description,
+      location: event.location,
+      start: event.start,
+      end: event.end,
+      scheduleID: scheduleID,
+    };
+
+    eventTemplates.forEach(function (eventTemplate) {
+      console.log(events[eventIndex]);
+      console.log(eventTemplate.title);
+      if (events[eventIndex].summary.includes(eventTemplate.title)) {
+        newEvent.eventTemplateID = eventTemplate._id;
+      }
+    })
+
+    await Event.create(newEvent);
+  }
+  return result.nextPageToken;
+}
+
+
+
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
     userID: req.cookies.currentUserID,
@@ -65,12 +112,13 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   });
 
   const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
+  let syncCalendar = false;
   if (googleCalendarID) {
     const existingGoogleCalendar = await gCalendar.calendars.get({
       calendarId: googleCalendarID,
     });
     googleCalendarTitle = existingGoogleCalendar.data.summary;
+    syncCalendar = true;
   }
 
   if (!googleCalendarID) {
@@ -92,6 +140,12 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
       clumpID: req.cookies.currentClumpID,
       googleCalendarID: googleCalendarID,
     });
+
+    if (syncCalendar) {
+      copyGoogleCalendar(googleCalendarID, req, 0, gCalendar, newSchedule._id);
+    }
+
+
     // and propogate permissions to self and above roles
 
     role.canViewSchedules.push(newSchedule._id);
@@ -142,7 +196,7 @@ exports.updateSchedule = catchAsync(async (req, res, next) => {
     summary: schedule.title,
   };
 
-  gCalendar.calendars.update({calendarId: schedule.googleCalendarID, resource: updatedCalendar});
+  gCalendar.calendars.update({ calendarId: schedule.googleCalendarID, resource: updatedCalendar });
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
