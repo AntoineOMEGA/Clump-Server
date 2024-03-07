@@ -13,11 +13,17 @@ const eventSchema = new mongoose.Schema({
   location: {
     type: String,
   },
-  start: {
-    type: Object
+  startDate: {
+    type: Date
   },
-  end: {
-    type: Object
+  endDate: {
+    type: Date
+  },
+  startTime: {
+    type: String
+  },
+  endTime: {
+    type: String
   },
   eventTemplateID: {
     type: String
