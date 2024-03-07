@@ -1,4 +1,5 @@
 const Schedule = require('../models/scheduleModel');
+const ScheduleCategories = require('../models/scheduleCategoryModel');
 const Member = require('../models/memberModel');
 const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
@@ -50,11 +51,45 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
+  const schedules = await Schedule.find({
+    clumpID: req.cookies.currentClumpID,
+    active: true,
+  });
+
+  const scheduleCategories = await ScheduleCategories.find({
+    clumpID: req.cookies.currentClumpID,
+  })
+
+  const eventTemplates = await EventTemplate.find({
+    clumpID: req.cookies.currentClumpID,
+  })
+
+  let eventQuery = { $or: [] }
+  for (let eventTemplate of eventTemplates) {
+    eventQuery.$or.push({eventTemplateID: eventTemplate._id});
+  }
+
+  const events = await Event.find(eventQuery)
+
+  res.status(200).json({
+    status: 'success',
+    results: events.length,
+    data: {
+      scheduleCategories: scheduleCategories,
+      schedules: schedules,
+      eventTemplates: eventTemplates,
+      events: events,
+    },
+  });
+});
+
 copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, scheduleID) => {
 
   let calendarQuery = {
     calendarId: googleCalendarID,
     //timeMin: (new Date()).toISOString(),
+    maxResults: 2500,
     singleEvents: true,
     orderBy: 'startTime',
   }
@@ -69,7 +104,7 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
   let events = result.data.items;
   let eventTemplates = await EventTemplate.find({ clumpID: req.cookies.currentClumpID });
 
-  for await (let event of createEvent()) {
+  for await (let event of events) {
     let newEvent = {
       title: event.summary,
       googleEventID: event.id,
@@ -80,10 +115,9 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
       scheduleID: scheduleID,
     };
 
+    //Some Error Here
     eventTemplates.forEach(function (eventTemplate) {
-      console.log(events[eventIndex]);
-      console.log(eventTemplate.title);
-      if (events[eventIndex].summary.includes(eventTemplate.title)) {
+      if (event.summary.includes(eventTemplate.title)) {
         newEvent.eventTemplateID = eventTemplate._id;
       }
     })

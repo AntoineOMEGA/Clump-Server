@@ -6,6 +6,13 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 router
+  .route('/combine-schedules')
+  .get(
+    authController.protect,
+    scheduleController.aliasCombineSchedules
+  );
+
+router
   .route('/')
   .get(
     authController.protect,
