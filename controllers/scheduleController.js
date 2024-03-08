@@ -173,6 +173,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
       scheduleCategories: req.body.scheduleCategories,
       clumpID: req.cookies.currentClumpID,
       googleCalendarID: googleCalendarID,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
     });
 
     if (syncCalendar) {

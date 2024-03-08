@@ -11,14 +11,24 @@ const scheduleSchema = new mongoose.Schema({
   },
   clumpID: {
     type: String,
+    require: true,
   },
   googleCalendarID: {
     type: String,
+    unique: true,
   },
   active: {
     type: Boolean,
     require: true,
     default: true,
+  },
+  startDate: {
+    type: Date,
+    require: true,
+  },
+  endDate: {
+    type: Date,
+    require: true,
   }
 });
 
