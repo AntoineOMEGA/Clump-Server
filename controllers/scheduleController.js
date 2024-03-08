@@ -52,6 +52,7 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
 });
 
 exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
+
   const schedules = await Schedule.find({
     clumpID: req.cookies.currentClumpID,
     active: true,
@@ -65,12 +66,15 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
   })
 
-  let eventQuery = { $or: [] }
+  console.log(new Date(req.query.startDate));
+
+  let eventQuery = { startDate: { $gt: new Date(req.query.startDate), $lt: new Date(req.query.endDate) } }
+  /*
   for (let eventTemplate of eventTemplates) {
     eventQuery.$or.push({eventTemplateID: eventTemplate._id});
   }
-
-  const events = await Event.find(eventQuery)
+*/
+  const events = await Event.find(eventQuery);
 
   res.status(200).json({
     status: 'success',
@@ -88,7 +92,7 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
 
   let calendarQuery = {
     calendarId: googleCalendarID,
-    //timeMin: (new Date()).toISOString(),
+    //timeMin: (new Date()),
     maxResults: 2500,
     singleEvents: true,
     orderBy: 'startTime',
@@ -104,14 +108,15 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
   let events = result.data.items;
   let eventTemplates = await EventTemplate.find({ clumpID: req.cookies.currentClumpID });
 
+
   for await (let event of events) {
     let newEvent = {
       title: event.summary,
       googleEventID: event.id,
       description: event.description,
       location: event.location,
-      start: event.start,
-      end: event.end,
+      startDate: new Date(event.start.dateTime),
+      endDate: new Date(event.end.dateTime),
       scheduleID: scheduleID,
     };
 
