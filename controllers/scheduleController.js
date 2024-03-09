@@ -66,10 +66,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
   })
 
-  console.log(new Date(req.query.startDate).toISOString().replace('Z', '+00:00'))
-  console.log(new Date(req.query.endDate).toISOString().replace('Z', '+00:00'))
-
-  let eventQuery = { startDate: { $gte: new Date(req.query.startDate).toISOString().replace('Z', '+00:00'), $lt: new Date(req.query.endDate).toISOString().replace('Z', '+00:00')} }
+  let eventQuery = { startDateTime: { $gte: new Date(req.query.startDate).toISOString().replace('Z', '+00:00'), $lt: new Date(req.query.endDate).toISOString().replace('Z', '+00:00')} }
   /*
   for (let eventTemplate of eventTemplates) {
     eventQuery.$or.push({eventTemplateID: eventTemplate._id});
@@ -89,11 +86,19 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 });
 
-copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, scheduleID) => {
+copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, scheduleID, startDate, endDate) => {
+
+  console.log(startDate);
+  console.log(endDate);
+  let adjustedEndDate = new Date(endDate);
+  adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+  console.log(new Date(startDate).toISOString());
+  console.log(adjustedEndDate.toISOString());
 
   let calendarQuery = {
     calendarId: googleCalendarID,
-    //timeMin: (new Date()),
+    timeMin: new Date(startDate).toISOString(),
+    timeMax: adjustedEndDate.toISOString(),
     maxResults: 2500,
     singleEvents: true,
     orderBy: 'startTime',
@@ -116,8 +121,8 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
       googleEventID: event.id,
       description: event.description,
       location: event.location,
-      startDate: new Date(event.start.dateTime),
-      endDate: new Date(event.end.dateTime),
+      startDateTime: new Date(event.start.dateTime),
+      endDateTime: new Date(event.end.dateTime),
       scheduleID: scheduleID,
     };
 
@@ -163,8 +168,6 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
     let acl = await gCalendar.acl.list({
       calendarId: googleCalendarID
     });
-
-    console.log(acl.data)
   }
 
   if (!googleCalendarID) {
@@ -182,7 +185,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
       title: googleCalendarTitle,
-      scheduleCategories: req.body.scheduleCategories,
+      scheduleCategoryID: req.body.scheduleCategoryID,
       clumpID: req.cookies.currentClumpID,
       googleCalendarID: googleCalendarID,
       startDate: req.body.startDate,
@@ -190,7 +193,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
     });
 
     if (syncCalendar) {
-      copyGoogleCalendar(googleCalendarID, req, 0, gCalendar, newSchedule._id);
+      copyGoogleCalendar(googleCalendarID, req, 0, gCalendar, newSchedule._id, req.body.startDate, req.body.endDate);
     }
 
 
@@ -224,7 +227,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
-    scheduleCategories: req.body.scheduleCategories,
+    scheduleCategoryID: req.body.scheduleCategoryID,
   };
 
   const schedule = await Schedule.findByIdAndUpdate(req.params.id, updatedSchedule, {

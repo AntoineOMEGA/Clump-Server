@@ -3,33 +3,34 @@ const mongoose = require('mongoose');
 const eventSchema = new mongoose.Schema({
   clumpID: {
     type: String,
+    require: true,
   },
   title: {
     type: String,
+    require: true,
   },
   description: {
     type: String,
+    require: true,
   },
   location: {
     type: String,
+    require: true,
   },
-  startDate: {
-    type: Date
+  startDateTime: {
+    type: Date,
+    require: true,
   },
-  endDate: {
-    type: Date
-  },
-  startTime: {
-    type: String
-  },
-  endTime: {
-    type: String
+  endDateTime: {
+    type: Date,
+    require: true,
   },
   eventTemplateID: {
     type: String
   },
   scheduleID: {
-    type: String
+    type: String,
+    require: true,
   },
   googleEventID: {
     type: String,

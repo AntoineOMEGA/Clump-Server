@@ -90,25 +90,14 @@ exports.deleteScheduleCategory = catchAsync(async (req, res, next) => {
   const scheduleCategory = await ScheduleCategory.findByIdAndDelete(req.params.id);
 
   if (scheduleCategory) {
-    const schedules = await Schedule.find({clumpID: req.cookies.currentClumpID});
-    schedules.forEach( async function (schedule) {
-      let validScheduleCategories = [];
-      schedule.scheduleCategories.forEach(function (scheduleCategoryId) {
-        if (scheduleCategoryId !== req.params.id) {
-          validScheduleCategories.push(scheduleCategoryId);
-        }
-      })
-
-      let validSchedule = schedule;
-      schedule.scheduleCategories = validScheduleCategories;
-
-      await Schedule.findByIdAndUpdate(schedule._id,
-        validSchedule,
-        {
-          new: true,
-          runValidators: true,
-        })
-    })
+    const schedules = await Schedule.find({clumpID: req.cookies.currentClumpID, scheduleCategoryID: req.params.id});
+    
+    for await (schedule of schedules) {
+      const temp = await Schedule.findByIdAndUpdate(schedule._id, {scheduleCategoryID: ''}, {
+        new: true,
+        runValidators: true,
+      });
+    }
   }
 
   if (!scheduleCategory) {

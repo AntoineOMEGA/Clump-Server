@@ -6,8 +6,10 @@ const scheduleSchema = new mongoose.Schema({
     require: true,
     trim: true,
   },
-  scheduleCategories: {
-    type: Array
+  scheduleCategoryID: {
+    type: String,
+    require: true,
+    default: '',
   },
   clumpID: {
     type: String,
@@ -21,14 +23,6 @@ const scheduleSchema = new mongoose.Schema({
     type: Boolean,
     require: true,
     default: true,
-  },
-  startDate: {
-    type: Date,
-    require: true,
-  },
-  endDate: {
-    type: Date,
-    require: true,
   }
 });
 

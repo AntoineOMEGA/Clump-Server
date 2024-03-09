@@ -7,12 +7,15 @@ const scheduleCategorySchema = new mongoose.Schema({
   },
   description: {
     type: String,
+    require: true,
   },
   color: {
     type: String,
+    require: true,
   },
   clumpID: {
     type: String,
+    require: true,
   }
 });
 
