@@ -66,9 +66,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
   })
 
-  console.log(new Date(req.query.startDate));
+  console.log(new Date(req.query.startDate).toISOString().replace('Z', '+00:00'))
+  console.log(new Date(req.query.endDate).toISOString().replace('Z', '+00:00'))
 
-  let eventQuery = { startDate: { $gt: new Date(req.query.startDate), $lt: new Date(req.query.endDate) } }
+  let eventQuery = { startDate: { $gte: new Date(req.query.startDate).toISOString().replace('Z', '+00:00'), $lt: new Date(req.query.endDate).toISOString().replace('Z', '+00:00')} }
   /*
   for (let eventTemplate of eventTemplates) {
     eventQuery.$or.push({eventTemplateID: eventTemplate._id});
@@ -158,6 +159,12 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
     });
     googleCalendarTitle = existingGoogleCalendar.data.summary;
     syncCalendar = true;
+
+    let acl = await gCalendar.acl.list({
+      calendarId: googleCalendarID
+    });
+
+    console.log(acl.data)
   }
 
   if (!googleCalendarID) {
