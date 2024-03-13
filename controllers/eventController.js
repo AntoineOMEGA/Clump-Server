@@ -54,11 +54,11 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     location: req.body.location,
     description: req.body.description,
     start: {
-      dateTime: req.body.startDate + 'T' + req.body.startTime,
+      dateTime: req.body.startDateTime,
       timeZone: 'America/Denver',
     },
     end: {
-      dateTime: req.body.startDate + 'T' + req.body.endTime,
+      dateTime: req.body.endDateTime,
       timeZone: 'America/Denver',
     },
     recurrence: ['RRULE:FREQ=DAILY;COUNT=2'],
