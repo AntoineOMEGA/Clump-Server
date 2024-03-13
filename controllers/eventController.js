@@ -8,12 +8,6 @@ const { google } = require('googleapis');
 const { OAuth2 } = google.auth;
 const oAuth2Client = new OAuth2(process.env.OAUTH_ID, process.env.OAUTH_SECRET);
 
-oAuth2Client.setCredentials({
-  refresh_token: process.env.OAUTH_REFRESH_TOKEN,
-});
-
-const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
 exports.getEvents = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Event.find(), req.query)
     .filter()
@@ -46,6 +40,25 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.createEvent = catchAsync(async (req, res, next) => {
+
+  const refreshToken = await Clump.findById(req.cookies.currentClumpID);
+  oAuth2Client.setCredentials({
+    refresh_token: refreshToken.googleToken,
+  });
+
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  let newEvent = {
+    title: req.body.summary,
+    googleEventID: req.body.id,
+    description: req.body.description,
+    location: req.body.location,
+    startDateTime: new Date(req.body.start.dateTime),
+    endDateTime: new Date(req.body.end.dateTime),
+    scheduleID: req.body.scheduleID,
+  };
+
+  gCalendar.events.insert();
 
   //Needs Google Integration
   res.status(201).json({

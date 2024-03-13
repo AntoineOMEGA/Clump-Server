@@ -113,7 +113,7 @@ exports.getGoogleCalendars = catchAsync(async (req, res, next) => {
 
   const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
-  const gCalendarList = await gCalendar.calendarList.list({auth: oAuth2Client});
+  const gCalendarList = await gCalendar.calendarList.list({ auth: oAuth2Client });
 
   res.status(200).json({
     status: 'success',
@@ -124,15 +124,7 @@ exports.getGoogleCalendars = catchAsync(async (req, res, next) => {
 })
 
 exports.createClump = catchAsync(async (req, res, next) => {
-  const scopes = [
-    'https://www.googleapis.com/auth/calendar'
-  ]
 
-  const url = await oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: scopes,
-    prompt: 'consent'
-  });
 
   /*
   res.status(201).json({
@@ -188,11 +180,29 @@ exports.createClump = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
-      redirectURL: url,
       clump: newClump,
     },
   });
 });
+
+exports.bindClump = catchAsync(async (req, res, next) => {
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar'
+  ]
+
+  const url = await oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: scopes,
+    prompt: 'consent'
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      redirectURL: url,
+    },
+  });
+})
 
 exports.updateClump = catchAsync(async (req, res, next) => {
   res.status(200).json({
