@@ -9,7 +9,6 @@ const scheduleSchema = new mongoose.Schema({
   scheduleCategoryID: {
     type: String,
     require: true,
-    default: '',
   },
   clumpID: {
     type: String,
