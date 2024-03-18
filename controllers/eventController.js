@@ -81,6 +81,10 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     calendarId: schedule.googleCalendarID,
     resource: event,
   }, function (err, newEvent) {
+    if (!newEvent) {
+      return next(new AppError('Event creation failed', 400));
+    }
+
     res.status(201).json({
       status: 'success',
       data: {
