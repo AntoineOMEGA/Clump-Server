@@ -3,16 +3,16 @@ const mongoose = require('mongoose');
 const scheduleSchema = new mongoose.Schema({
   title: {
     type: String,
-    require: true,
+    required: true,
     trim: true,
   },
   scheduleCategoryID: {
     type: String,
-    require: true,
+    required: true,
   },
   clumpID: {
     type: String,
-    require: true,
+    required: true,
   },
   googleCalendarID: {
     type: String,
@@ -20,7 +20,7 @@ const scheduleSchema = new mongoose.Schema({
   },
   active: {
     type: Boolean,
-    require: true,
+    required: true,
     default: true,
   }
 });

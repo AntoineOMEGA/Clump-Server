@@ -63,6 +63,12 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     },
   };
 
+  if (req.body.frequency != '') {
+    event.recurrence = [
+      'RRULE:FREQ=WEEKLY'
+    ]
+  }
+
   const tempevent = {
     'summary': 'Google I/O 2024',
     'location': '800 Howard St., San Francisco, CA 94103',
