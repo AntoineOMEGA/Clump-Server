@@ -54,26 +54,42 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     location: req.body.location,
     description: req.body.description,
     start: {
-      dateTime: req.body.startDateTime,
+      dateTime: new Date(req.body.startDateTime),
       timeZone: 'America/Denver',
     },
     end: {
-      dateTime: req.body.endDateTime,
+      dateTime: new Date(req.body.endDateTime),
       timeZone: 'America/Denver',
     },
-    recurrence: ['RRULE:FREQ=DAILY;COUNT=2'],
   };
-/*
-  let newEvent = {
-    title: req.body.title,
-    googleEventID: req.body.id,
-    description: req.body.description,
-    location: req.body.location,
-    startDateTime: new Date(req.body.start.dateTime),
-    endDateTime: new Date(req.body.end.dateTime),
-    scheduleID: req.body.scheduleID,
+
+  const tempevent = {
+    'summary': 'Google I/O 2024',
+    'location': '800 Howard St., San Francisco, CA 94103',
+    'description': 'A chance to hear more about Google\'s developer products.',
+    'start': {
+      'dateTime': '2024-05-28T09:00:00-07:00',
+      'timeZone': 'America/Los_Angeles',
+    },
+    'end': {
+      'dateTime': '2024-05-28T17:00:00-07:00',
+      'timeZone': 'America/Los_Angeles',
+    },
+    'recurrence': [
+      'RRULE:FREQ=DAILY;COUNT=2'
+    ],
+    'attendees': [
+      {'email': 'lpage@example.com'},
+      {'email': 'sbrin@example.com'},
+    ],
+    'reminders': {
+      'useDefault': false,
+      'overrides': [
+        {'method': 'email', 'minutes': 24 * 60},
+        {'method': 'popup', 'minutes': 10},
+      ],
+    },
   };
-  */
 
   let schedule = await Schedule.findById(req.body.scheduleID);
   gCalendar.events.insert({
@@ -81,6 +97,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     calendarId: schedule.googleCalendarID,
     resource: event,
   }, function (err, newEvent) {
+    console.log(err);
     if (!newEvent) {
       return next(new AppError('Event creation failed', 400));
     }
