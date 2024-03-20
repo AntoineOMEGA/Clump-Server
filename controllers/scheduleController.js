@@ -88,12 +88,8 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 
 copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, scheduleID, startDate, endDate) => {
 
-  console.log(startDate);
-  console.log(endDate);
   let adjustedEndDate = new Date(endDate);
   adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-  console.log(new Date(startDate).toISOString());
-  console.log(adjustedEndDate.toISOString());
 
   let calendarQuery = {
     calendarId: googleCalendarID,
@@ -124,6 +120,7 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
       startDateTime: new Date(event.start.dateTime),
       endDateTime: new Date(event.end.dateTime),
       scheduleID: scheduleID,
+      clumpID: req.cookies.currentClumpID,
     };
 
     //Some Error Here

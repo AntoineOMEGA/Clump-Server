@@ -63,7 +63,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     },
   };
 
-  if (req.body.frequency != '') {
+  if (req.body.frequency === 'Weekly') {
     event.recurrence = [
       'RRULE:FREQ=WEEKLY'
     ]
@@ -85,38 +85,51 @@ exports.createEvent = catchAsync(async (req, res, next) => {
       'RRULE:FREQ=DAILY;COUNT=2'
     ],
     'attendees': [
-      {'email': 'lpage@example.com'},
-      {'email': 'sbrin@example.com'},
+      { 'email': 'lpage@example.com' },
+      { 'email': 'sbrin@example.com' },
     ],
     'reminders': {
       'useDefault': false,
       'overrides': [
-        {'method': 'email', 'minutes': 24 * 60},
-        {'method': 'popup', 'minutes': 10},
+        { 'method': 'email', 'minutes': 24 * 60 },
+        { 'method': 'popup', 'minutes': 10 },
       ],
     },
   };
 
   let schedule = await Schedule.findById(req.body.scheduleID);
-  gCalendar.events.insert({
-    auth: oAuth2Client,
-    calendarId: schedule.googleCalendarID,
-    resource: event,
-  }, function (err, newEvent) {
-    console.log(err);
-    if (!newEvent) {
-      return next(new AppError('Event creation failed', 400));
-    }
-
-    res.status(201).json({
-      status: 'success',
-      data: {
-        event: newEvent,
-      },
+  let gEvent;
+  try {
+    gEvent = await gCalendar.events.insert({
+      auth: oAuth2Client,
+      calendarId: schedule.googleCalendarID,
+      resource: event,
     });
-  });
+  } catch (error) {
+    return next(new AppError('Event creation failed', 400));
+  }
 
-  
+  console.log(gEvent);
+
+  let lNewEvent = {
+    title: gEvent.data.summary,
+    googlenewEventID: gEvent.data.id,
+    description: gEvent.data.description,
+    location: gEvent.data.location,
+    startDateTime: new Date(gEvent.data.start.dateTime),
+    endDateTime: new Date(gEvent.data.end.dateTime),
+    scheduleID: schedule._id,
+    clumpID: req.cookies.currentClumpID,
+  };
+
+  let localNewEvent = await Event.create(lNewEvent);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      event: localNewEvent,
+    },
+  });
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
