@@ -31,6 +31,9 @@ const scheduleSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  nextSyncToken: {
+    type: String,
+  }
 });
 
 const Schedule = mongoose.model('schedule', scheduleSchema);
