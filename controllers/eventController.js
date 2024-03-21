@@ -111,31 +111,65 @@ exports.createEvent = catchAsync(async (req, res, next) => {
   }
 
   if (gEvent.recurrence) {
-    await gCalendar.events.instances();
+    let gEvents = await gCalendar.events.instances({
+      auth: oAuth2Client,
+      calendarId: schedule.googleCalendarID,
+      eventId: gEvent.id,
+    });
 
+    let localNewEvents = [];
+
+    for (let event of gEvents) {
+      let lNewEvent = {
+        title: event.summary,
+        googleEventID: event.id,
+        description: event.description,
+        location: event.location,
+        startDateTime: new Date(event.start.dateTime),
+        endDateTime: new Date(event.end.dateTime),
+        scheduleID: schedule._id,
+        clumpID: req.cookies.currentClumpID,
+        created: event.created,
+        updated: event.updated
+      };
+    
+      let tempLocalNewEvent = await Event.create(lNewEvent);
+      localNewEvents.push(tempLocalNewEvent);
+    }
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        events: localNewEvents,
+      },
+    });
+  } else {
+    let lNewEvent = {
+      title: gEvent.data.summary,
+      googleEventID: gEvent.data.id,
+      description: gEvent.data.description,
+      location: gEvent.data.location,
+      startDateTime: new Date(gEvent.data.start.dateTime),
+      endDateTime: new Date(gEvent.data.end.dateTime),
+      scheduleID: schedule._id,
+      clumpID: req.cookies.currentClumpID,
+      created: gEvent.data.created,
+      updated: gEvent.data.updated
+    };
+  
+    let localNewEvent = await Event.create(lNewEvent);
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        event: localNewEvent,
+      },
+    });
   }
 
-  let lNewEvent = {
-    title: gEvent.data.summary,
-    googleEventID: gEvent.data.id,
-    description: gEvent.data.description,
-    location: gEvent.data.location,
-    startDateTime: new Date(gEvent.data.start.dateTime),
-    endDateTime: new Date(gEvent.data.end.dateTime),
-    scheduleID: schedule._id,
-    clumpID: req.cookies.currentClumpID,
-    created: gEvent.data.created,
-    updated: gEvent.data.updated
-  };
+  
 
-  let localNewEvent = await Event.create(lNewEvent);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      event: localNewEvent,
-    },
-  });
+  
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
