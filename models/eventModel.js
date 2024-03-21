@@ -33,6 +33,12 @@ const eventSchema = new mongoose.Schema({
   googleEventID: {
     type: String,
     unique: true
+  },
+  created: {
+    type: Date,
+  },
+  updated: {
+    type: Date,
   }
 
 });

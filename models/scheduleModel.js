@@ -22,7 +22,15 @@ const scheduleSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
     default: true,
-  }
+  },
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  endDate: {
+    type: Date,
+    required: true,
+  },
 });
 
 const Schedule = mongoose.model('schedule', scheduleSchema);

@@ -49,6 +49,8 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 
   const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
+  let schedule = await Schedule.findById(req.body.scheduleID);
+
   var event = {
     summary: req.body.title,
     location: req.body.location,
@@ -65,7 +67,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 
   if (req.body.frequency === 'Weekly') {
     event.recurrence = [
-      'RRULE:FREQ=WEEKLY'
+      'RRULE:FREQ=WEEKLY;UNTIL=' + schedule.endDate.toISOString().replace('-', '').replace('-', '').replace(':', '').replace(':', '').substring(0, 15) + 'Z'
     ]
   }
 
@@ -97,7 +99,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     },
   };
 
-  let schedule = await Schedule.findById(req.body.scheduleID);
   let gEvent;
   try {
     gEvent = await gCalendar.events.insert({
@@ -109,17 +110,22 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     return next(new AppError('Event creation failed', 400));
   }
 
-  console.log(gEvent);
+  if (gEvent.recurrence) {
+    await gCalendar.events.instances();
+
+  }
 
   let lNewEvent = {
     title: gEvent.data.summary,
-    googlenewEventID: gEvent.data.id,
+    googleEventID: gEvent.data.id,
     description: gEvent.data.description,
     location: gEvent.data.location,
     startDateTime: new Date(gEvent.data.start.dateTime),
     endDateTime: new Date(gEvent.data.end.dateTime),
     scheduleID: schedule._id,
     clumpID: req.cookies.currentClumpID,
+    created: gEvent.data.created,
+    updated: gEvent.data.updated
   };
 
   let localNewEvent = await Event.create(lNewEvent);

@@ -110,7 +110,6 @@ copyGoogleCalendar = async (googleCalendarID, req, pageToken, gCalendar, schedul
   let events = result.data.items;
   let eventTemplates = await EventTemplate.find({ clumpID: req.cookies.currentClumpID });
 
-
   for await (let event of events) {
     let newEvent = {
       title: event.summary,
