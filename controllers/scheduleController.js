@@ -93,9 +93,26 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 });
 
+fullSync = catchAsync(async (req, res, next) => {
+  copyGoogleCalendar(
+    googleCalendarID,
+    req,
+    0,
+    gCalendar,
+    newSchedule._id,
+    req.body.startDate,
+    req.body.endDate,
+    newSchedule
+  );
+});
+
+incrementalSync = catchAsync(async (req, res, next) => {
+  
+});
+
 copyGoogleCalendar = async (
   googleCalendarID,
-  req,
+  clumpID,
   pageToken,
   gCalendar,
   scheduleID,
@@ -108,12 +125,9 @@ copyGoogleCalendar = async (
 
   let calendarQuery = {
     calendarId: googleCalendarID,
-    //timeMin: new Date(startDate).toISOString(),
-    //timeMax: adjustedEndDate.toISOString(),
     maxResults: 2500,
     singleEvents: true,
     syncToken: 'CJiT8MfGgYUDEJiT8MfGgYUDGAUgnOOFpgIonOOFpgI='
-    //orderBy: 'startTime',
   };
 
   if (pageToken != 0) {
@@ -125,7 +139,7 @@ copyGoogleCalendar = async (
   let result = await gCalendar.events.list(calendarQuery);
   let events = result.data.items;
   let eventTemplates = await EventTemplate.find({
-    clumpID: req.cookies.currentClumpID,
+    clumpID: clumpID,
   });
 
   for await (let event of events) {
@@ -137,7 +151,7 @@ copyGoogleCalendar = async (
       startDateTime: new Date(event.start.dateTime),
       endDateTime: new Date(event.end.dateTime),
       scheduleID: scheduleID,
-      clumpID: req.cookies.currentClumpID,
+      clumpID: clumpID,
     };
 
     //Some Error Here
@@ -157,7 +171,7 @@ copyGoogleCalendar = async (
   if (result.data.nextPageToken != null) {
     copyGoogleCalendar(
       googleCalendarID,
-      req,
+      clumpID,
       result.data.nextPageToken,
       gCalendar,
       scheduleID,
@@ -226,7 +240,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
     if (syncCalendar) {
       copyGoogleCalendar(
         googleCalendarID,
-        req,
+        req.cookies.currentClumpID,
         0,
         gCalendar,
         newSchedule._id,

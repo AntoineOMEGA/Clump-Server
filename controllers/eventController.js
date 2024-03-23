@@ -67,34 +67,37 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 
   if (req.body.frequency === 'Weekly') {
     event.recurrence = [
-      'RRULE:FREQ=WEEKLY;UNTIL=' + schedule.endDate.toISOString().replace('-', '').replace('-', '').replace(':', '').replace(':', '').substring(0, 15) + 'Z'
-    ]
+      'RRULE:FREQ=WEEKLY;UNTIL=' +
+        schedule.endDate
+          .toISOString()
+          .replace('-', '')
+          .replace('-', '')
+          .replace(':', '')
+          .replace(':', '')
+          .substring(0, 15) +
+        'Z',
+    ];
   }
 
   const tempevent = {
-    'summary': 'Google I/O 2024',
-    'location': '800 Howard St., San Francisco, CA 94103',
-    'description': 'A chance to hear more about Google\'s developer products.',
-    'start': {
-      'dateTime': '2024-05-28T09:00:00-07:00',
-      'timeZone': 'America/Los_Angeles',
+    summary: 'Google I/O 2024',
+    location: '800 Howard St., San Francisco, CA 94103',
+    description: "A chance to hear more about Google's developer products.",
+    start: {
+      dateTime: '2024-05-28T09:00:00-07:00',
+      timeZone: 'America/Los_Angeles',
     },
-    'end': {
-      'dateTime': '2024-05-28T17:00:00-07:00',
-      'timeZone': 'America/Los_Angeles',
+    end: {
+      dateTime: '2024-05-28T17:00:00-07:00',
+      timeZone: 'America/Los_Angeles',
     },
-    'recurrence': [
-      'RRULE:FREQ=DAILY;COUNT=2'
-    ],
-    'attendees': [
-      { 'email': 'lpage@example.com' },
-      { 'email': 'sbrin@example.com' },
-    ],
-    'reminders': {
-      'useDefault': false,
-      'overrides': [
-        { 'method': 'email', 'minutes': 24 * 60 },
-        { 'method': 'popup', 'minutes': 10 },
+    recurrence: ['RRULE:FREQ=DAILY;COUNT=2'],
+    attendees: [{ email: 'lpage@example.com' }, { email: 'sbrin@example.com' }],
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: 'email', minutes: 24 * 60 },
+        { method: 'popup', minutes: 10 },
       ],
     },
   };
@@ -130,9 +133,9 @@ exports.createEvent = catchAsync(async (req, res, next) => {
         scheduleID: schedule._id,
         clumpID: req.cookies.currentClumpID,
         created: event.created,
-        updated: event.updated
+        updated: event.updated,
       };
-    
+
       let tempLocalNewEvent = await Event.create(lNewEvent);
       localNewEvents.push(tempLocalNewEvent);
     }
@@ -154,9 +157,9 @@ exports.createEvent = catchAsync(async (req, res, next) => {
       scheduleID: schedule._id,
       clumpID: req.cookies.currentClumpID,
       created: gEvent.data.created,
-      updated: gEvent.data.updated
+      updated: gEvent.data.updated,
     };
-  
+
     let localNewEvent = await Event.create(lNewEvent);
 
     res.status(201).json({
@@ -166,10 +169,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
       },
     });
   }
-
-  
-
-  
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
