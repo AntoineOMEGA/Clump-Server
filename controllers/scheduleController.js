@@ -71,8 +71,8 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       $lt: new Date(req.query.endDate).toISOString().replace('Z', '+00:00'),
     },
     eventTemplateID: {
-      $exists : true
-    }
+      $exists: true,
+    },
   };
   /*
   for (let eventTemplate of eventTemplates) {
@@ -93,42 +93,30 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 });
 
-fullSync = catchAsync(async (req, res, next) => {
-  copyGoogleCalendar(
-    googleCalendarID,
-    req,
-    0,
-    gCalendar,
-    newSchedule._id,
-    req.body.startDate,
-    req.body.endDate,
-    newSchedule
-  );
-});
-
-incrementalSync = catchAsync(async (req, res, next) => {
-  
-});
+syncCalendar = async (gCalendar, schedule, fullSync) => {
+  if (fullSync) {
+    //Delete Events in Mongo
+    copyGoogleCalendar(0, gCalendar, schedule, false);
+  } else {
+    copyGoogleCalendar(0, gCalendar, schedule, true);
+  }
+};
 
 copyGoogleCalendar = async (
-  googleCalendarID,
-  clumpID,
   pageToken,
   gCalendar,
-  scheduleID,
-  startDate,
-  endDate,
-  schedule
+  schedule,
+  incrementalSync
 ) => {
-  let adjustedEndDate = new Date(endDate);
-  adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-
   let calendarQuery = {
-    calendarId: googleCalendarID,
+    calendarId: schedule.googleCalendarID,
     maxResults: 2500,
     singleEvents: true,
-    syncToken: 'CJiT8MfGgYUDEJiT8MfGgYUDGAUgnOOFpgIonOOFpgI='
   };
+
+  if (incrementalSync) {
+    calendarQuery.syncToken = schedule.nextSyncToken;
+  }
 
   if (pageToken != 0) {
     calendarQuery.pageToken = pageToken;
@@ -139,7 +127,7 @@ copyGoogleCalendar = async (
   let result = await gCalendar.events.list(calendarQuery);
   let events = result.data.items;
   let eventTemplates = await EventTemplate.find({
-    clumpID: clumpID,
+    clumpID: schedule.clumpID,
   });
 
   for await (let event of events) {
@@ -150,8 +138,8 @@ copyGoogleCalendar = async (
       location: event.location,
       startDateTime: new Date(event.start.dateTime),
       endDateTime: new Date(event.end.dateTime),
-      scheduleID: scheduleID,
-      clumpID: clumpID,
+      scheduleID: schedule._id,
+      clumpID: schedule.clumpID,
     };
 
     //Some Error Here
@@ -170,18 +158,16 @@ copyGoogleCalendar = async (
 
   if (result.data.nextPageToken != null) {
     copyGoogleCalendar(
-      googleCalendarID,
-      clumpID,
       result.data.nextPageToken,
       gCalendar,
-      scheduleID,
-      startDate,
-      endDate,
-      schedule
+      schedule,
+      incrementalSync
     );
   } else {
-    await Schedule.findByIdAndUpdate(schedule._id, {nextSyncToken: result.nextSyncToken});
-    console.log(result, result.data.items);
+    await Schedule.findByIdAndUpdate(schedule._id, {
+      nextSyncToken: result.data.nextSyncToken,
+    });
+    console.log(result.data.nextSyncToken);
   }
 };
 
@@ -202,17 +188,11 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   });
 
   const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-  let syncCalendar = false;
   if (googleCalendarID) {
     const existingGoogleCalendar = await gCalendar.calendars.get({
       calendarId: googleCalendarID,
     });
     googleCalendarTitle = existingGoogleCalendar.data.summary;
-    syncCalendar = true;
-
-    let acl = await gCalendar.acl.list({
-      calendarId: googleCalendarID,
-    });
   }
 
   if (!googleCalendarID) {
@@ -235,20 +215,10 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
       googleCalendarID: googleCalendarID,
       startDate: req.body.startDate,
       endDate: req.body.endDate,
+      comments: req.body.comments,
     });
 
-    if (syncCalendar) {
-      copyGoogleCalendar(
-        googleCalendarID,
-        req.cookies.currentClumpID,
-        0,
-        gCalendar,
-        newSchedule._id,
-        req.body.startDate,
-        req.body.endDate,
-        newSchedule
-      );
-    }
+    syncCalendar(gCalendar, newSchedule, false);
 
     // and propogate permissions to self and above roles
 
@@ -281,6 +251,7 @@ exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
     scheduleCategoryID: req.body.scheduleCategoryID,
+    comments: req.body.comments,
   };
 
   const schedule = await Schedule.findByIdAndUpdate(
