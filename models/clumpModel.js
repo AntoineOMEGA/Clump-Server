@@ -14,6 +14,9 @@ const clumpSchema = new mongoose.Schema({
   },
   googleToken: {
     type: String
+  },
+  gmail: {
+    type: String
   }
 });
 

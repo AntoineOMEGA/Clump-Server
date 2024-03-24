@@ -6,6 +6,9 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  timeZone: {
+    type: String
+  },
   scheduleCategoryID: {
     type: String,
     required: true,
@@ -33,6 +36,9 @@ const scheduleSchema = new mongoose.Schema({
   },
   nextSyncToken: {
     type: String,
+  },
+  comments: {
+    type: String
   }
 });
 

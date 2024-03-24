@@ -16,6 +16,15 @@ const eventTemplateSchema = new mongoose.Schema({
   location: {
     type: String,
   },
+  comments: {
+    type: String
+  },
+  forceShifts: {
+    type: Boolean
+  },
+  shifts: {
+    type: Array
+  }
 });
 
 const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema);

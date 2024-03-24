@@ -39,6 +39,12 @@ const eventSchema = new mongoose.Schema({
   },
   updated: {
     type: Date,
+  },
+  recurrence: {
+    type: String,
+  },
+  attendees: {
+    type: Array
   }
 
 });
