@@ -37,6 +37,9 @@ const scheduleSchema = new mongoose.Schema({
   nextSyncToken: {
     type: String,
   },
+  lastSync: {
+    type: Date,
+  },
   comments: {
     type: String
   }

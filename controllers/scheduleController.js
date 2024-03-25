@@ -166,8 +166,8 @@ copyGoogleCalendar = async (
   } else {
     await Schedule.findByIdAndUpdate(schedule._id, {
       nextSyncToken: result.data.nextSyncToken,
+      lastSync: new Date(),
     });
-    console.log(result.data.nextSyncToken);
   }
 };
 
