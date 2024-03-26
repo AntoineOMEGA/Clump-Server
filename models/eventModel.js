@@ -34,14 +34,14 @@ const eventSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  googleRecurringEventID: {
+    type: String,
+  },
   created: {
     type: Date,
   },
   updated: {
     type: Date,
-  },
-  recurrence: {
-    type: String,
   },
   attendees: {
     type: Array

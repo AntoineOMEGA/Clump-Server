@@ -13,6 +13,13 @@ router
   );
 
 router
+  .route('/sync/:id')
+  .post(
+    authController.protect,
+    scheduleController.aliasSyncSchedule
+  );
+
+router
   .route('/')
   .get(
     authController.protect,

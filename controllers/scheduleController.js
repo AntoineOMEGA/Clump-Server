@@ -95,10 +95,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 
 syncCalendar = async (gCalendar, schedule, fullSync) => {
   if (fullSync) {
-    //Delete Events in Mongo
-    copyGoogleCalendar(0, gCalendar, schedule, false);
+    await Event.deleteMany({ scheduleID: schedule._id });
+    await copyGoogleCalendar(0, gCalendar, schedule, false);
   } else {
-    copyGoogleCalendar(0, gCalendar, schedule, true);
+    await copyGoogleCalendar(0, gCalendar, schedule, true);
   }
 };
 
@@ -131,28 +131,30 @@ copyGoogleCalendar = async (
   });
 
   for await (let event of events) {
-    let newEvent = {
-      title: event.summary,
-      googleEventID: event.id,
-      description: event.description,
-      location: event.location,
-      startDateTime: new Date(event.start.dateTime),
-      endDateTime: new Date(event.end.dateTime),
-      scheduleID: schedule._id,
-      clumpID: schedule.clumpID,
-    };
+    if (event.status == 'confirmed') {
+      let newEvent = {
+        title: event.summary,
+        googleEventID: event.id,
+        description: event.description,
+        location: event.location,
+        startDateTime: new Date(event.start.dateTime),
+        endDateTime: new Date(event.end.dateTime),
+        scheduleID: schedule._id,
+        clumpID: schedule.clumpID,
+      };
 
-    //Some Error Here
-    eventTemplates.forEach(function (eventTemplate) {
-      if (event.summary.includes(eventTemplate.title)) {
-        newEvent.eventTemplateID = eventTemplate._id;
+      //Some Error Here
+      eventTemplates.forEach(function (eventTemplate) {
+        if (event.summary.includes(eventTemplate.title)) {
+          newEvent.eventTemplateID = eventTemplate._id;
+        }
+      });
+
+      try {
+        await Event.create(newEvent);
+      } catch (err) {
+        console.log(err);
       }
-    });
-
-    try {
-      await Event.create(newEvent);
-    } catch (err) {
-      console.log(err);
     }
   }
 
@@ -170,6 +172,28 @@ copyGoogleCalendar = async (
     });
   }
 };
+
+exports.aliasSyncSchedule = catchAsync(async (req, res, next) => {
+  const schedule = await Schedule.findById(req.params.id);
+
+  //ONLY UPDATE GOOGLE CALENDAR IF THE INFO FOR IT HAS CHANGED
+  const refreshToken = await Clump.findById(req.cookies.currentClumpID);
+  oAuth2Client.setCredentials({
+    refresh_token: refreshToken.googleToken,
+  });
+
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  await syncCalendar(gCalendar, schedule, true)
+
+  if (!schedule) {
+    return next(new AppError('No schedule found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success'
+  });
+})
 
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
