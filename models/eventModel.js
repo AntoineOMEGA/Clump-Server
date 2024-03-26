@@ -32,7 +32,6 @@ const eventSchema = new mongoose.Schema({
   },
   googleEventID: {
     type: String,
-    unique: true
   },
   googleRecurringEventID: {
     type: String,

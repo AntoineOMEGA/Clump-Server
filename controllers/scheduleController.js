@@ -7,6 +7,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Clump = require('../models/clumpModel');
 const Event = require('../models/eventModel');
+const RecurringEvent = require('../models/recurringEventModel');
 const EventTemplate = require('../models/eventTemplateModel');
 
 const { google } = require('googleapis');
@@ -96,6 +97,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 syncCalendar = async (gCalendar, schedule, fullSync) => {
   if (fullSync) {
     await Event.deleteMany({ scheduleID: schedule._id });
+    await RecurringEvent.deleteMany({ scheduleID: schedule._id });
     await copyGoogleCalendar(0, gCalendar, schedule, false);
   } else {
     await copyGoogleCalendar(0, gCalendar, schedule, true);
@@ -130,32 +132,99 @@ copyGoogleCalendar = async (
     clumpID: schedule.clumpID,
   });
 
+  let recurringEventIDs = [];
+
   for await (let event of events) {
-    if (event.status == 'confirmed') {
-      let newEvent = {
-        title: event.summary,
-        googleEventID: event.id,
-        description: event.description,
-        location: event.location,
-        startDateTime: new Date(event.start.dateTime),
-        endDateTime: new Date(event.end.dateTime),
-        scheduleID: schedule._id,
-        clumpID: schedule.clumpID,
-      };
+    if (!incrementalSync) {
+      if (event.status == 'confirmed') {
+        let newEvent = {
+          title: event.summary,
+          googleEventID: event.id,
+          description: event.description,
+          location: event.location,
+          startDateTime: new Date(event.start.dateTime),
+          endDateTime: new Date(event.end.dateTime),
+          scheduleID: schedule._id,
+          clumpID: schedule.clumpID,
+        };
 
-      //Some Error Here
-      eventTemplates.forEach(function (eventTemplate) {
-        if (event.summary.includes(eventTemplate.title)) {
-          newEvent.eventTemplateID = eventTemplate._id;
+        if (
+          'recurringEventId' in event &&
+          !recurringEventIDs.includes(event.recurringEventId)
+        ) {
+          recurringEventIDs.push(event.recurringEventId);
         }
-      });
 
-      try {
-        await Event.create(newEvent);
-      } catch (err) {
-        console.log(err);
+        //Some Error Here
+        eventTemplates.forEach(function (eventTemplate) {
+          if (event.summary.includes(eventTemplate.title)) {
+            newEvent.eventTemplateID = eventTemplate._id;
+          }
+        });
+
+        try {
+          await Event.create(newEvent);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    } else {
+      let existingEvent = await Event.find({ googleEventID: event.id });
+      if (event.status == 'confirmed') {
+        let newEvent = {
+          title: event.summary,
+          googleEventID: event.id,
+          description: event.description,
+          location: event.location,
+          startDateTime: new Date(event.start.dateTime),
+          endDateTime: new Date(event.end.dateTime),
+          scheduleID: schedule._id,
+          clumpID: schedule.clumpID,
+        };
+
+        if ('recurringEventId' in event) {
+          let existingRecurringEvent = await RecurringEvent.find({
+            googleRecurringEventID: event.recurringEventId,
+          });
+          if (existingRecurringEvent.length == 0) {
+            recurringEventIDs.push(event.recurringEventId);
+          }
+        }
+
+        //Some Error Here
+        eventTemplates.forEach(function (eventTemplate) {
+          if (event.summary.includes(eventTemplate.title)) {
+            newEvent.eventTemplateID = eventTemplate._id;
+          }
+        });
+
+        try {
+          if (existingEvent.length == 0) {
+            await Event.create(newEvent);
+          } else {
+            await Event.findOneAndUpdate({ googleEventID: event.id }, newEvent);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      } else if (event.status == 'cancelled') {
+        await Event.findOneAndDelete({ googleEventID: event.id });
       }
     }
+  }
+
+  for await (let recurringEventId of recurringEventIDs) {
+    let recurringEvent = await gCalendar.events.get({
+      calendarId: schedule.googleCalendarID,
+      eventId: recurringEventId,
+    });
+
+    RecurringEvent.create({
+      clumpID: schedule.clumpID,
+      scheduleID: schedule._id,
+      googleRecurringEventID: recurringEventId,
+      recurrence: recurringEvent.data.recurrence[0],
+    });
   }
 
   if (result.data.nextPageToken != null) {
@@ -184,16 +253,16 @@ exports.aliasSyncSchedule = catchAsync(async (req, res, next) => {
 
   const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
-  await syncCalendar(gCalendar, schedule, true)
+  await syncCalendar(gCalendar, schedule, false);
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
   }
 
   res.status(200).json({
-    status: 'success'
+    status: 'success',
   });
-})
+});
 
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
