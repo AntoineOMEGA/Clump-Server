@@ -255,7 +255,7 @@ exports.aliasSyncSchedule = catchAsync(async (req, res, next) => {
 
   const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
-  await syncCalendar(gCalendar, schedule, false);
+  await syncCalendar(gCalendar, schedule, true);
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
@@ -332,7 +332,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 
     syncCalendar(gCalendar, newSchedule, false);
 
-    gCalendar.events.watch({calendarId: googleCalendarID , resource: {id: googleCalendarID, type: 'web_hook', address: 'https://clump.app/api/v1/schedules/autoSync'}})
+    //gCalendar.events.watch({calendarId: googleCalendarID , resource: {id: googleCalendarID, type: 'web_hook', address: 'https://clump.app/api/v1/schedules/autoSync'}})
 
     // and propogate permissions to self and above roles
 
