@@ -19,7 +19,6 @@ const scheduleRouter = require('./routes/scheduleRoutes');
 const scheduleCategoryRouter = require('./routes/scheduleCategoryRoutes');
 const eventTemplateRouter = require('./routes/eventTemplateRoutes');
 const eventRouter = require('./routes/eventRoutes');
-const googleRouter = require('./routes/googleRoutes');
 
 
 const app = express();
@@ -77,7 +76,6 @@ app.use('/api/v1/schedules', scheduleRouter);
 app.use('/api/v1/schedule-categories', scheduleCategoryRouter);
 app.use('/api/v1/event-templates', eventTemplateRouter);
 app.use('/api/v1/events', eventRouter);
-app.use('/api/v1/google', googleRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

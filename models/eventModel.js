@@ -5,6 +5,35 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  scheduleID: {
+    type: String,
+    required: true,
+  },
+  eventTemplateID: {
+    type: String,
+  },
+  shiftID: {
+    type: String,
+  },
+  
+  creator: {
+    type: String,
+    required: true
+  },
+
+  organizer: {
+    type: String,
+  },
+  attendees: {
+    type: Array,
+  },
+
+  status: {
+    type: String,
+    required: true,
+    default: 'Confirmed',
+  },
+
   title: {
     type: String,
     required: true,
@@ -23,27 +52,34 @@ const eventSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  eventTemplateID: {
-    type: String
-  },
-  scheduleID: {
-    type: String,
-    required: true,
-  },
-  googleEventID: {
+
+  recurrence: {
     type: String,
   },
-  googleRecurringEventID: {
-    type: String,
+  cancelledDates: {
+    type: Array,
   },
+  
   created: {
     type: Date,
+    required: true,
+    default: new Date()
   },
-  updated: {
+  lastModified: {
     type: Date,
+    required: true,
+    default: new Date()
   },
-  attendees: {
-    type: Array
+
+  timeStamp: {
+    type: Date,
+    required: true,
+    default: new Date()
+  },
+  sequence: {
+    type: Number,
+    required: true,
+    default: 0
   }
 
 });

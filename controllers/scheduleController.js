@@ -5,9 +5,7 @@ const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const Clump = require('../models/clumpModel');
 const Event = require('../models/eventModel');
-const RecurringEvent = require('../models/recurringEventModel');
 const EventTemplate = require('../models/eventTemplateModel');
 
 exports.getSchedules = catchAsync(async (req, res, next) => {
@@ -46,7 +44,6 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
 exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   const schedules = await Schedule.find({
     clumpID: req.cookies.currentClumpID,
-    active: true,
   });
 
   const scheduleCategories = await ScheduleCategories.find({
@@ -95,10 +92,12 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
-      title: googleCalendarTitle,
-      scheduleCategoryID: req.body.scheduleCategoryID,
       clumpID: req.cookies.currentClumpID,
-      googleCalendarID: googleCalendarID,
+      scheduleCategoryID: req.body.scheduleCategoryID,
+
+      title: req.body.title,
+      timeZone: 'America/Denver',
+      
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       comments: req.body.comments,

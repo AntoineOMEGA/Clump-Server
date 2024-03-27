@@ -39,24 +39,30 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 exports.createEvent = catchAsync(async (req, res, next) => {
   let schedule = await Schedule.findById(req.body.scheduleID);
 
-  var event = {
-    summary: req.body.title,
+  let eventToCreate = {
+    clumpID: req.cookies.currentClumpID,
+    scheduleID: schedule._id,
+
+    creator: req.cookies.currentUserID,
+
+    title: req.body.title,
     location: req.body.location,
     description: req.body.description,
-    start: {
-      dateTime: new Date(req.body.startDateTime),
-      timeZone: 'America/Denver',
-    },
-    end: {
-      dateTime: new Date(req.body.endDateTime),
-      timeZone: 'America/Denver',
-    },
-  };
+
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
+  }
+
+  if (req.body.eventTemplateID) {
+    eventToCreate.eventTemplateID = req.body.eventTemplateID;
+  }
+
+  let newEvent = await Event.create(eventToCreate);
 
   res.status(201).json({
     status: 'success',
     data: {
-      event,
+      newEvent,
     },
   });
 });

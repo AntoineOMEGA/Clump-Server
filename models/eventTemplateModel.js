@@ -4,6 +4,7 @@ const eventTemplateSchema = new mongoose.Schema({
   clumpID: {
     type: String,
   },
+
   title: {
     type: String,
     required: true,
@@ -16,14 +17,14 @@ const eventTemplateSchema = new mongoose.Schema({
   location: {
     type: String,
   },
+
   comments: {
     type: String
   },
-  forceShifts: {
-    type: Boolean
-  },
-  shifts: {
-    type: Array
+
+  useShifts: {
+    type: Boolean,
+    default: false
   }
 });
 
