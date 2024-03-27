@@ -182,7 +182,7 @@ copyGoogleCalendar = async (
           clumpID: schedule.clumpID,
         };
 
-        if ('recurringEventId' in event) {
+        if ('recurringEventId' in event && !recurringEventIDs.includes(event.recurringEventId)) {
           let existingRecurringEvent = await RecurringEvent.find({
             googleRecurringEventID: event.recurringEventId,
           });
@@ -190,6 +190,8 @@ copyGoogleCalendar = async (
             recurringEventIDs.push(event.recurringEventId);
           }
         }
+
+        
 
         //Some Error Here
         eventTemplates.forEach(function (eventTemplate) {
