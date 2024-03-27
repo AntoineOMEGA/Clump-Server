@@ -7,17 +7,13 @@ const router = express.Router();
 
 router
   .route('/combine-schedules')
-  .get(
-    authController.protect,
-    scheduleController.aliasCombineSchedules
-  );
+  .get(authController.protect, scheduleController.aliasCombineSchedules);
 
 router
   .route('/sync/:id')
-  .post(
-    authController.protect,
-    scheduleController.aliasSyncSchedule
-  );
+  .post(authController.protect, scheduleController.aliasSyncSchedule);
+
+router.route(`/autoSync`).post(scheduleController.aliasAutoSyncSchedule);
 
 router
   .route('/')

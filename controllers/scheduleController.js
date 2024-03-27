@@ -266,6 +266,23 @@ exports.aliasSyncSchedule = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.aliasAutoSyncSchedule = catchAsync(async (req, res, next) => {
+  const googleCalendarId = req.headers['x-goog-resource-id'];
+  console.log(googleCalendarId);
+
+  const schedule = await Schedule.findById(googleCalendarId);
+
+  //ONLY UPDATE GOOGLE CALENDAR IF THE INFO FOR IT HAS CHANGED
+  const refreshToken = await Clump.findById(schedule.clumpID);
+  oAuth2Client.setCredentials({
+    refresh_token: refreshToken.googleToken,
+  });
+
+  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  syncCalendar(gCalendar, schedule, false);
+})
+
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
     userID: req.cookies.currentUserID,
@@ -314,6 +331,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
     });
 
     syncCalendar(gCalendar, newSchedule, false);
+
+    gCalendar.events.watch({calendarId: googleCalendarID , resource: {id: googleCalendarID, type: 'web_hook', address: 'https://clump.app/api/v1/schedules/autoSync'}})
 
     // and propogate permissions to self and above roles
 
