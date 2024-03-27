@@ -10,12 +10,6 @@ router
   .get(authController.protect, scheduleController.aliasCombineSchedules);
 
 router
-  .route('/sync/:id')
-  .post(authController.protect, scheduleController.aliasSyncSchedule);
-
-router.route(`/autoSync`).post(scheduleController.aliasAutoSyncSchedule);
-
-router
   .route('/')
   .get(
     authController.protect,

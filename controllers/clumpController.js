@@ -6,11 +6,6 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const crypto = require('crypto');
 
-const { google } = require('googleapis');
-
-const { OAuth2 } = google.auth;
-const oAuth2Client = new OAuth2(process.env.OAUTH_ID, process.env.OAUTH_SECRET, process.env.OAUTH_REDIRECT_URL);
-
 const getClumps = async (members) => {
   const clumps = [];
 
@@ -91,51 +86,8 @@ exports.getClump = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.assignToken = catchAsync(async (req, res, next) => {
-  console.log(req);
-})
-
-exports.getRefreshToken = catchAsync(async (req, res, next) => {
-  const { tokens } = await oAuth2Client.getToken(req.body.code)
-  oAuth2Client.setCredentials(tokens);
-  console.log(tokens);
-
-  let currentClump = await Clump.findById(req.cookies.currentClumpID);
-  currentClump.googleToken = tokens.refresh_token;
-  currentClump.save();
-})
-
-exports.getGoogleCalendars = catchAsync(async (req, res, next) => {
-  const refreshToken = await Clump.findById(req.cookies.currentClumpID);
-  oAuth2Client.setCredentials({
-    refresh_token: refreshToken.googleToken,
-  });
-
-  const gCalendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
-  const gCalendarList = await gCalendar.calendarList.list({ auth: oAuth2Client });
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      googleCalendars: gCalendarList
-    },
-  });
-})
 
 exports.createClump = catchAsync(async (req, res, next) => {
-
-
-  /*
-  res.status(201).json({
-    status: 'success',
-    data: {
-      redirectURL: url,
-    },
-  });
-  */
-
-  //Add Clump to Clumps Doc
   const newClump = await Clump.create({
     title: req.body.title,
     inviteToken: crypto.randomBytes(16).toString('hex')
@@ -184,25 +136,6 @@ exports.createClump = catchAsync(async (req, res, next) => {
     },
   });
 });
-
-exports.bindClump = catchAsync(async (req, res, next) => {
-  const scopes = [
-    'https://www.googleapis.com/auth/calendar'
-  ]
-
-  const url = await oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: scopes,
-    prompt: 'consent'
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      redirectURL: url,
-    },
-  });
-})
 
 exports.updateClump = catchAsync(async (req, res, next) => {
   res.status(200).json({
