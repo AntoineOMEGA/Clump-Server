@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
-const eventSchema = new mongoose.Schema({
+const shiftSchema = new mongoose.Schema({
   clumpID: {
     type: String,
     required: true,
   },
   eventTemplateID: {
     type: String,
+    required: true,
   },
 
   dayOfWeek: {
@@ -23,6 +24,6 @@ const eventSchema = new mongoose.Schema({
   },
 });
 
-const Event = mongoose.model('event', eventSchema);
+const Shift = mongoose.model('shift', shiftSchema);
 
-module.exports = Event;
+module.exports = Shift;

@@ -18,6 +18,7 @@ const roleRouter = require('./routes/roleRoutes');
 const scheduleRouter = require('./routes/scheduleRoutes');
 const scheduleCategoryRouter = require('./routes/scheduleCategoryRoutes');
 const eventTemplateRouter = require('./routes/eventTemplateRoutes');
+const shiftRouter = require('./routes/shiftRoutes');
 const eventRouter = require('./routes/eventRoutes');
 
 
@@ -75,6 +76,7 @@ app.use('/api/v1/roles', roleRouter);
 app.use('/api/v1/schedules', scheduleRouter);
 app.use('/api/v1/schedule-categories', scheduleCategoryRouter);
 app.use('/api/v1/event-templates', eventTemplateRouter);
+app.use('/api/v1/shifts', shiftRouter);
 app.use('/api/v1/events', eventRouter);
 
 app.all('*', (req, res, next) => {

@@ -21,11 +21,6 @@ const eventTemplateSchema = new mongoose.Schema({
   comments: {
     type: String
   },
-
-  useShifts: {
-    type: Boolean,
-    default: false
-  }
 });
 
 const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema);

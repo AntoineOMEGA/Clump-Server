@@ -73,7 +73,6 @@ exports.createEventTemplate = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEventTemplate = catchAsync(async (req, res, next) => {
-  //Needs Google Integration
   let updatedEventTemplate = {
     title: req.body.title,
     description: req.body.description,
@@ -103,7 +102,6 @@ exports.updateEventTemplate = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteEventTemplate = catchAsync(async (req, res, next) => {
-  //Needs Google Integration ???
   const eventTemplate = await EventTemplate.findByIdAndDelete(req.params.id);
 
   if (!eventTemplate) {
