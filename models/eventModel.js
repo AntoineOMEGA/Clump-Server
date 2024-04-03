@@ -16,15 +16,15 @@ const eventSchema = new mongoose.Schema({
     type: String,
   },
   
-  creator: {
+  creatorID: {
     type: String,
     required: true
   },
 
-  organizer: {
+  organizerID: {
     type: String,
   },
-  attendees: {
+  attendeeIDs: {
     type: Array,
   },
 
@@ -54,7 +54,7 @@ const eventSchema = new mongoose.Schema({
   },
 
   recurrence: {
-    type: String,
+    type: Object,
   },
   cancelledDates: {
     type: Array,

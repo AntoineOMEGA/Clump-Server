@@ -46,11 +46,11 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
     scheduleID: schedule._id,
 
-    creator: req.cookies.currentUserID,
+    creatorID: req.cookies.currentUserID,
 
     title: req.body.title,
-    location: req.body.location,
     description: req.body.description,
+    location: req.body.location,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
@@ -58,6 +58,14 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 
   if (req.body.eventTemplateID) {
     eventToCreate.eventTemplateID = req.body.eventTemplateID;
+  }
+
+  if (req.body.shiftID) {
+    eventToCreate.shiftID = req.body.shiftID;
+  }
+
+  if (req.body.recurrence) {
+    eventToCreate.recurrence = req.body.recurrence;
   }
 
   let newEvent = await Event.create(eventToCreate);
