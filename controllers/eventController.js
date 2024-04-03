@@ -8,15 +8,6 @@ const AppError = require('./../utils/appError');
 const RRuleLib = require ('rrule');
 const RRule = RRuleLib.RRule;
 
-
-const rule = new RRule({
-  freq: RRule.WEEKLY,
-  interval: 5,
-  byweekday: [RRule.MO],
-})
-
-console.log(rule.all());
-
 exports.getEvents = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Event.find(), req.query)
     .filter()
