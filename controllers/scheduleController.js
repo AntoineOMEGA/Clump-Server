@@ -8,6 +8,9 @@ const AppError = require('../utils/appError');
 const Event = require('../models/eventModel');
 const EventTemplate = require('../models/eventTemplateModel');
 
+const RRuleLib = require('rrule');
+const RRule = RRuleLib.RRule;
+
 exports.getSchedules = catchAsync(async (req, res, next) => {
   const schedules = await Schedule.find({
     clumpID: req.cookies.currentClumpID,

@@ -15,7 +15,7 @@ const eventSchema = new mongoose.Schema({
   shiftID: {
     type: String,
   },
-  
+
   creatorID: {
     type: String,
     required: true
@@ -53,13 +53,32 @@ const eventSchema = new mongoose.Schema({
     required: true,
   },
 
-  recurrence: {
-    type: Object,
+  frequency: {
+    type: String
   },
+  byDayWeekly: {
+    type: String
+  },
+  byDayMonthly: {
+    type: String
+  },
+  byDayExtended: {
+    type: Number
+  },
+  interval: {
+    type: Number
+  },
+  count: {
+    type: Number
+  },
+  until: {
+    type: Date
+  },
+
   cancelledDates: {
     type: Array,
   },
-  
+
   created: {
     type: Date,
     required: true,

@@ -5,7 +5,7 @@ const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
-const RRuleLib = require ('rrule');
+const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
 
 exports.getEvents = catchAsync(async (req, res, next) => {
@@ -52,6 +52,16 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     description: req.body.description,
     location: req.body.location,
 
+
+    frequency: req.body.frequency,
+    byDayWeekly: req.body.ByDayWeekly,
+    byDayMonthly: req.body.ByDayMonthly,
+    byDayExtended: req.body.ByDayExtended,
+    interval: req.body.interval,
+    count: req.body.count,
+    until: req.body.until,
+
+
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
   }
@@ -62,10 +72,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 
   if (req.body.shiftID) {
     eventToCreate.shiftID = req.body.shiftID;
-  }
-
-  if (req.body.recurrence) {
-    eventToCreate.recurrence = req.body.recurrence;
   }
 
   let newEvent = await Event.create(eventToCreate);
