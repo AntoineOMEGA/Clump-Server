@@ -36,7 +36,6 @@ const eventSchema = new mongoose.Schema({
 
   title: {
     type: String,
-    required: true,
   },
   description: {
     type: String,
@@ -44,13 +43,17 @@ const eventSchema = new mongoose.Schema({
   location: {
     type: String,
   },
-  startDateTime: {
-    type: Date,
-    required: true,
+  startDate: {
+    type: String,
   },
-  endDateTime: {
-    type: Date,
-    required: true,
+  endDate: {
+    type: String,
+  },
+  startTime: {
+    type: String,
+  },
+  endTime: {
+    type: String,
   },
 
   frequency: {
@@ -99,6 +102,10 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required: true,
     default: 0
+  },
+
+  recurrence: {
+    type: Object
   }
 
 });

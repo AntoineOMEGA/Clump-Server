@@ -10,6 +10,10 @@ router
   .get(authController.protect, scheduleController.aliasCombineSchedules);
 
 router
+  .route('/ical/:id')
+  .get(scheduleController.aliasGenerateICal);
+
+router
   .route('/')
   .get(
     authController.protect,

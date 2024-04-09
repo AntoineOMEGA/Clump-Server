@@ -85,6 +85,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.aliasGenerateICal = catchAsync(async (req, res, next) => {
+  const events = await Event.find();
+})
+
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
     userID: req.cookies.currentUserID,
