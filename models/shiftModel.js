@@ -10,10 +10,6 @@ const shiftSchema = new mongoose.Schema({
     required: true,
   },
 
-  dayOfWeek: {
-    type: String,
-    required: true,
-  },
   startTime: {
     type: String,
     required: true,
