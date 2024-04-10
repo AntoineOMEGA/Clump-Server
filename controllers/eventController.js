@@ -62,8 +62,10 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     until: req.body.until,
 
 
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
+    startDate: req.body.startDate,
+    endDate: req.body.endDate,
+    startTime: req.body.startTime,
+    endTime: req.body.endTime,
   }
 
   if (req.body.eventTemplateID) {

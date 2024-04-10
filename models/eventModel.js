@@ -56,26 +56,8 @@ const eventSchema = new mongoose.Schema({
     type: String,
   },
 
-  frequency: {
-    type: String
-  },
-  byDayWeekly: {
-    type: String
-  },
-  byDayMonthly: {
-    type: String
-  },
-  byDayExtended: {
-    type: Number
-  },
-  interval: {
-    type: Number
-  },
-  count: {
-    type: Number
-  },
-  until: {
-    type: Date
+  recurrence: {
+    type: Object
   },
 
   cancelledDates: {
