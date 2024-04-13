@@ -43,6 +43,9 @@ const eventSchema = new mongoose.Schema({
   location: {
     type: String,
   },
+  timeZone: {
+    type: String,
+  },
   startDate: {
     type: String,
   },
@@ -84,10 +87,6 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required: true,
     default: 0
-  },
-
-  recurrence: {
-    type: Object
   }
 
 });

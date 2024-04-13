@@ -52,15 +52,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     description: req.body.description,
     location: req.body.location,
 
-
-    frequency: req.body.frequency,
-    byDayWeekly: req.body.ByDayWeekly,
-    byDayMonthly: req.body.ByDayMonthly,
-    byDayExtended: req.body.ByDayExtended,
-    interval: req.body.interval,
-    count: req.body.count,
-    until: req.body.until,
-
+    recurrence: req.body.recurrence,
 
     startDate: req.body.startDate,
     endDate: req.body.endDate,

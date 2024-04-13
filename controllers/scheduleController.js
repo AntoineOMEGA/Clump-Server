@@ -7,6 +7,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Event = require('../models/eventModel');
 const EventTemplate = require('../models/eventTemplateModel');
+const Shift = require('../models/shiftModel');
 
 const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
@@ -57,6 +58,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
   });
 
+  const shifts = await Shift.find({
+    clumpID: req.cookies.currentClumpID,
+  });
+
   let eventQuery = {
     startDateTime: {
       $gte: new Date(req.query.startDate).toISOString().replace('Z', '+00:00'),
@@ -81,6 +86,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       schedules: schedules,
       eventTemplates: eventTemplates,
       events: events,
+      shifts: shifts,
     },
   });
 });
