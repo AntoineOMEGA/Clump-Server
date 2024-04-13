@@ -58,7 +58,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     endDate: req.body.endDate,
     startTime: req.body.startTime,
     endTime: req.body.endTime,
-  }
+  };
 
   if (req.body.eventTemplateID) {
     eventToCreate.eventTemplateID = req.body.eventTemplateID;
@@ -79,7 +79,45 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
-  //Needs Google Integration
+  let updatedEvent = {
+    clumpID: req.cookies.currentClumpID,
+    scheduleID: schedule._id,
+
+    creatorID: req.cookies.currentUserID,
+
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location,
+
+    recurrence: req.body.recurrence,
+
+    startDate: req.body.startDate,
+    endDate: req.body.endDate,
+    startTime: req.body.startTime,
+    endTime: req.body.endTime,
+  };
+
+  if (req.body.eventTemplateID) {
+    updatedEvemt.eventTemplateID = req.body.eventTemplateID;
+  }
+
+  if (req.body.shiftID) {
+    updatedEvemt.shiftID = req.body.shiftID;
+  }
+
+  const event = await Event.findByIdAndUpdate(
+    req.params.id,
+    updatedEvent,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!event) {
+    return next(new AppError('No event found with that ID', 404));
+  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -89,7 +127,23 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteEvent = catchAsync(async (req, res, next) => {
-  //Needs Google Integration
+  let deletedEvent = {
+    status: 'Deleted',
+  };
+
+  const event = await Event.findByIdAndUpdate(
+    req.params.id,
+    deletedEvent,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!event) {
+    return next(new AppError('No event found with that ID', 404));
+  }
+
   res.status(204).json({
     status: 'success',
   });

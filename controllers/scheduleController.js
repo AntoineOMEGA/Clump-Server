@@ -63,10 +63,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 
   let eventQuery = {
-    startDateTime: {
-      $gte: new Date(req.query.startDate).toISOString().replace('Z', '+00:00'),
-      $lt: new Date(req.query.endDate).toISOString().replace('Z', '+00:00'),
-    },
+    /*startDateTime: {
+      $gte: new Date(req.query.startDate).toISOString().substring(0, 10),
+      $lt: new Date(req.query.endDate).toISOString().substring(0, 10),
+    },*/
     eventTemplateID: {
       $exists: true,
     },
@@ -173,7 +173,7 @@ exports.deleteSchedule = catchAsync(async (req, res, next) => {
   let deletedSchedule = {
     active: false,
   };
-  //Needs Google Integration ???
+  
   const schedule = await Schedule.findByIdAndUpdate(
     req.params.id,
     deletedSchedule,
