@@ -46,17 +46,11 @@ const eventSchema = new mongoose.Schema({
   timeZone: {
     type: String,
   },
-  startDate: {
-    type: String,
+  startDateTime: {
+    type: Date,
   },
-  endDate: {
-    type: String,
-  },
-  startTime: {
-    type: String,
-  },
-  endTime: {
-    type: String,
+  endDateTime: {
+    type: Date,
   },
 
   recurrence: {

@@ -54,10 +54,8 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 
     recurrence: req.body.recurrence,
 
-    startDate: req.body.startDate,
-    endDate: req.body.endDate,
-    startTime: req.body.startTime,
-    endTime: req.body.endTime,
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
   };
 
   if (req.body.eventTemplateID) {
@@ -91,10 +89,8 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 
     recurrence: req.body.recurrence,
 
-    startDate: req.body.startDate,
-    endDate: req.body.endDate,
-    startTime: req.body.startTime,
-    endTime: req.body.endTime,
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
   };
 
   if (req.body.eventTemplateID) {

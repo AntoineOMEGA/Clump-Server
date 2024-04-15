@@ -63,10 +63,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 
   let eventQuery = {
-    /*startDateTime: {
-      $gte: new Date(req.query.startDate).toISOString().substring(0, 10),
-      $lt: new Date(req.query.endDate).toISOString().substring(0, 10),
-    },*/
+    startDateTime: {
+      $gte: new Date(req.query.startDate).toISOString(),
+      $lt: new Date(req.query.endDate).toISOString(),
+    },
     eventTemplateID: {
       $exists: true,
     },
