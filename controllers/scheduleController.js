@@ -90,14 +90,22 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 */
   const events = await Event.find(eventQuery);
 
+  const fEvents = [];
+
+
+
+  for (let event of events) {
+    const rrule = RRule.fromString()
+  }
+
   res.status(200).json({
     status: 'success',
-    results: events.length,
+    results: fEvents.length,
     data: {
       scheduleCategories: scheduleCategories,
       schedules: schedules,
       eventTemplates: eventTemplates,
-      events: events,
+      events: fEvents,
       shifts: shifts,
     },
   });
