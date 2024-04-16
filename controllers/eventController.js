@@ -58,6 +58,10 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     endDateTime: new Date(req.body.endDateTime),
   };
 
+  if (req.body.until) {
+    eventToCreate.until = req.body.until;
+  }
+
   if (req.body.eventTemplateID) {
     eventToCreate.eventTemplateID = req.body.eventTemplateID;
   }
@@ -92,6 +96,10 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
   };
+
+  if (req.body.until) {
+    updatedEvent.until = req.body.until;
+  }
 
   if (req.body.eventTemplateID) {
     updatedEvent.eventTemplateID = req.body.eventTemplateID;

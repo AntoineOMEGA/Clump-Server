@@ -57,6 +57,10 @@ const eventSchema = new mongoose.Schema({
     type: Object
   },
 
+  until: {
+    type: Date
+  },
+
   cancelledDates: {
     type: Array,
   },

@@ -63,13 +63,25 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 
   let eventQuery = {
-    startDateTime: {
-      $gte: new Date(req.query.startDate).toISOString(),
-      $lt: new Date(req.query.endDate).toISOString(),
-    },
-    eventTemplateID: {
-      $exists: true,
-    },
+    $or: [
+      {
+        startDateTime: {
+          $gte: new Date(req.query.startDate).toISOString(),
+          $lt: new Date(req.query.endDate).toISOString(),
+        },
+        eventTemplateID: {
+          $exists: true,
+        },
+      },
+      {
+        startDateTime: {
+          $lt: new Date(req.query.startDate).toISOString(),
+        },
+        until: {
+          $gte: new Date(req.query.endDate).toISOString(),
+        },
+      },
+    ],
   };
   /*
   for (let eventTemplate of eventTemplates) {
@@ -93,7 +105,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 
 exports.aliasGenerateICal = catchAsync(async (req, res, next) => {
   const events = await Event.find();
-})
+});
 
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
@@ -110,7 +122,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 
       title: req.body.title,
       timeZone: 'America/Denver',
-      
+
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       comments: req.body.comments,
@@ -173,7 +185,7 @@ exports.deleteSchedule = catchAsync(async (req, res, next) => {
   let deletedSchedule = {
     active: false,
   };
-  
+
   const schedule = await Schedule.findByIdAndUpdate(
     req.params.id,
     deletedSchedule,
