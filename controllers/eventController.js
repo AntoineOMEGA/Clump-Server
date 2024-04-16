@@ -77,11 +77,11 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
+  let schedule = await Schedule.findById(req.body.scheduleID);
+
   let updatedEvent = {
     clumpID: req.cookies.currentClumpID,
     scheduleID: schedule._id,
-
-    creatorID: req.cookies.currentUserID,
 
     title: req.body.title,
     description: req.body.description,
@@ -94,11 +94,11 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
   };
 
   if (req.body.eventTemplateID) {
-    updatedEvemt.eventTemplateID = req.body.eventTemplateID;
+    updatedEvent.eventTemplateID = req.body.eventTemplateID;
   }
 
   if (req.body.shiftID) {
-    updatedEvemt.shiftID = req.body.shiftID;
+    updatedEvent.shiftID = req.body.shiftID;
   }
 
   const event = await Event.findByIdAndUpdate(

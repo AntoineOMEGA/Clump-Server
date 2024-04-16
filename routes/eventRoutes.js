@@ -17,7 +17,7 @@ router
 router
   .route(`/:id`)
   .get(authController.protect, eventController.getEvent)
-  .patch(
+  .put(
     authController.protect,
     //authController.restrictTo('admin'),
     eventController.updateEvent
