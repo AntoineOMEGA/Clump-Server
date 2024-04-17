@@ -93,19 +93,19 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   const fEvents = [];
 
 
-
+/*
   for (let event of events) {
     const rrule = RRule.fromString()
-  }
+  }*/
 
   res.status(200).json({
     status: 'success',
-    results: fEvents.length,
+    results: events.length,
     data: {
       scheduleCategories: scheduleCategories,
       schedules: schedules,
       eventTemplates: eventTemplates,
-      events: fEvents,
+      events: events,
       shifts: shifts,
     },
   });
