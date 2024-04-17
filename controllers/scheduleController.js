@@ -140,6 +140,11 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
         ';';
     }
 
+    if (event.until) {
+      rruleString = rruleString + 'UNTIL=' + new Date(event.until).toISOString().replaceAll('-', '').replaceAll(':', '').replace('.000', '') + ';';
+    }
+    console.log(rruleString);
+
     const rrule = RRule.fromString(
       rruleString.substring(0, rruleString.length - 1)
     );
@@ -150,25 +155,27 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     let dates = rrule.between(
       datetime(
         tStart.getUTCFullYear(),
-        tStart.getUTCMonth(),
+        tStart.getUTCMonth() + 1,
         tStart.getUTCDate()
       ),
-      datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth(), tEnd.getUTCDate())
+      datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
     console.log(dates);
 
-    fEvents.push(event);
+    for (let date of dates) {
+      fEvents.push(event);
+    }
   }
 
   res.status(200).json({
     status: 'success',
-    results: events.length,
+    results: fEvents.length,
     data: {
       scheduleCategories: scheduleCategories,
       schedules: schedules,
       eventTemplates: eventTemplates,
-      events: events,
+      events: fEvents,
       shifts: shifts,
     },
   });
