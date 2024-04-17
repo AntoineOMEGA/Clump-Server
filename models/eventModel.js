@@ -54,7 +54,7 @@ const eventSchema = new mongoose.Schema({
   },
 
   recurrence: {
-    type: Object
+    type: Object,
   },
 
   until: {
