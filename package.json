@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "docker:build": "docker build -t clump-app/express-api:latest-dev .",
+    "docker:run": "docker run -v ./:/user/src/app --name api clump-app/express-api:latest-dev",
+    "docker:stop": "docker stop api"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +28,7 @@
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.8",
+    "nodemon": "^3.1.0",
     "rrule": "^2.8.1",
     "validator": "^13.11.0",
     "xss-clean": "^0.1.4"
