@@ -7,7 +7,7 @@
     "start": "nodemon server.js",
     "debug": "ndb server.js",
     "docker:build": "docker build -t clump-app/express-api:latest-dev .",
-    "docker:run": "docker run -v ./:/user/src/app --name api clump-app/express-api:latest-dev",
+    "docker:run": "docker run -p 3000:3000 -v ./user/src/app --name api clump-app/express-api:latest-dev",
     "docker:stop": "docker stop api"
   },
   "author": "",
