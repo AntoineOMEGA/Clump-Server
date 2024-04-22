@@ -11,6 +11,8 @@ services:
     - "27018:27017"
     volumes:
       - ./data:/data/db
+    networks:
+      - clump-network
 
   api:
     container_name: clump-server-api
@@ -20,3 +22,11 @@ services:
       - "3000:3000"
     volumes:
       - .:/user/src/app
+    networks:
+      - clump-network
+    depends_on:
+      - mongo
+
+networks:
+  clump-network:
+    driver: bridge
