@@ -5,8 +5,6 @@ services:
     container_name: clump-db
     image: mongo:latest
     restart: unless-stopped
-    env_file:
-      - .env.development
     ports:
     - "27018:27017"
     volumes:
@@ -19,9 +17,7 @@ services:
     build: .
     restart: always
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/user/src/app
+      - "14000:3000"
     networks:
       - clump-network
     depends_on:
