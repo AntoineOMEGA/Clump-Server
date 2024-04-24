@@ -128,5 +128,5 @@ dist
 
 #custom
 *.env
-/views
+/api/views
 /data
