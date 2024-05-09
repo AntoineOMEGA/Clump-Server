@@ -15,8 +15,7 @@ const datetime = RRuleLib.datetime;
 
 exports.getSchedules = catchAsync(async (req, res, next) => {
   const schedules = await Schedule.find({
-    clumpID: req.cookies.currentClumpID,
-    active: true,
+    clumpID: req.cookies.currentClumpID
   });
 
   res.status(200).json({
