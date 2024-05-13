@@ -1,25 +1,21 @@
 const express = require('express');
 
-const eventTemplateController = require('../controllers/eventTemplateController');
+const scheduleTagController = require('../controllers/scheduleTagController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
-
-router
-  .route('/schedule/:id')
-  .get(authController.protect, eventTemplateController.aliasGetEventTemplateSchedule);
 
 router
   .route('/')
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    eventTemplateController.getEventTemplates
+    scheduleTagController.getScheduleTags
   )
   .post(
     authController.protect,
     //authController.restrictTo('admin'),
-    eventTemplateController.createEventTemplate
+    scheduleTagController.createScheduleTag
   );
 
 router
@@ -27,17 +23,17 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    eventTemplateController.getEventTemplate
+    scheduleTagController.getScheduleTag
   )
   .put(
     authController.protect,
     //authController.restrictTo('admin'),
-    eventTemplateController.updateEventTemplate
+    scheduleTagController.updateScheduleTag
   )
   .delete(
     authController.protect,
     //authController.restrictTo('admin'),
-    eventTemplateController.deleteEventTemplate
+    scheduleTagController.deleteScheduleTag
   );
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const scheduleCategoryController = require('../controllers/scheduleCategoryController');
+const eventTemplateTagController = require('../controllers/eventTemplateTagController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
@@ -10,12 +10,12 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    scheduleCategoryController.getScheduleCategories
+    eventTemplateTagController.getEventTemplateTags
   )
   .post(
     authController.protect,
     //authController.restrictTo('admin'),
-    scheduleCategoryController.createScheduleCategory
+    eventTemplateTagController.creatEeventTemplateTag
   );
 
 router
@@ -23,17 +23,17 @@ router
   .get(
     authController.protect,
     //authController.restrictTo('admin'),
-    scheduleCategoryController.getScheduleCategory
+    eventTemplateTagController.getEventTemplateTag
   )
   .put(
     authController.protect,
     //authController.restrictTo('admin'),
-    scheduleCategoryController.updateScheduleCategory
+    eventTemplateTagController.updateEventTemplateTag
   )
   .delete(
     authController.protect,
     //authController.restrictTo('admin'),
-    scheduleCategoryController.deleteScheduleCategory
+    eventTemplateTagController.deleteEventTemplateTag
   );
 
 module.exports = router;
