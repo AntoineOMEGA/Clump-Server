@@ -7,7 +7,7 @@ const router = express.Router();
 
 router
   .route('/schedule/:id')
-  .get(authController.protect, eventTemplateController.aliasGetEventTemplateSchedule);
+  .get(authController.protect, eventTemplateController.aliasCombineSchedules);
 
 router
   .route('/')

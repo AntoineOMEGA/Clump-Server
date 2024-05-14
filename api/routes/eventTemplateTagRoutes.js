@@ -15,7 +15,7 @@ router
   .post(
     authController.protect,
     //authController.restrictTo('admin'),
-    eventTemplateTagController.creatEeventTemplateTag
+    eventTemplateTagController.createEventTemplateTag
   );
 
 router

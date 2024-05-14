@@ -1,5 +1,5 @@
 const Schedule = require('../models/scheduleModel');
-const ScheduleCategories = require('../models/scheduleCategoryModel');
+const ScheduleTag = require('../models/scheduleTagModel');
 const Member = require('../models/memberModel');
 const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
@@ -50,7 +50,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
   });
 
-  const scheduleCategories = await ScheduleCategories.find({
+  const scheduleTags = await ScheduleTag.find({
     clumpID: req.cookies.currentClumpID,
   });
 
@@ -171,7 +171,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     status: 'success',
     results: fEvents.length,
     data: {
-      scheduleCategories: scheduleCategories,
+      scheduleTags: scheduleTags,
       schedules: schedules,
       eventTemplates: eventTemplates,
       events: fEvents,
@@ -195,7 +195,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
       clumpID: req.cookies.currentClumpID,
-      scheduleCategoryID: req.body.scheduleCategoryID,
+      scheduleTagID: req.body.scheduleTagID,
 
       title: req.body.title,
       timeZone: 'America/Denver',
@@ -233,7 +233,7 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
-    scheduleCategoryID: req.body.scheduleCategoryID,
+    scheduleTagID: req.body.scheduleTagID,
     comments: req.body.comments,
   };
 
