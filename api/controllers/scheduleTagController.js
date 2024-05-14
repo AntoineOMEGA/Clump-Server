@@ -57,7 +57,6 @@ exports.createScheduleTag = catchAsync(async (req, res, next) => {
 });
 
 exports.updateScheduleTag = catchAsync(async (req, res, next) => {
-  //Needs Google Integration
   let updatedScheduleTag = {
     title: req.body.title,
     color: req.body.color,

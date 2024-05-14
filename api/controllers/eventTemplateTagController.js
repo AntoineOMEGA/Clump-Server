@@ -57,7 +57,6 @@ exports.createEventTemplateTag = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEventTemplateTag = catchAsync(async (req, res, next) => {
-  //Needs Google Integration
   let updatedEventTemplateTag = {
     title: req.body.title,
     color: req.body.color,

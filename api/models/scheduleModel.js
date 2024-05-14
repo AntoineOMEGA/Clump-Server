@@ -5,9 +5,12 @@ const scheduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  scheduleCategoryID: {
+  primaryScheduleTagID: {
     type: String,
     required: true,
+  },
+  scheduleTagIDs: {
+    type: Array
   },
   
   title: {
