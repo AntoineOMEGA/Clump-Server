@@ -4,11 +4,11 @@ const eventTemplateSchema = new mongoose.Schema({
   clumpID: {
     type: String,
   },
-  primaryEventTemplateTagID: {
+  primaryTagID: {
     type: String,
     required: true,
   },
-  eventTemplateTagIDs: {
+  tagIDs: {
     type: Array
   },
 

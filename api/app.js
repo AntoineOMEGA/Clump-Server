@@ -16,9 +16,8 @@ const clumpRouter = require('./routes/clumpRoutes');
 const memberRouter = require('./routes/memberRoutes');
 const roleRouter = require('./routes/roleRoutes');
 const scheduleRouter = require('./routes/scheduleRoutes');
-const scheduleTagRouter = require('./routes/scheduleTagRoutes');
+const tagRouter = require('./routes/tagRoutes');
 const eventTemplateRouter = require('./routes/eventTemplateRoutes');
-const eventTemplateTagRouter = require('./routes/eventTemplateTagRoutes');
 const shiftRouter = require('./routes/shiftRoutes');
 const eventRouter = require('./routes/eventRoutes');
 
@@ -75,9 +74,8 @@ app.use('/api/v1/clumps', clumpRouter);
 app.use('/api/v1/members', memberRouter);
 app.use('/api/v1/roles', roleRouter);
 app.use('/api/v1/schedules', scheduleRouter);
-app.use('/api/v1/schedule-tags', scheduleTagRouter);
+app.use('/api/v1/tags', tagRouter);
 app.use('/api/v1/event-templates', eventTemplateRouter);
-app.use('/api/v1/event-templates-tags', eventTemplateTagRouter);
 app.use('/api/v1/shifts', shiftRouter);
 app.use('/api/v1/events', eventRouter);
 

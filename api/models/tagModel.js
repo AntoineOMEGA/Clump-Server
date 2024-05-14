@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const eventTemplateTagSchema = new mongoose.Schema({
+const tagSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -18,6 +18,6 @@ const eventTemplateTagSchema = new mongoose.Schema({
   }
 });
 
-const EventTemplateTag = mongoose.model('eventTemplateTag', eventTemplateTagSchema);
+const Tag = mongoose.model('tag', tagSchema);
 
-module.exports = EventTemplateTag;
+module.exports = Tag;

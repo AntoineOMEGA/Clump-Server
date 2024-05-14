@@ -1,5 +1,5 @@
 const Schedule = require('../models/scheduleModel');
-const ScheduleTag = require('../models/scheduleTagModel');
+const Tag = require('../models/tagModel');
 const Member = require('../models/memberModel');
 const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
@@ -195,8 +195,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
       clumpID: req.cookies.currentClumpID,
-      primaryScheduleTagID: req.body.primaryScheduleTagID,
-      scheduleTagIDs: req.body.scheduleTagIDs,
+      primaryTagID: req.body.primaryTagID,
+      tagIDs: req.body.tagIDs,
 
       title: req.body.title,
       timeZone: 'America/Denver',
@@ -234,8 +234,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
-    primaryScheduleTagID: req.body.primaryScheduleTagID,
-    scheduleTagIDs: req.body.scheduleTagIDs,
+    primaryTagID: req.body.primaryTagID,
+    tagIDs: req.body.tagIDs,
     comments: req.body.comments,
   };
 
