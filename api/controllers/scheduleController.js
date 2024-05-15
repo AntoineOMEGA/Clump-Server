@@ -195,7 +195,6 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
   if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
       clumpID: req.cookies.currentClumpID,
-      primaryTagID: req.body.primaryTagID,
       tagIDs: req.body.tagIDs,
 
       title: req.body.title,
@@ -234,7 +233,6 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
-    primaryTagID: req.body.primaryTagID,
     tagIDs: req.body.tagIDs,
     comments: req.body.comments,
   };

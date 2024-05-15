@@ -4,10 +4,6 @@ const eventTemplateSchema = new mongoose.Schema({
   clumpID: {
     type: String,
   },
-  primaryTagID: {
-    type: String,
-    required: true,
-  },
   tagIDs: {
     type: Array
   },

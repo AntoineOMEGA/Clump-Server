@@ -5,10 +5,6 @@ const scheduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  primaryTagID: {
-    type: String,
-    required: true,
-  },
   tagIDs: {
     type: Array
   },
