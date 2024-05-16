@@ -46,11 +46,15 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
 });
 
 exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
+  req.query.startDate = "2024-05-01T22:34:50.747Z";
+  req.query.endDate = "2024-05-30T22:54:50.747Z";
+  req.cookies.currentClumpID = "664520630a1e34e22d2fee4e";
+
   const schedules = await Schedule.find({
     clumpID: req.cookies.currentClumpID,
   });
 
-  const scheduleTags = await ScheduleTag.find({
+  const tags = await Tag.find({
     clumpID: req.cookies.currentClumpID,
   });
 
@@ -171,7 +175,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     status: 'success',
     results: fEvents.length,
     data: {
-      scheduleTags: scheduleTags,
+      tags: tags,
       schedules: schedules,
       eventTemplates: eventTemplates,
       events: fEvents,

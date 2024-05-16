@@ -6,8 +6,9 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 router
-  .route('/combine-schedules')
-  .get(authController.protect, scheduleController.aliasCombineSchedules);
+  .route('/combine')
+  .get(//authController.protect,
+     scheduleController.aliasCombineSchedules);
 
 router
   .route('/ical/:id')
