@@ -47,18 +47,17 @@ exports.getSchedule = catchAsync(async (req, res, next) => {
 
 exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   req.query.startDate = "2024-05-01T22:34:50.747Z";
-  req.query.endDate = "2024-05-30T22:54:50.747Z";
-  req.cookies.currentClumpID = "664520630a1e34e22d2fee4e";
+  req.query.endDate = "2024-06-30T22:54:50.747Z";
 
   const schedules = await Schedule.find({
     clumpID: req.cookies.currentClumpID,
   });
 
-  const tags = await Tag.find({
+  const eventTemplates = await EventTemplate.find({
     clumpID: req.cookies.currentClumpID,
   });
 
-  const eventTemplates = await EventTemplate.find({
+  const tags = await Tag.find({
     clumpID: req.cookies.currentClumpID,
   });
 
@@ -67,12 +66,10 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 
   let singleEventQuery = {
+    clumpID: req.cookies.currentClumpID,
     startDateTime: {
       $gte: new Date(req.query.startDate).toISOString(),
       $lt: new Date(req.query.endDate).toISOString(),
-    },
-    eventTemplateID: {
-      $exists: true,
     },
     until: {
       $exists: false,
@@ -80,14 +77,12 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   };
 
   let recurringEventQuery = {
+    clumpID: req.cookies.currentClumpID,
     startDateTime: {
-      $lt: new Date(req.query.startDate).toISOString(),
+      $lt: new Date(req.query.endDate).toISOString(),
     },
     until: {
-      $gte: new Date(req.query.endDate).toISOString(),
-    },
-    eventTemplateID: {
-      $exists: true,
+      $gte: new Date(req.query.startDate).toISOString(),
     },
     until: {
       $exists: true,
@@ -144,8 +139,9 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     }
 
     if (event.until) {
-      rruleString = rruleString + 'UNTIL=' + new Date(event.until).toISOString().replaceAll('-', '').replaceAll(':', '').replace('.000', '') + ';';
+      rruleString = rruleString + 'UNTIL=' + new Date(event.until).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
     }
+    rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
     console.log(rruleString);
 
     const rrule = RRule.fromString(
