@@ -16,14 +16,6 @@ const eventSchema = new mongoose.Schema({
     type: String,
   },
 
-  creatorID: {
-    type: String,
-    required: true
-  },
-
-  organizerID: {
-    type: String,
-  },
   attendeeIDs: {
     type: Array,
   },
@@ -64,28 +56,6 @@ const eventSchema = new mongoose.Schema({
   cancelledDates: {
     type: Array,
   },
-
-  created: {
-    type: Date,
-    required: true,
-    default: new Date()
-  },
-  lastModified: {
-    type: Date,
-    required: true,
-    default: new Date()
-  },
-
-  timeStamp: {
-    type: Date,
-    required: true,
-    default: new Date()
-  },
-  sequence: {
-    type: Number,
-    required: true,
-    default: 0
-  }
 
 });
 
