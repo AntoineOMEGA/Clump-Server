@@ -110,37 +110,19 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       rruleString = rruleString + 'INTERVAL=' + event.recurrence.interval + ';';
     }
 
-    if (event.recurrence.byMonth) {
-      rruleString = rruleString + 'BYMONTH=' + event.recurrence.byMonth + ';';
-    }
-
     if (event.recurrence.byDay && event.recurrence.byDay.length > 0) {
       let byDayString = '';
       for (let day of event.recurrence.byDay) {
         byDayString = byDayString + day + ',';
       }
-      rruleString =
-        rruleString +
-        'BYDAY=' +
-        byDayString.substring(0, byDayString.length - 1) +
-        ';';
+      rruleString = rruleString + 'BYDAY=' + byDayString.substring(0, byDayString.length - 1) +';';
     }
 
-    if (event.recurrence.byMonthDay && event.recurrence.byMonthDay.length > 0) {
-      let byMonthDayString = '';
-      for (let day of event.recurrence.byMonthDay) {
-        byMonthDayString = byMonthDayString + day + ',';
-      }
-      rruleString =
-        rruleString +
-        'BYMONTHDAY=' +
-        byMonthDayString.substring(0, byMonthDayString.length - 1) +
-        ';';
-    }
 
     if (event.until) {
       rruleString = rruleString + 'UNTIL=' + new Date(event.until).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
     }
+
     rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
     console.log(rruleString);
 
