@@ -49,22 +49,6 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   req.query.startDate = "2024-05-01T22:34:50.747Z";
   req.query.endDate = "2024-06-30T22:54:50.747Z";
 
-  const schedules = await Schedule.find({
-    clumpID: req.cookies.currentClumpID,
-  });
-
-  const eventTemplates = await EventTemplate.find({
-    clumpID: req.cookies.currentClumpID,
-  });
-
-  const tags = await Tag.find({
-    clumpID: req.cookies.currentClumpID,
-  });
-
-  const shifts = await Shift.find({
-    clumpID: req.cookies.currentClumpID,
-  });
-
   let singleEventQuery = {
     clumpID: req.cookies.currentClumpID,
     startDateTime: {
@@ -81,24 +65,12 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     startDateTime: {
       $lt: new Date(req.query.endDate).toISOString(),
     },
-    until: {
-      $gte: new Date(req.query.startDate).toISOString(),
-    },
-    until: {
-      $exists: true,
-    },
   };
-  /*
-  for (let eventTemplate of eventTemplates) {
-    eventQuery.$or.push({eventTemplateID: eventTemplate._id});
-  }
-*/
-  const events = await Event.find(singleEventQuery);
-  const rEvents = await Event.find(recurringEventQuery);
 
-  let fEvents = [];
+  let events = await Event.find(singleEventQuery);
+  let rEvents = await Event.find(recurringEventQuery);
 
-  fEvents = events;
+  let eventInstances = [];
 
   for (let event of rEvents) {
     let rruleString = '';
@@ -142,22 +114,26 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
-    console.log(dates);
+    if (dates.length > 0) {
+      events.push(event);
+    }
 
     for (let date of dates) {
-      fEvents.push(event);
+      let eventInstance = {
+        _id: event._id + new Date(date).toISOString(),
+        startDateTime: event.startDateTime + ' - ' + date, //adjust for new date
+        endDateTime: event.endDateTime + ' - ' + date, //adjust for new date
+      }
+      eventInstances.push(eventInstance);
     }
   }
 
   res.status(200).json({
     status: 'success',
-    results: fEvents.length,
+    results: events.length,
     data: {
-      tags: tags,
-      schedules: schedules,
-      eventTemplates: eventTemplates,
-      events: fEvents,
-      shifts: shifts,
+      events: events,
+      eventInstances: eventInstances,
     },
   });
 });

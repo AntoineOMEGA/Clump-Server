@@ -44,6 +44,9 @@ const eventSchema = new mongoose.Schema({
   endDateTime: {
     type: Date,
   },
+  duration: {
+    type: Number,
+  },
 
   recurrence: {
     type: Object,
