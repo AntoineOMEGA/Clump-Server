@@ -12,6 +12,7 @@ const Shift = require('../models/shiftModel');
 const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
 const datetime = RRuleLib.datetime;
+const dayjs = require('dayjs');
 
 exports.getSchedules = catchAsync(async (req, res, next) => {
   const schedules = await Schedule.find({
@@ -72,6 +73,15 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 
   let eventInstances = [];
 
+  for (let event of events) {
+    let eventInstance = {
+      _id: event._id,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
+    }
+    eventInstances.push(eventInstance);
+  }
+
   for (let event of rEvents) {
     let rruleString = '';
     if (event.recurrence.frequency != 'Once') {
@@ -120,7 +130,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 
     for (let date of dates) {
       let eventInstance = {
-        _id: event._id + new Date(date).toISOString(),
+        _id: event._id + dayjs(date).toISOString(),
         startDateTime: event.startDateTime + ' - ' + date, //adjust for new date
         endDateTime: event.endDateTime + ' - ' + date, //adjust for new date
       }
