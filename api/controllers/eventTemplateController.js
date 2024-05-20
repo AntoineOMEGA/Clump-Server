@@ -12,10 +12,6 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
     clumpID: req.cookies.currentClumpID,
   });
 
-  const shifts = await Shift.find({
-    clumpID: req.cookies.currentClumpID,
-  });
-
   let singleEventQuery = {
     startDateTime: {
       $gte: new Date(req.query.startDate).toISOString(),
@@ -125,7 +121,6 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       schedules: schedules,
       eventTemplates: eventTemplates,
       events: fEvents,
-      shifts: shifts,
     },
   });
 });

@@ -7,7 +7,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Event = require('../models/eventModel');
 const EventTemplate = require('../models/eventTemplateModel');
-const Shift = require('../models/shiftModel');
 
 const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;

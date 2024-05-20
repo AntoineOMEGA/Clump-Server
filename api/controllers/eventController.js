@@ -64,10 +64,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     eventToCreate.eventTemplateID = req.body.eventTemplateID;
   }
 
-  if (req.body.shiftID) {
-    eventToCreate.shiftID = req.body.shiftID;
-  }
-
   let newEvent = await Event.create(eventToCreate);
 
   res.status(201).json({
@@ -101,10 +97,6 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 
   if (req.body.eventTemplateID) {
     updatedEvent.eventTemplateID = req.body.eventTemplateID;
-  }
-
-  if (req.body.shiftID) {
-    updatedEvent.shiftID = req.body.shiftID;
   }
 
   const event = await Event.findByIdAndUpdate(

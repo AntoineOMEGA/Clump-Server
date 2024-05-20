@@ -1,29 +1,9 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  clumpID: {
-    type: String,
-    required: true,
-  },
   scheduleID: {
     type: String,
     required: true,
-  },
-  eventTemplateID: {
-    type: String,
-  },
-  shiftID: {
-    type: String,
-  },
-
-  attendeeIDs: {
-    type: Array,
-  },
-
-  status: {
-    type: String,
-    required: true,
-    default: 'Confirmed',
   },
 
   title: {
@@ -44,22 +24,10 @@ const eventSchema = new mongoose.Schema({
   endDateTime: {
     type: Date,
   },
-  duration: {
-    type: Number,
-  },
 
   recurrence: {
     type: Object,
   },
-
-  until: {
-    type: Date
-  },
-
-  cancelledDates: {
-    type: Array,
-  },
-
 });
 
 const Event = mongoose.model('event', eventSchema);
