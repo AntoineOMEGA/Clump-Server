@@ -10,10 +10,15 @@ const eventAttendantExceptionSchema = new mongoose.Schema({
     required: true,
   },
 
-  status: {
+  //Date of Occurrence
+  eventAttendantOccurrence: {
     type: String,
     required: true,
-    default: 'Confirmed',
+  },
+  
+  status: {
+    type: String,
+    required: true
   },
 
   startDateTime: {
