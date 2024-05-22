@@ -1,5 +1,4 @@
 const EventTemplate = require('../models/eventTemplateModel');
-const Tag = require('../models/tagModel');
 const Member = require('../models/memberModel');
 const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
@@ -164,7 +163,6 @@ exports.createEventTemplate = catchAsync(async (req, res, next) => {
       title: req.body.title,
       description: req.body.description,
       location: req.body.location,
-      tagIDs: req.body.tagIDs
     });
     // and propogate permissions to self and above roles
 
@@ -197,7 +195,6 @@ exports.updateEventTemplate = catchAsync(async (req, res, next) => {
     title: req.body.title,
     description: req.body.description,
     location: req.body.location,
-    tagIDs: req.body.tagIDs
   };
 
   const eventTemplate = await EventTemplate.findByIdAndUpdate(

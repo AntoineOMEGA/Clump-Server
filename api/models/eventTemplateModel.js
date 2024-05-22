@@ -4,9 +4,6 @@ const eventTemplateSchema = new mongoose.Schema({
   clumpID: {
     type: String,
   },
-  tagIDs: {
-    type: Array
-  },
 
   title: {
     type: String,
