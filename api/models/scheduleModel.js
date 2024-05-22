@@ -26,9 +26,6 @@ const scheduleSchema = new mongoose.Schema({
   endDate: {
     type: Date,
     required: true,
-  },
-  comments: {
-    type: String
   }
 });
 

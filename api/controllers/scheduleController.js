@@ -169,7 +169,6 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 
       startDate: req.body.startDate,
       endDate: req.body.endDate,
-      comments: req.body.comments,
     });
 
     role.canViewSchedules.push(newSchedule._id);
@@ -201,7 +200,6 @@ exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
     tagIDs: req.body.tagIDs,
-    comments: req.body.comments,
   };
 
   const schedule = await Schedule.findByIdAndUpdate(

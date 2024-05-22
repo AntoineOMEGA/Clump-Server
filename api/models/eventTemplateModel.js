@@ -20,10 +20,6 @@ const eventTemplateSchema = new mongoose.Schema({
   location: {
     type: String,
   },
-
-  comments: {
-    type: String
-  },
 });
 
 const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema);

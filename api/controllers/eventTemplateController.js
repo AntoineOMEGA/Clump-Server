@@ -164,7 +164,6 @@ exports.createEventTemplate = catchAsync(async (req, res, next) => {
       title: req.body.title,
       description: req.body.description,
       location: req.body.location,
-      comments: req.body.comments,
       tagIDs: req.body.tagIDs
     });
     // and propogate permissions to self and above roles
@@ -198,7 +197,6 @@ exports.updateEventTemplate = catchAsync(async (req, res, next) => {
     title: req.body.title,
     description: req.body.description,
     location: req.body.location,
-    comments: req.body.comments,
     tagIDs: req.body.tagIDs
   };
 
