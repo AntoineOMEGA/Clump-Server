@@ -130,3 +130,5 @@ dist
 *.env
 /api/views
 /data
+
+*.DS_Store

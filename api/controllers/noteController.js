@@ -40,8 +40,8 @@ exports.createNote = catchAsync(async (req, res, next) => {
     newNote = await Note.create({
       clumpID: req.cookies.currentClumpID,
       title: req.body.title,
-      color: req.body.color,
-      type: req.body.type
+      note: req.body.note,
+      tagIDs: req.body.tagIDs
     });
   } else {
     return next(new AppError('You are not authorized to Create Notes', 401));
@@ -59,8 +59,8 @@ exports.createNote = catchAsync(async (req, res, next) => {
 exports.updateNote = catchAsync(async (req, res, next) => {
   let updatedNote = {
     title: req.body.title,
-    color: req.body.color,
-    type: req.body.type
+    note: req.body.note,
+    tagIDs: req.body.tagIDs
   };
 
   const note = await Note.findByIdAndUpdate(
