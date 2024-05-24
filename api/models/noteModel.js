@@ -10,7 +10,7 @@ const noteSchema = new mongoose.Schema({
     required: true,
   },
   note: {
-    note: String,
+    type: String,
   },
   tagIDs: {
     type: Array
