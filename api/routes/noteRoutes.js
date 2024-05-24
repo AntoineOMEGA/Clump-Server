@@ -16,7 +16,7 @@ router
 router
   .route(`/:id`)
   .get(authController.protect, noteController.getNote)
-  .patch(
+  .put(
     authController.protect,
     noteController.updateNote
   )

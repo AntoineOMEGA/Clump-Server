@@ -25,7 +25,7 @@ router
     //authController.restrictTo('admin'),
     roleController.getRole
   )
-  .patch(
+  .put(
     authController.protect,
     //authController.restrictTo('admin'),
     roleController.updateRole

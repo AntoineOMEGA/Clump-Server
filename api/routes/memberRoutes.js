@@ -24,7 +24,7 @@ router
     //authController.restrictTo('admin'),
     memberController.getMember
   )
-  .patch(
+  .put(
     authController.protect,
     //authController.restrictTo('admin'),
     memberController.updateMember
