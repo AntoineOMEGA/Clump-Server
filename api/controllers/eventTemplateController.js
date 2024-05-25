@@ -152,31 +152,16 @@ exports.getEventTemplate = catchAsync(async (req, res, next) => {
 });
 
 exports.createEventTemplate = catchAsync(async (req, res, next) => {
-  //const member = await Member.findOne({userID: req.cookies.currentUserID, clumpID: req.cookies.currentClumpID});
-  //const role = await Role.findOne({_id: member.roleID});
   let newEventTemplate;
 
-  //if (role.canCreateEventTemplates) {
   if (true) {
     newEventTemplate = await EventTemplate.create({
       clumpID: req.cookies.currentClumpID,
       title: req.body.title,
       description: req.body.description,
       location: req.body.location,
+      tagIDs: req.body.tagIDs
     });
-    // and propogate permissions to self and above roles
-
-    //role.canViewEventTemplates.push(newEventTemplate._id);
-    //role.canEditEventTemplates.push(newEventTemplate._id);
-    //await role.save();
-
-    //let parentRoleID = role.parentRole;
-    //while (parentRoleID !== undefined) {
-      //let parentRole = await Role.findOne({_id: parentRoleID});
-      //parentRole.canViewEventTemplates.push(newEventTemplate._id);
-      //parentRole.canEditEventTemplates.push(newEventTemplate._id);
-      //await parentRole.save();
-    //}
   } else {
     return next(new AppError('You are not authorized to Create Event Templates', 401));
   }
@@ -195,6 +180,7 @@ exports.updateEventTemplate = catchAsync(async (req, res, next) => {
     title: req.body.title,
     description: req.body.description,
     location: req.body.location,
+    tagIDs: req.body.tagIDs
   };
 
   const eventTemplate = await EventTemplate.findByIdAndUpdate(

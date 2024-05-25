@@ -55,9 +55,6 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       $gte: new Date(req.query.startDate).toISOString(),
       $lt: new Date(req.query.endDate).toISOString(),
     },
-    until: {
-      $exists: false,
-    },
   };
 
   let recurringEventQuery = {
@@ -69,6 +66,7 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
 
   let events = await Event.find(singleEventQuery);
   let rEvents = await Event.find(recurringEventQuery);
+  console.log(events);
 
   let eventInstances = [];
 
@@ -122,6 +120,8 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       ),
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
+
+    console.log(dates);
 
     if (dates.length > 0) {
       events.push(event);

@@ -17,6 +17,9 @@ const eventTemplateSchema = new mongoose.Schema({
   location: {
     type: String,
   },
+  tagIDs: {
+    type: Array
+  }
 });
 
 const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema);
