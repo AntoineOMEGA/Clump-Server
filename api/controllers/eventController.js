@@ -9,11 +9,7 @@ const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
 
 exports.getEvents = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Event.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields();
-  const events = await features.query;
+  const events = await Event.find({clumpID: req.cookies.currentClumpID});
 
   res.status(200).json({
     status: 'success',
