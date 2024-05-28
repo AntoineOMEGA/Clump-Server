@@ -37,17 +37,12 @@ exports.getEventException = catchAsync(async (req, res, next) => {
 });
 
 exports.createEventException = catchAsync(async (req, res, next) => {
-  let schedule = await Schedule.findById(req.body.scheduleID);
-
   let eventExceptionToCreate = {
-    clumpID: req.cookies.currentClumpID,
-    scheduleID: schedule._id,
+    scheduleID: req.body.scheduleID,
+    eventID: req.body.eventID,
 
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-
-    recurrence: req.body.recurrence,
+    eventOccurrence: new Date(req.body.eventOccurrence),
+    status: req.body.status,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
