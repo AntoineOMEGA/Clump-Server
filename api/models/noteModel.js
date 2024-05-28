@@ -11,6 +11,7 @@ const noteSchema = new mongoose.Schema({
   },
   note: {
     type: String,
+    required: true
   },
   tagIDs: {
     type: Array
