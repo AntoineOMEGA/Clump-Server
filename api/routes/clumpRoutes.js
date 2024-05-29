@@ -18,12 +18,10 @@ router
   .get(authController.protect, clumpController.getClump)
   .patch(
     authController.protect,
-    //authController.restrictTo('admin'),
     clumpController.updateClump
   )
   .delete(
     authController.protect,
-    //authController.restrictTo('admin'),
     clumpController.deleteClump
   );
 

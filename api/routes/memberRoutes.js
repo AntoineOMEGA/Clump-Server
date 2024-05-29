@@ -9,7 +9,6 @@ router
   .route('/')
   .get(
     authController.protect,
-    //authController.restrictTo('admin'),
     memberController.getMembers
   )
   .post(
@@ -21,17 +20,14 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    //authController.restrictTo('admin'),
     memberController.getMember
   )
   .put(
     authController.protect,
-    //authController.restrictTo('admin'),
     memberController.updateMember
   )
   .delete(
     authController.protect,
-    //authController.restrictTo('admin'),
     memberController.deleteMember
   );
 

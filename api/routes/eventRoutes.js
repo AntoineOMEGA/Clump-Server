@@ -1,6 +1,9 @@
 const express = require(`express`);
 
 const eventController = require(`./../controllers/eventController`);
+const eventExceptionController = require(`./../controllers/eventExceptionController`);
+const eventAttendantController = require(`./../controllers/eventAttendantController`);
+const eventAttendantExceptionController = require(`./../controllers/eventAttendantExceptionController`);
 const authController = require('./../controllers/authController');
 
 const router = express.Router();
@@ -10,7 +13,6 @@ router
   .get(authController.protect, eventController.getEvents)
   .post(
     authController.protect,
-    //authController.restrictTo('admin'),
     eventController.createEvent
   );
 
@@ -19,13 +21,45 @@ router
   .get(authController.protect, eventController.getEvent)
   .put(
     authController.protect,
-    //authController.restrictTo('admin'),
     eventController.updateEvent
   )
   .delete(
     authController.protect,
-    //authController.restrictTo('admin'),
     eventController.deleteEvent
+  );
+
+
+router
+  .route(`/exceptions/`)
+  .post(
+    authController.protect,
+    eventExceptionController.createEventException
+  );
+
+router
+  .route(`/attendant/`)
+  .post(
+    authController.protect,
+    eventAttendantController.createEventAttendant
+  );
+
+router
+  .route(`/attendant/:id`)
+  .put(
+    authController.protect,
+    eventAttendantController.updateEventAttendant
+  )
+  .delete(
+    authController.protect,
+    eventAttendantController.deleteEventAttendant
+  );
+
+
+router
+  .route(`/attendant/exceptions/`)
+  .post(
+    authController.protect,
+    eventAttendantExceptionController.createEventAttendantException
   );
 
 module.exports = router;

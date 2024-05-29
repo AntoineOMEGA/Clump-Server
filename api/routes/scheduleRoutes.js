@@ -6,11 +6,6 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 router
-  .route('/combine')
-  .get(//authController.protect,
-     scheduleController.aliasCombineSchedules);
-
-router
   .route('/ical/:id')
   .get(scheduleController.aliasGenerateICal);
 
@@ -18,12 +13,10 @@ router
   .route('/')
   .get(
     authController.protect,
-    //authController.restrictTo('admin'),
     scheduleController.getSchedules
   )
   .post(
     authController.protect,
-    //authController.restrictTo('admin'),
     scheduleController.createSchedule
   );
 
@@ -31,17 +24,14 @@ router
   .route('/:id')
   .get(
     authController.protect,
-    //authController.restrictTo('admin'),
     scheduleController.getSchedule
   )
   .put(
     authController.protect,
-    //authController.restrictTo('admin'),
     scheduleController.updateSchedule
   )
   .delete(
     authController.protect,
-    //authController.restrictTo('admin'),
     scheduleController.deleteSchedule
   );
 
