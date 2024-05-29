@@ -10,17 +10,6 @@ const eventExceptionSchema = new mongoose.Schema({
     required: true,
   },
 
-  //Date of Occurrence
-  eventOccurrence: {
-    type: Date,
-    required: true,
-  },
-
-  status: {
-    type: String,
-    required: true
-  },
-
   startDateTime: {
     type: Date,
     required: true
