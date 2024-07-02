@@ -117,24 +117,11 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteEvent = catchAsync(async (req, res, next) => {
-  let deletedEvent = {
-    status: 'Deleted',
-  };
-
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    deletedEvent,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const event = await Event.findByIdAndDelete(req.params.id);
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));
   }
 
-  res.status(204).json({
-    status: 'success',
-  });
+  res.status(204).send();
 });

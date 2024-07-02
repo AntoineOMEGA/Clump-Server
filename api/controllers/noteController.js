@@ -87,22 +87,9 @@ exports.updateNote = catchAsync(async (req, res, next) => {
 exports.deleteNote = catchAsync(async (req, res, next) => {
   const note = await Note.findByIdAndDelete(req.params.id);
 
-  if (note) {
-    const schedules = await Schedule.find({clumpID: req.cookies.currentClumpID, noteID: req.params.id});
-    
-    for await (schedule of schedules) {
-      const temp = await Schedule.findByIdAndUpdate(schedule._id, {noteID: ''}, {
-        new: true,
-        runValidators: true,
-      });
-    }
-  }
-
   if (!note) {
     return next(new AppError('No note found with that ID', 404));
   }
 
-  res.status(204).json({
-    status: 'success',
-  });
+  res.status(204).send();
 });

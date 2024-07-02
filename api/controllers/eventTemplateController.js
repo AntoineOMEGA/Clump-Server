@@ -211,7 +211,5 @@ exports.deleteEventTemplate = catchAsync(async (req, res, next) => {
     return next(new AppError('No eventTemplate found with that ID', 404));
   }
 
-  res.status(204).json({
-    status: 'success',
-  });
+  res.status(204).send();
 });

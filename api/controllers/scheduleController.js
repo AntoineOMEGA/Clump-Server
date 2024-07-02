@@ -224,24 +224,11 @@ exports.updateSchedule = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteSchedule = catchAsync(async (req, res, next) => {
-  let deletedSchedule = {
-    active: false,
-  };
-
-  const schedule = await Schedule.findByIdAndUpdate(
-    req.params.id,
-    deletedSchedule,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const schedule = await Schedule.findByIdAndDelete(req.params.id);
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
   }
 
-  res.status(204).json({
-    status: 'success',
-  });
+  res.status(204).send();
 });
