@@ -1,4 +1,5 @@
 const Event = require('../models/eventModel');
+const EventException = require('../models/eventExceptionModel');
 const Clump = require('../models/clumpModel');
 const Schedule = require('../models/scheduleModel');
 const APIFeatures = require('./../utils/apiFeatures');
@@ -116,6 +117,19 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
   });
 });
 
+//UPDATE SUB FUNCTIONS
+exports.updateThisEvent = catchAsync(async (req, res, next) => {
+
+});
+
+exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
+
+});
+
+exports.updateAllEvents = catchAsync(async (req, res, next) => {
+
+});
+
 exports.deleteEvent = catchAsync(async (req, res, next) => {
   const event = await Event.findByIdAndDelete(req.params.id);
 
@@ -124,4 +138,17 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
   }
 
   res.status(204).send();
+});
+
+//DELETE SUB FUNCTIONS
+exports.deleteThisEvent = catchAsync(async (req, res, next) => {
+
+});
+
+exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
+
+});
+
+exports.deleteAllEvents = catchAsync(async (req, res, next) => {
+
 });
