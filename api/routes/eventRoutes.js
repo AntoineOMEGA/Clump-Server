@@ -1,9 +1,7 @@
 const express = require(`express`);
 
 const eventController = require(`./../controllers/eventController`);
-const eventExceptionController = require(`./../controllers/eventExceptionController`);
 const eventAttendantController = require(`./../controllers/eventAttendantController`);
-const eventAttendantExceptionController = require(`./../controllers/eventAttendantExceptionController`);
 const authController = require('./../controllers/authController');
 
 const router = express.Router();
@@ -28,14 +26,6 @@ router
     eventController.deleteEvent
   );
 
-
-router
-  .route(`/exceptions/`)
-  .post(
-    authController.protect,
-    eventExceptionController.createEventException
-  );
-
 router
   .route(`/attendant/`)
   .post(
@@ -52,14 +42,6 @@ router
   .delete(
     authController.protect,
     eventAttendantController.deleteEventAttendant
-  );
-
-
-router
-  .route(`/attendant/exceptions/`)
-  .post(
-    authController.protect,
-    eventAttendantExceptionController.createEventAttendantException
   );
 
 module.exports = router;
