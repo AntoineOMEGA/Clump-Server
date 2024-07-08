@@ -1,7 +1,6 @@
 const express = require(`express`);
 
 const eventController = require(`./../controllers/eventController`);
-const eventExceptionController = require(`./../controllers/eventExceptionController`);
 const authController = require('./../controllers/authController');
 
 const router = express.Router();
@@ -24,13 +23,6 @@ router
   .delete(
     authController.protect,
     eventController.deleteEvent
-  );
-
-router
-  .route(`/exception/`)
-  .post(
-    authController.protect,
-    eventExceptionController.createEventException
   );
 
 module.exports = router;

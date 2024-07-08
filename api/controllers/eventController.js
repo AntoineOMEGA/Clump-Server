@@ -40,7 +40,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
   let schedule = await Schedule.findById(req.body.scheduleID);
 
   let eventToCreate = {
-    clumpID: req.cookies.currentClumpID,
     scheduleID: schedule._id,
 
     title: req.body.title,
@@ -75,7 +74,6 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
   let schedule = await Schedule.findById(req.body.scheduleID);
 
   let updatedEvent = {
-    clumpID: req.cookies.currentClumpID,
     scheduleID: schedule._id,
 
     title: req.body.title,
@@ -119,15 +117,36 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 
 //UPDATE SUB FUNCTIONS
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
+  let eventExceptionToCreate = {
 
+  }
+  EventException.create(eventExceptionToCreate);
+
+  let eventToCreate = {
+
+  }
+  Event.create(eventToCreate);
+
+  //TODO: Get AND Update Child Events if they have their own Start OR End DateTimes
 });
 
 exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
+  let event = await Event.findById(req.body.eventID);
+  //TODO: Update Event to End before NEW Event
 
+  let eventToCreate = {
+
+  }
+  Event.create(eventToCreate);
+
+  EventException.updateMany();
+  //TODO: Update Event Exceptions for Original Event to New Event if they occur During the New Event
+
+  //TODO: Delete Event Exceptions if New Event occurs on a different day of the week than the Original Event
 });
 
 exports.updateAllEvents = catchAsync(async (req, res, next) => {
-
+  this.updateEvent(req, res, next);
 });
 
 exports.deleteEvent = catchAsync(async (req, res, next) => {
@@ -142,13 +161,19 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
 
 //DELETE SUB FUNCTIONS
 exports.deleteThisEvent = catchAsync(async (req, res, next) => {
+  let eventExceptionToCreate = {
 
+  }
+  EventException.create(eventExceptionToCreate);
 });
 
 exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
+  this.updateEvent(req, res, next);
 
+  EventException.deleteMany();
 });
 
 exports.deleteAllEvents = catchAsync(async (req, res, next) => {
-
+  Event.deleteOne();
+  EventException.deleteMany();
 });
