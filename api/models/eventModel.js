@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  clumpID: {
-    type: String,
-    required: true
-  },
   scheduleID: {
     type: String,
     required: true,
+  },
+  parentEventID: {
+    type: String
   },
 
   title: {
