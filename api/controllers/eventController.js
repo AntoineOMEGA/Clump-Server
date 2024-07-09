@@ -143,11 +143,41 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   EventException.updateMany();
   //TODO: Update Event Exceptions for Original Event to New Event if they occur During the New Event
 
-  //TODO: Delete Event Exceptions if New Event occurs on a different day of the week than the Original Event
+  if (new Date(currentEvent.startDateTime).getDay() != new Date(event.startDateTime).getDay()) {
+    const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  }
 });
 
 exports.updateAllEvents = catchAsync(async (req, res, next) => {
-  this.updateEvent(req, res, next);
+  let currentEvent = await Event.findById(req.params.id);
+
+  let updatedEvent = {
+    recurrence: { until: req.body.recurrence.until},
+  };
+
+  const event = await Event.findByIdAndUpdate(
+    req.params.id,
+    updatedEvent,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!event) {
+    return next(new AppError('No event found with that ID', 404));
+  }
+
+  if (new Date(currentEvent.startDateTime).getDay() != new Date(event.startDateTime).getDay()) {
+    const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      event,
+    },
+  });
 });
 
 exports.deleteEvent = catchAsync(async (req, res, next) => {
@@ -160,23 +190,28 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
   res.status(204).send();
 });
 
-//DELETE SUB FUNCTIONS
 exports.deleteThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
-    eventID: req.body.eventID,
+    eventID: req.params.id,
     startDateTime: req.body.startDateTime
   }
-  EventException.create(eventExceptionToCreate);
+  let eventException = await EventException.create(eventExceptionToCreate);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      eventException,
+    },
+  });
 });
 
 exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
-  let updatedEvent = {
-    recurrence: req.body.recurrence,
-  };
+  let untilDate = new Date(req.body.startDateTime);
+  untilDate.setDate(untilDate.getDate() - 1);
 
-  if (req.body.until) {
-    updatedEvent.recurrence.until = req.body.until;
-  }
+  let updatedEvent = {
+    recurrence: { until: untilDate},
+  };
 
   const event = await Event.findByIdAndUpdate(
     req.params.id,
@@ -187,10 +222,27 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
     }
   );
 
-  EventException.deleteMany($and[{eventID: {$eq: req.body.eventID}}, {startDateTime: {$gte: req.body.startDateTime}}]);
+  let eventExceptions = await EventException.deleteMany($and[{eventID: {$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]);
+
+  if (!event) {
+    return next(new AppError('No event found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      event,
+    },
+  });
 });
 
 exports.deleteAllEvents = catchAsync(async (req, res, next) => {
-  Event.deleteOne();
-  EventException.deleteMany({eventID: {$eq: req.body.eventID}});
+  const event = await Event.deleteOne({_id: req.params.id});
+  const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+
+  if (!event) {
+    return next(new AppError('No event found with that ID', 404));
+  }
+
+  res.status(204).send();
 });
