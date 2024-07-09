@@ -118,7 +118,8 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 //UPDATE SUB FUNCTIONS
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
-
+    eventID: req.body.eventID,
+    startDateTime: req.body.startDateTime
   }
   EventException.create(eventExceptionToCreate);
 
@@ -162,18 +163,34 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
 //DELETE SUB FUNCTIONS
 exports.deleteThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
-
+    eventID: req.body.eventID,
+    startDateTime: req.body.startDateTime
   }
   EventException.create(eventExceptionToCreate);
 });
 
 exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
-  this.updateEvent(req, res, next);
+  let updatedEvent = {
+    recurrence: req.body.recurrence,
+  };
 
-  EventException.deleteMany();
+  if (req.body.until) {
+    updatedEvent.recurrence.until = req.body.until;
+  }
+
+  const event = await Event.findByIdAndUpdate(
+    req.params.id,
+    updatedEvent,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  EventException.deleteMany($and[{eventID: {$eq: req.body.eventID}}, {startDateTime: {$gte: req.body.startDateTime}}]);
 });
 
 exports.deleteAllEvents = catchAsync(async (req, res, next) => {
   Event.deleteOne();
-  EventException.deleteMany();
+  EventException.deleteMany({eventID: {$eq: req.body.eventID}});
 });
