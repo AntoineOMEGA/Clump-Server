@@ -56,10 +56,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     eventToCreate.until = req.body.until;
   }
 
-  if (req.body.eventTemplateID) {
-    eventToCreate.eventTemplateID = req.body.eventTemplateID;
-  }
-
   let newEvent = await Event.create(eventToCreate);
 
   res.status(201).json({
@@ -86,12 +82,8 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     endDateTime: new Date(req.body.endDateTime),
   };
 
-  if (req.body.until) {
-    updatedEvent.until = req.body.until;
-  }
-
-  if (req.body.eventTemplateID) {
-    updatedEvent.eventTemplateID = req.body.eventTemplateID;
+  if (req.body.recurrence.until) {
+    updatedEvent.recurrence.until = req.body.recurrence.until;
   }
 
   const event = await Event.findByIdAndUpdate(
@@ -132,19 +124,39 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
-  let event = await Event.findById(req.body.eventID);
-  //TODO: Update Event to End before NEW Event
+  let untilDate = new Date(req.body.startDateTime);
+  untilDate.setDate(untilDate.getDate() - 1);
+
+  let updatedEvent = {
+    recurrence: { until: untilDate},
+  };
+
+  const event = await Event.findByIdAndUpdate(
+    req.params.id,
+    updatedEvent,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   let eventToCreate = {
 
   }
-  Event.create(eventToCreate);
+  let newEvent = await Event.create(eventToCreate);
 
-  EventException.updateMany();
-  //TODO: Update Event Exceptions for Original Event to New Event if they occur During the New Event
+  let eventExceptions;
 
   if (new Date(currentEvent.startDateTime).getDay() != new Date(event.startDateTime).getDay()) {
     const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  } else {
+    eventExceptions = await EventException.updateMany(
+      $and [{eventID:{$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}],  
+      {eventID: newEvent._id}, function (err, eventExceptions) { 
+      if (err){ 
+        return next(new AppError('Issue updating Event Exceptions', 400));
+      }
+    });
   }
 });
 
