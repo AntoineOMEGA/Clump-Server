@@ -25,4 +25,19 @@ router
     eventController.deleteEvent
   );
 
+  router
+  .route('/thisEvent/:id')
+  .put(authController.protect, eventController.updateThisEvent)
+  .delete(authController.protect, eventController.deleteThisEvent);
+
+  router
+  .route('/thisAndFollowingEvents/:id')
+  .put(authController.protect, eventController.updateThisAndFollowingEvents)
+  .delete(authController.protect, eventController.deleteThisAndFollowingEvents);
+
+  router
+  .route('/allEvents/:id')
+  .put(authController.protect, eventController.updateAllEvents)
+  .delete(authController.protect, eventController.deleteAllEvents);
+
 module.exports = router;
