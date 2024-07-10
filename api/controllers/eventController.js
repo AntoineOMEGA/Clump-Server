@@ -1,6 +1,5 @@
 const Event = require('../models/eventModel');
 const EventException = require('../models/eventExceptionModel');
-const Clump = require('../models/clumpModel');
 const Schedule = require('../models/scheduleModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
@@ -37,10 +36,8 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.createEvent = catchAsync(async (req, res, next) => {
-  let schedule = await Schedule.findById(req.body.scheduleID);
-
   let eventToCreate = {
-    scheduleID: schedule._id,
+    scheduleID: req.body.scheduleID,
 
     title: req.body.title,
     description: req.body.description,
@@ -51,10 +48,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
   };
-
-  if (req.body.until) {
-    eventToCreate.until = req.body.until;
-  }
 
   let newEvent = await Event.create(eventToCreate);
 
@@ -67,10 +60,8 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
-  let schedule = await Schedule.findById(req.body.scheduleID);
-
   let updatedEvent = {
-    scheduleID: schedule._id,
+    scheduleID: req.body.scheduleID,
 
     title: req.body.title,
     description: req.body.description,
@@ -81,10 +72,6 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
   };
-
-  if (req.body.recurrence.until) {
-    updatedEvent.recurrence.until = req.body.recurrence.until;
-  }
 
   const event = await Event.findByIdAndUpdate(
     req.params.id,
@@ -107,20 +94,34 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
   });
 });
 
-//UPDATE SUB FUNCTIONS
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
     eventID: req.body.eventID,
     startDateTime: req.body.startDateTime
   }
-  EventException.create(eventExceptionToCreate);
+  let newEventException = await EventException.create(eventExceptionToCreate);
 
   let eventToCreate = {
+    scheduleID: req.body.scheduleID,
 
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location,
+
+    recurrence: req.body.recurrence,
+
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
   }
-  Event.create(eventToCreate);
+  let newEvent = await Event.create(eventToCreate);
 
-  //TODO: Get AND Update Child Events if they have their own Start OR End DateTimes
+  res.status(201).json({
+    status: 'success',
+    data: {
+      newEvent,
+      newEventException
+    },
+  });
 });
 
 exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
@@ -128,8 +129,19 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   untilDate.setDate(untilDate.getDate() - 1);
 
   let updatedEvent = {
-    recurrence: { until: untilDate},
+    scheduleID: req.body.scheduleID,
+
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location,
+
+    recurrence: req.body.recurrence,
+
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
   };
+
+  updatedEvent.recurrence.until = untilDate;
 
   const event = await Event.findByIdAndUpdate(
     req.params.id,
@@ -141,14 +153,23 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   );
 
   let eventToCreate = {
+    scheduleID: req.body.scheduleID,
 
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location,
+
+    recurrence: req.body.recurrence,
+
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
   }
   let newEvent = await Event.create(eventToCreate);
 
   let eventExceptions;
 
   if (new Date(currentEvent.startDateTime).getDay() != new Date(event.startDateTime).getDay()) {
-    const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+    eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
   } else {
     eventExceptions = await EventException.updateMany(
       $and [{eventID:{$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}],  
@@ -158,13 +179,31 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
       }
     });
   }
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      event,
+      newEvent,
+      eventExceptions
+    },
+  });
 });
 
 exports.updateAllEvents = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
 
   let updatedEvent = {
-    recurrence: { until: req.body.recurrence.until},
+    scheduleID: req.body.scheduleID,
+
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location,
+
+    recurrence: req.body.recurrence,
+
+    startDateTime: new Date(req.body.startDateTime),
+    endDateTime: new Date(req.body.endDateTime),
   };
 
   const event = await Event.findByIdAndUpdate(
