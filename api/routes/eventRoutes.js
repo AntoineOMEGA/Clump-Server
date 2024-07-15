@@ -25,17 +25,21 @@ router
     eventController.deleteEvent
   );
 
-  router
+router
+  .route(`/onSchedule/:id`)
+  .get(authController.protect, eventController.getEventsOnSchedule);
+
+router
   .route('/thisEvent/:id')
   .put(authController.protect, eventController.updateThisEvent)
   .delete(authController.protect, eventController.deleteThisEvent);
 
-  router
+router
   .route('/thisAndFollowingEvents/:id')
   .put(authController.protect, eventController.updateThisAndFollowingEvents)
   .delete(authController.protect, eventController.deleteThisAndFollowingEvents);
 
-  router
+router
   .route('/allEvents/:id')
   .put(authController.protect, eventController.updateAllEvents)
   .delete(authController.protect, eventController.deleteAllEvents);

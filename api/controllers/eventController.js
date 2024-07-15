@@ -9,7 +9,7 @@ const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
 
 exports.getEvents = catchAsync(async (req, res, next) => {
-  const events = await Event.find({clumpID: req.cookies.currentClumpID});
+  const events = await Event.find({scheduleID: req.body.scheduleID});
 
   res.status(200).json({
     status: 'success',
@@ -19,6 +19,18 @@ exports.getEvents = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
+  const events = await Event.find({scheduleID: req.params.id});
+
+  res.status(200).json({
+    status: 'success',
+    results: events.length,
+    data: {
+      events,
+    },
+  });
+})
 
 exports.getEvent = catchAsync(async (req, res, next) => {
   const event = await Event.findById(req.params.id);
@@ -124,18 +136,7 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
-  let updatedEvent = {
-    scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-
-    recurrence: req.body.recurrence,
-
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
-  };
+  let updatedEvent = {};
 
   updatedEvent.recurrence.until = untilDate;
 
