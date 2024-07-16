@@ -28,9 +28,15 @@ const eventSchema = new mongoose.Schema({
     type: Date,
   },
 
-  recurrence: {
-    type: Object,
+  frequency: {
+    type: String,
   },
+  interval: {
+    type: Number,
+  },
+  untilDateTime: {
+    type: Date
+  }
 });
 
 const Event = mongoose.model('event', eventSchema);
