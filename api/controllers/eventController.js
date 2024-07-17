@@ -281,7 +281,7 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
     }
   );
 
-  let eventExceptions = await EventException.deleteMany($and[{eventID: {$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]);
+  let eventExceptions = await EventException.deleteMany({$and: [{eventID: {$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]});
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));
