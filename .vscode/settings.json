@@ -24,6 +24,7 @@
         "BYMONTH",
         "BYMONTHDAY",
         "datetime",
+        "DTSTART",
         "rrule"
     ]
 }

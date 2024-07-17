@@ -269,7 +269,7 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   untilDate.setDate(untilDate.getDate() - 1);
 
   let updatedEvent = {
-    untilDateTime: req.body.untilDateTime,
+    untilDateTime: untilDate,
   };
 
   const event = await Event.findByIdAndUpdate(
@@ -304,4 +304,105 @@ exports.deleteAllEvents = catchAsync(async (req, res, next) => {
   }
 
   res.status(204).send();
+});
+
+
+
+exports.aliasLoadSchedule = catchAsync(async (req, res, next) => {
+  req.query.startDate = "2024-05-01T22:34:50.747Z";
+  req.query.endDate = "2024-06-30T22:54:50.747Z";
+
+  let eventQuery = {
+    scheduleID: req.params.id,
+    $and: [
+      {
+        startDateTime: {
+          $gte: new Date(req.query.startDate).toISOString(),
+          $lt: new Date(req.query.endDate).toISOString(),
+        }
+      }
+    ]
+  };
+
+  let events = await Event.find(eventQuery);
+
+  let eventInstances = [];
+
+  for (let event of events) {
+    let eventInstance = {
+      _id: event._id,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
+    }
+    eventInstances.push(eventInstance);
+  }
+
+  for (let event of events) {
+    let rruleString = '';
+    if (event.frequency != 'Once') {
+      rruleString = rruleString + 'FREQ=' + event.frequency + ';';
+    }
+
+    if (event.interval) {
+      rruleString = rruleString + 'INTERVAL=' + event.interval + ';';
+    }
+
+    let byDay = 'MO';
+
+    if (byDay && byDay.length > 0) {
+      let byDayString = '';
+      for (let day of byDay) {
+        byDayString = byDayString + day + ',';
+      }
+      rruleString = rruleString + 'BYDAY=' + byDayString.substring(0, byDayString.length - 1) +';';
+    }
+
+
+    if (event.untilDateTime) {
+      rruleString = rruleString + 'UNTIL=' + new Date(event.untilDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
+    }
+
+    rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
+    console.log(rruleString);
+
+    const rrule = RRule.fromString(
+      rruleString.substring(0, rruleString.length - 1)
+    );
+
+    let tStart = new Date(req.query.startDate);
+    let tEnd = new Date(req.query.endDate);
+
+    let dates = rrule.between(
+      datetime(
+        tStart.getUTCFullYear(),
+        tStart.getUTCMonth() + 1,
+        tStart.getUTCDate()
+      ),
+      datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
+    );
+
+    console.log(dates);
+
+    if (dates.length > 0) {
+      events.push(event);
+    }
+
+    for (let date of dates) {
+      let eventInstance = {
+        _id: event._id + dayjs(date).toISOString(),
+        startDateTime: event.startDateTime + ' - ' + date, //adjust for new date
+        endDateTime: event.endDateTime + ' - ' + date, //adjust for new date
+      }
+      eventInstances.push(eventInstance);
+    }
+  }
+
+  res.status(200).json({
+    status: 'success',
+    results: events.length,
+    data: {
+      events: events,
+      eventInstances: eventInstances,
+    },
+  });
 });
