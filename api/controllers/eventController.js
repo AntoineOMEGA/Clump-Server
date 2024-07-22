@@ -329,15 +329,6 @@ exports.aliasLoadSchedule = catchAsync(async (req, res, next) => {
   let eventInstances = [];
 
   for (let event of events) {
-    let eventInstance = {
-      _id: event._id,
-      startDateTime: event.startDateTime,
-      endDateTime: event.endDateTime,
-    }
-    eventInstances.push(eventInstance);
-  }
-
-  for (let event of events) {
     let rruleString = '';
     if (event.frequency != 'Once') {
       rruleString = rruleString + 'FREQ=' + event.frequency + ';';
@@ -347,7 +338,7 @@ exports.aliasLoadSchedule = catchAsync(async (req, res, next) => {
       rruleString = rruleString + 'INTERVAL=' + event.interval + ';';
     }
 
-    let byDay = 'MO';
+    let byDay;
 
     if (byDay && byDay.length > 0) {
       let byDayString = '';
