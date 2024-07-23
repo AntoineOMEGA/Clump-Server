@@ -309,8 +309,8 @@ exports.deleteAllEvents = catchAsync(async (req, res, next) => {
 
 
 exports.aliasLoadSchedule = catchAsync(async (req, res, next) => {
-  req.query.startDate = "2024-05-01T22:34:50.747Z";
-  req.query.endDate = "2024-06-30T22:54:50.747Z";
+  //req.query.startDate = "2024-05-01T22:34:50.747Z";
+  //req.query.endDate = "2024-06-30T22:54:50.747Z";
 
   let eventQuery = {
     scheduleID: req.params.id,
