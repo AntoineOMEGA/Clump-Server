@@ -21,7 +21,41 @@ exports.getEvents = catchAsync(async (req, res, next) => {
 });
 
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
-  const events = await Event.find({scheduleID: req.params.id});
+  console.log(req.query.startDateTime)
+  let eventQuery = {
+    scheduleID: req.params.id,
+    frequency: {
+      $eq: 'Once'
+    },
+    startDateTime: {
+      $gte: new Date(req.query.startDateTime).toISOString(),
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    },
+    endDateTime: {
+      $gte: new Date(req.query.startDateTime).toISOString(),
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    }
+  };
+
+  const events = await Event.find(eventQuery);
+
+  let recurringEventQuery = {
+    scheduleID: req.params.id,
+    frequency: {
+      $ne: 'Once'
+    },
+    startDateTime: {
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    },
+    untilDateTime: {
+      $gte: new Date(req.query.startDateTime).toISOString(),
+    }
+  }
+
+  const recurringEvents = await Event.find(recurringEventQuery);
+  console.log(recurringEvents);
+
+
 
   res.status(200).json({
     status: 'success',
