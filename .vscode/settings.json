@@ -26,5 +26,8 @@
         "datetime",
         "DTSTART",
         "rrule"
+    ],
+    "cSpell.ignoreWords": [
+        "DTEND"
     ]
 }

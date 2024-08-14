@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env.development
+    ports:
+      - "27017:27017"
     volumes:
       - ./data:/data/db
     networks:
