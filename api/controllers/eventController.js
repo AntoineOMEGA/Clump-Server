@@ -48,7 +48,6 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
     }
 
     rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
-    console.log(rruleString);
 
     const rrule = RRule.fromString(
       rruleString.substring(0, rruleString.length - 1)
@@ -66,10 +65,6 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
-    if (dates.length > 0) {
-      events.push(event);
-    }
-
     for (let date of dates) {
       let eventInstance = {
         _id: event._id + dayjs(date).toISOString(),
@@ -78,12 +73,10 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
       }
       eventInstances.push(eventInstance);
     }
-    console.log(eventInstances);
   }
 }
 
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
-  console.log(req.query.startDateTime)
   let eventQuery = {
     scheduleID: req.params.id,
     frequency: {
@@ -117,7 +110,6 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   const recurringEvents = await Event.find(recurringEventQuery);
 
   let recurringEventInstances = findInstancesInRange(recurringEvents, req.query.startDateTime, req.query.endDateTime);
-  console.log(recurringEventInstances);
 
   res.status(200).json({
     status: 'success',
