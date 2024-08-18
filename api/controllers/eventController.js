@@ -66,12 +66,25 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
     );
 
     for (let date of dates) {
+      let timeBetweenStartAndEnd = dayjs(event.endDateTime).diff(dayjs(event.startDateTime).second());
+      let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
       let eventInstance = {
         _id: event._id + dayjs(date).toISOString(),
-        startDateTime: event.startDateTime + ' - ' + date, //adjust for new date
-        endDateTime: event.endDateTime + ' - ' + date, //adjust for new date
+
+        scheduleID: event.scheduleID,
+        parentEventID: event.parentEventID,
+        title: event.title,
+        description: event.description,
+        location: event.location,
+        timeZone: event.timeZone,
+        startDateTime: date, //adjust for new date
+        endDateTime: endDateTime.toISOString(), //adjust for new date
+        frequency: event.frequency,
+        interval: event.interval,
+        untilDateTime: event.untilDateTime
       }
       eventInstances.push(eventInstance);
+      console.log(eventInstance);
     }
   }
 }
