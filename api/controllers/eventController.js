@@ -66,10 +66,14 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
     );
 
     for (let date of dates) {
-      let timeBetweenStartAndEnd = dayjs(event.endDateTime).diff(dayjs(event.startDateTime).second());
+      let startDateTimeTemp = dayjs(event.startDateTime);
+      let endDateTimeTemp = dayjs(event.endDateTime);
+      let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
+
       let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
       let eventInstance = {
-        _id: event._id + dayjs(date).toISOString(),
+        _id: event._id,
+        isInstance: true,
 
         scheduleID: event.scheduleID,
         parentEventID: event.parentEventID,
@@ -84,9 +88,10 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
         untilDateTime: event.untilDateTime
       }
       eventInstances.push(eventInstance);
-      console.log(eventInstance);
     }
   }
+
+  return eventInstances;
 }
 
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
@@ -123,6 +128,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   const recurringEvents = await Event.find(recurringEventQuery);
 
   let recurringEventInstances = findInstancesInRange(recurringEvents, req.query.startDateTime, req.query.endDateTime);
+  recurringEventInstances.forEach(function (eventInstance) {
+    events.push(eventInstance);
+  })
 
   res.status(200).json({
     status: 'success',
