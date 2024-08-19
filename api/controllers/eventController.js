@@ -22,7 +22,7 @@ exports.getEvents = catchAsync(async (req, res, next) => {
   });
 });
 
-const findInstancesInRange = (events, startDateTime, endDateTime) => {
+const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTime) => {
   let eventInstances = [];
 
   for (let event of events) {
@@ -66,6 +66,17 @@ const findInstancesInRange = (events, startDateTime, endDateTime) => {
     );
 
     for (let date of dates) {
+      let foundException = false;
+      console.log(event._id + ' EVENT INSTANCE ' + event.startDateTime);
+      eventExceptions.forEach(function(eventException) {
+        console.log(eventException.eventID + ' EVENT EXCEPTION ' + eventException.startDateTime);
+        
+        if (eventException.eventID == event._id && eventException.startDateTime == event.startDateTime) {
+          foundException = true;
+          console.log('Found Exception')
+        }
+      })
+
       let startDateTimeTemp = dayjs(event.startDateTime);
       let endDateTimeTemp = dayjs(event.endDateTime);
       let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
@@ -127,7 +138,17 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
   const recurringEvents = await Event.find(recurringEventQuery);
 
-  let recurringEventInstances = findInstancesInRange(recurringEvents, req.query.startDateTime, req.query.endDateTime);
+  let eventExceptionQuery = {
+    scheduleID: req.params.id,
+    startDateTime: {
+      $gte: new Date(req.query.startDateTime).toISOString(),
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    }
+  };
+
+  const recurringEventExceptions = await EventException.find(eventExceptionQuery);
+
+  let recurringEventInstances = findInstancesInRange(recurringEvents, recurringEventExceptions, req.query.startDateTime, req.query.endDateTime);
   recurringEventInstances.forEach(function (eventInstance) {
     events.push(eventInstance);
   })
@@ -185,10 +206,15 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 exports.updateEvent = catchAsync(async (req, res, next) => {
   let updatedEvent = {
     scheduleID: req.body.scheduleID,
+    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
     location: req.body.location,
+    timeZone: req.body.timeZone,
+    frequency: req.body.frequency,
+    interval: req.body.interval,
+    untilDateTime: req.body.untilDateTime,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
@@ -224,6 +250,7 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
 
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
+    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
@@ -266,6 +293,7 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
 
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
+    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
@@ -309,6 +337,7 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
 
   let updatedEvent = {
     scheduleID: req.body.scheduleID,
+    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
