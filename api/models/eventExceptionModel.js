@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const eventExceptionSchema = new mongoose.Schema({
+  scheduleID: {
+    type: String,
+    required: true,
+  },
+
   eventID: {
     type: String,
     required: true,

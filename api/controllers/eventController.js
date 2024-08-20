@@ -67,38 +67,37 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
 
     for (let date of dates) {
       let foundException = false;
-      console.log(event._id + ' EVENT INSTANCE ' + event.startDateTime);
       eventExceptions.forEach(function(eventException) {
-        console.log(eventException.eventID + ' EVENT EXCEPTION ' + eventException.startDateTime);
-        
-        if (eventException.eventID == event._id && eventException.startDateTime == event.startDateTime) {
+        if (eventException.eventID == event._id.toString(), new Date(eventException.startDateTime).toISOString() == new Date(date).toISOString()) {
           foundException = true;
-          console.log('Found Exception')
         }
       })
 
-      let startDateTimeTemp = dayjs(event.startDateTime);
-      let endDateTimeTemp = dayjs(event.endDateTime);
-      let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
+      if (foundException == false) {
+        let startDateTimeTemp = dayjs(event.startDateTime);
+        let endDateTimeTemp = dayjs(event.endDateTime);
+        let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
 
-      let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
-      let eventInstance = {
-        _id: event._id,
-        isInstance: true,
+        let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
+        let eventInstance = {
+          _id: event._id,
+          isInstance: true,
 
-        scheduleID: event.scheduleID,
-        parentEventID: event.parentEventID,
-        title: event.title,
-        description: event.description,
-        location: event.location,
-        timeZone: event.timeZone,
-        startDateTime: date, //adjust for new date
-        endDateTime: endDateTime.toISOString(), //adjust for new date
-        frequency: event.frequency,
-        interval: event.interval,
-        untilDateTime: event.untilDateTime
+          scheduleID: event.scheduleID,
+          parentEventID: event.parentEventID,
+          title: event.title,
+          description: event.description,
+          location: event.location,
+          timeZone: event.timeZone,
+          startDateTime: date, //adjust for new date
+          endDateTime: endDateTime.toISOString(), //adjust for new date
+          frequency: event.frequency,
+          interval: event.interval,
+          untilDateTime: event.untilDateTime
+        }
+        eventInstances.push(eventInstance);
       }
-      eventInstances.push(eventInstance);
+      foundException = false;
     }
   }
 
@@ -243,6 +242,7 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
+    scheduleID: req.body.scheduleID,
     eventID: req.params.id,
     startDateTime: req.body.startDateTime
   }
@@ -259,9 +259,7 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
 
-    frequency: req.body.frequency,
-    interval: req.body.interval,
-    untilDateTime: req.body.untilDateTime,
+    frequency: "Once"
   }
   let newEvent = await Event.create(eventToCreate);
 
