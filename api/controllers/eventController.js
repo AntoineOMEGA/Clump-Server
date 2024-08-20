@@ -195,10 +195,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
   let newEvent = await Event.create(eventToCreate);
 
   res.status(201).json({
-    status: 'success',
-    data: {
-      newEvent,
-    },
+    status: 'success'
   });
 });
 
@@ -233,10 +230,7 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json({
-    status: 'success',
-    data: {
-      event,
-    },
+    status: 'success'
   });
 });
 
@@ -264,11 +258,7 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
   let newEvent = await Event.create(eventToCreate);
 
   res.status(201).json({
-    status: 'success',
-    data: {
-      newEvent,
-      newEventException
-    },
+    status: 'success'
   });
 });
 
@@ -321,12 +311,7 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   }
 
   res.status(201).json({
-    status: 'success',
-    data: {
-      currentEvent,
-      newEvent,
-      eventExceptions
-    },
+    status: 'success'
   });
 });
 
@@ -367,10 +352,7 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json({
-    status: 'success',
-    data: {
-      event,
-    },
+    status: 'success'
   });
 });
 
@@ -393,10 +375,7 @@ exports.deleteThisEvent = catchAsync(async (req, res, next) => {
   let eventException = await EventException.create(eventExceptionToCreate);
 
   res.status(201).json({
-    status: 'success',
-    data: {
-      eventException,
-    },
+    status: 'success'
   });
 });
 
@@ -424,10 +403,7 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).json({
-    status: 'success',
-    data: {
-      event,
-    },
+    status: 'success'
   });
 });
 
