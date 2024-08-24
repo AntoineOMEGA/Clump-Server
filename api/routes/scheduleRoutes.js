@@ -6,7 +6,7 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 router
-  .route('/ical/:id')
+  .route('/ical')
   .get(scheduleController.aliasGenerateICal);
 
 router
