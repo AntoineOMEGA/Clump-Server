@@ -147,28 +147,6 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.aliasGenerateICal = catchAsync(async (req, res, next) => {
-  const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Your Organization//Your App//EN
-CALSCALE:GREGORIAN
-BEGIN:VEVENT
-UID:12345678@yourapp.com
-DTSTAMP:20230823T120000Z
-DTSTART:20240823T130000Z
-DTEND:20240823T140000Z
-SUMMARY:Sample Event
-DESCRIPTION:This is a sample event in a generated .ics file.
-END:VEVENT
-END:VCALENDAR`;
-
-    // Set the Content-Type header to 'text/calendar'
-    res.setHeader('Content-Type', 'text/calendar');
-
-    // Send the .ics content
-    res.send(icsContent);
-});
-
 exports.createSchedule = catchAsync(async (req, res, next) => {
   const member = await Member.findOne({
     userID: req.cookies.currentUserID,

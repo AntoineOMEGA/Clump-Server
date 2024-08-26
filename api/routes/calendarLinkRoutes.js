@@ -1,6 +1,6 @@
 const express = require('express');
 
-const scheduleController = require('../controllers/scheduleController');
+const iCalController = require('../controllers/iCalController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
@@ -9,7 +9,7 @@ router
   .route('/')
   .get(
     authController.protect,
-    scheduleController.getSchedules
+    iCalController.getSchedules
   )
   .post(
     authController.protect,
