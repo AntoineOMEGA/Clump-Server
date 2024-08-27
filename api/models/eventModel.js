@@ -35,7 +35,18 @@ const eventSchema = new Schema({
 
   recurrenceRuleID: {
     type: ObjectId
-  }
+  },
+
+  createdDateTime: {
+    type: Date,
+    required: true,
+    default: new Date()
+  },
+  modifiedDateTime: {
+    type: Date,
+    required: true,
+    default: new Date()
+  },
 });
 
 const Event = mongoose.model('event', eventSchema);

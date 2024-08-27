@@ -1,7 +1,6 @@
 const Schedule = require('../models/scheduleModel');
 const Tag = require('../models/tagModel');
 const Member = require('../models/memberModel');
-const Role = require('../models/roleModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -152,10 +151,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
     userID: req.cookies.currentUserID,
     clumpID: req.cookies.currentClumpID,
   });
-  const role = await Role.findOne({ _id: member.roleID });
   let newSchedule;
 
-  if (role.canCreateSchedules) {
     newSchedule = await Schedule.create({
       clumpID: req.cookies.currentClumpID,
       tagIDs: req.body.tagIDs,
@@ -166,23 +163,6 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
       startDate: req.body.startDate,
       endDate: req.body.endDate,
     });
-
-    role.canViewSchedules.push(newSchedule._id);
-    role.canEditSchedules.push(newSchedule._id);
-    await role.save();
-
-    let parentRoleID = role.parentRole;
-    while (parentRoleID !== undefined) {
-      let parentRole = await Role.findOne({ _id: parentRoleID });
-      parentRole.canViewSchedules.push(newSchedule._id);
-      parentRole.canEditSchedules.push(newSchedule._id);
-      await parentRole.save();
-    }
-  } else {
-    return next(
-      new AppError('You are not authorized to Create Event Templates', 401)
-    );
-  }
 
   res.status(201).json({
     status: 'success',

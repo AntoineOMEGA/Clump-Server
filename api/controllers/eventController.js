@@ -9,6 +9,7 @@ const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
 const datetime = RRuleLib.datetime;
 const dayjs = require('dayjs');
+const RecurrenceRule = require('../models/recurrenceRuleModel');
 
 exports.getEvents = catchAsync(async (req, res, next) => {
   const events = await Event.find({scheduleID: req.body.scheduleID});
@@ -107,9 +108,6 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   let eventQuery = {
     scheduleID: req.params.id,
-    frequency: {
-      $eq: 'Once'
-    },
     startDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
@@ -117,6 +115,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     endDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
+    },
+    RecurrenceRuleID: {
+      $exists: false
     }
   };
 
@@ -124,14 +125,18 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
   let recurringEventQuery = {
     scheduleID: req.params.id,
-    frequency: {
-      $ne: 'Once'
-    },
     startDateTime: {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
+
+    /*
     untilDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
+    },
+    */
+
+    recurrenceRuleID: {
+      $exists: false
     }
   }
 
