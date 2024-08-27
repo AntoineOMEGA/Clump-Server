@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
-const scheduleSchema = new mongoose.Schema({
+const scheduleSchema = new Schema({
   clumpID: {
-    type: String,
+    type: ObjectId,
     required: true,
   },
   tagIDs: {
-    type: Array
+    type: [ObjectId]
   },
   
   title: {

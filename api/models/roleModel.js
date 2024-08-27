@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
-const roleSchema = new mongoose.Schema({
+const roleSchema = new Schema({
   title: {
     type: String,
     required: true,
   },
   clumpID: {
-    type: String,
+    type: ObjectId,
     required: true,
   },
   canViewAssignments: {
@@ -24,22 +26,22 @@ const roleSchema = new mongoose.Schema({
   canCreateEventTemplates: {
     type: Boolean,
     required: true,
-    default: false
+    default: false,
   },
   canCreateEvents: {
     type: Boolean,
     required: true,
-    default: false
+    default: false,
   },
   canCreateRoles: {
     type: Boolean,
     required: true,
-    default: false
+    default: false,
   },
   canCreateSchedules: {
     type: Boolean,
     required: true,
-    default: false
+    default: false,
   },
   parentRole: {
     type: String,
@@ -47,8 +49,8 @@ const roleSchema = new mongoose.Schema({
   canBeModified: {
     type: Boolean,
     required: true,
-    default: true
-  }
+    default: true,
+  },
 });
 
 const Role = mongoose.model('Role', roleSchema);

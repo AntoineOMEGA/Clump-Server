@@ -1,20 +1,24 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
-const noteSchema = new mongoose.Schema({
+const noteSchema = new Schema({
   clumpID: {
-    type: String,
+    type: ObjectId,
     required: true,
   },
   title: {
     type: String,
     required: true,
+    trim: true,
   },
   note: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
   },
   tagIDs: {
-    type: Array
+    type: [ObjectId]
   },
 });
 

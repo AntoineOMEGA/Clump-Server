@@ -1,22 +1,27 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
-const eventSchema = new mongoose.Schema({
+const eventSchema = new Schema({
   scheduleID: {
-    type: String,
+    type: ObjectId,
     required: true,
   },
   parentEventID: {
-    type: String
+    type: ObjectId
   },
 
   title: {
     type: String,
+    trim: true,
   },
   description: {
     type: String,
+    trim: true,
   },
   location: {
     type: String,
+    trim: true,
   },
   timeZone: {
     type: String,
@@ -28,14 +33,8 @@ const eventSchema = new mongoose.Schema({
     type: Date,
   },
 
-  frequency: {
-    type: String,
-  },
-  interval: {
-    type: Number,
-  },
-  untilDateTime: {
-    type: Date
+  recurrenceRuleID: {
+    type: ObjectId
   }
 });
 

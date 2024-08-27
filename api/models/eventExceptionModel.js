@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
-const eventExceptionSchema = new mongoose.Schema({
+const eventExceptionSchema = new Schema({
   scheduleID: {
-    type: String,
+    type: ObjectId,
     required: true,
   },
 
   eventID: {
-    type: String,
+    type: ObjectId,
     required: true,
   },
 

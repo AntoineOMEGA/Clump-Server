@@ -1,34 +1,38 @@
 const express = require('express');
 
-const iCalController = require('../controllers/iCalController');
+const scheduleLinkController = require('../controllers/scheduleLinkController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
 
 router
+  .route(`/exportSchedule/:id`)
+  .get(authController.protect, scheduleLinkController.generateICal);
+
+router
   .route('/')
   .get(
     authController.protect,
-    iCalController.getSchedules
+    scheduleLinkController.getScheduleLinks
   )
   .post(
     authController.protect,
-    scheduleController.createSchedule
+    scheduleLinkController.createScheduleLink
   );
 
 router
   .route('/:id')
   .get(
     authController.protect,
-    scheduleController.getSchedule
+    scheduleLinkController.getScheduleLink
   )
   .put(
     authController.protect,
-    scheduleController.updateSchedule
+    scheduleLinkController.updateScheduleLink
   )
   .delete(
     authController.protect,
-    scheduleController.deleteSchedule
+    scheduleLinkController.deleteScheduleLink
   );
 
 module.exports = router;
