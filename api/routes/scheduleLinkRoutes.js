@@ -22,14 +22,6 @@ router
 
 router
   .route('/:id')
-  .get(
-    authController.protect,
-    scheduleLinkController.getScheduleLink
-  )
-  .put(
-    authController.protect,
-    scheduleLinkController.updateScheduleLink
-  )
   .delete(
     authController.protect,
     scheduleLinkController.deleteScheduleLink

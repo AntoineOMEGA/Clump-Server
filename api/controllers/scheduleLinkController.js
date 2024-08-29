@@ -13,10 +13,7 @@ const utc = require('dayjs/plugin/utc');
 const ical = require('ical-generator');
 
 exports.generateICal = catchAsync(async (req, res, next) => {
-  const schedule = await Schedule.find({
-    _id: req.params.id,
-    clumpID: req.cookies.currentClumpID,
-  });
+  const schedule = await Schedule.findById(req.params.id);
 
   const icsContent = ical({ name: 'Test Cal' });
 
@@ -36,68 +33,22 @@ exports.getScheduleLinks = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getScheduleLink = catchAsync(async (req, res, next) => {
-  const scheduleLink = await ScheduleLink.find({_id: req.params.id, clumpID: req.cookies.currentClumpID});
-
-  if (!scheduleLink) {
-    return next(new AppError('No scheduleLink found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      scheduleLink,
-    },
-  });
-});
-
 exports.createScheduleLink = catchAsync(async (req, res, next) => {
-  let newScheduleLink;
+  let scheduleLinks = [];
 
-  if (true) {
-    newScheduleLink = await ScheduleLink.create({
-      clumpID: req.cookies.currentClumpID,
-      title: req.body.title,
-      scheduleLink: req.body.scheduleLink,
-      tagIDs: req.body.tagIDs
+  for (recipient in req.body.recipients) {
+    let newScheduleLink = await ScheduleLink.create({
+      scheduleID: req.body.scheduleID,
+      recipient: recipient
     });
-  } else {
-    return next(new AppError('You are not authorized to Create ScheduleLinks', 401));
+
+    scheduleLinks.push(newScheduleLink);
   }
-  
 
   res.status(201).json({
     status: 'success',
     data: {
-      scheduleLink: newScheduleLink,
-    },
-  });
-});
-
-exports.updateScheduleLink = catchAsync(async (req, res, next) => {
-  let updatedScheduleLink = {
-    title: req.body.title,
-    scheduleLink: req.body.scheduleLink,
-    tagIDs: req.body.tagIDs
-  };
-
-  const scheduleLink = await ScheduleLink.findByIdAndUpdate(
-    req.params.id,
-    updatedScheduleLink,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-
-  if (!scheduleLink) {
-    return next(new AppError('No scheduleLink found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      scheduleLink,
+      scheduleLinks: scheduleLinks,
     },
   });
 });
