@@ -22,7 +22,7 @@ exports.generateICal = catchAsync(async (req, res, next) => {
 });
 
 exports.getScheduleLinks = catchAsync(async (req, res, next) => {
-  const scheduleLinks = await ScheduleLink.find({clumpID: req.cookies.currentClumpID});
+  const scheduleLinks = await ScheduleLink.find({scheduleID: req.params.id});
 
   res.status(200).json({
     status: 'success',
@@ -38,7 +38,7 @@ exports.createScheduleLink = catchAsync(async (req, res, next) => {
 
   for (recipient in req.body.recipients) {
     let newScheduleLink = await ScheduleLink.create({
-      scheduleID: req.body.scheduleID,
+      scheduleID: req.params.id,
       recipient: recipient
     });
 
@@ -54,7 +54,7 @@ exports.createScheduleLink = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteScheduleLink = catchAsync(async (req, res, next) => {
-  const scheduleLink = await ScheduleLink.findByIdAndDelete(req.params.id);
+  const scheduleLink = await ScheduleLink.findByIdAndDelete(req.params.linkId);
 
   if (!scheduleLink) {
     return next(new AppError('No scheduleLink found with that ID', 404));

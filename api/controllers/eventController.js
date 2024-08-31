@@ -136,7 +136,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     */
 
     recurrenceRuleID: {
-      $exists: false
+      $exists: true
     }
   }
 
