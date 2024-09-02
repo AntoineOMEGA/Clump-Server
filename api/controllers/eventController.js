@@ -26,25 +26,23 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
   let eventInstances = [];
 
   for (let event of events) {
-    let rruleString = 'FREQ=' + event.frequency + ';';
+    let rruleString = 'FREQ=' + event.recurrenceRule.frequency + ';';
 
     if (event.interval) {
-      rruleString = rruleString + 'INTERVAL=' + event.interval + ';';
+      rruleString = rruleString + 'INTERVAL=' + event.recurrenceRule.interval + ';';
     }
 
     let byDay;
-
     if (byDay && byDay.length > 0) {
       let byDayString = '';
-      for (let day of byDay) {
+      for (let day of event.recurrenceRule.byDay) {
         byDayString = byDayString + day + ',';
       }
       rruleString = rruleString + 'BYDAY=' + byDayString.substring(0, byDayString.length - 1) +';';
     }
 
-
     if (event.untilDateTime) {
-      rruleString = rruleString + 'UNTIL=' + new Date(event.untilDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
+      rruleString = rruleString + 'UNTIL=' + new Date(event.recurrenceRule.untilDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
     }
 
     rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
