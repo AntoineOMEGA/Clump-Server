@@ -9,7 +9,6 @@ const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
 const datetime = RRuleLib.datetime;
 const dayjs = require('dayjs');
-const RecurrenceRule = require('../models/recurrenceRuleModel');
 
 exports.getEvents = catchAsync(async (req, res, next) => {
   const events = await Event.find({scheduleID: req.body.scheduleID});
