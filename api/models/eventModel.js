@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
+const RecurrenceRuleObject = require('./recurrenceRuleModel');
 
 const eventSchema = new Schema({
   scheduleID: {
@@ -33,8 +34,8 @@ const eventSchema = new Schema({
     type: Date,
   },
 
-  recurrenceRuleID: {
-    type: ObjectId
+  recurrenceRule: {
+    type: RecurrenceRuleObject
   },
 
   createdDateTime: {

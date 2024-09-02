@@ -116,7 +116,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
-    RecurrenceRuleID: {
+    recurrenceRule: {
       $exists: false
     }
   };
@@ -128,14 +128,11 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     startDateTime: {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
-
-    /*
-    untilDateTime: {
+    'recurrenceRule.untilDateTime': {
       $gte: new Date(req.query.startDateTime).toISOString(),
     },
-    */
 
-    recurrenceRuleID: {
+    recurrenceRule: {
       $exists: true
     }
   }
