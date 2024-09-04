@@ -26,14 +26,25 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
   let eventInstances = [];
 
   for (let event of events) {
-    let rruleString = 'FREQ=' + event.recurrenceRule.frequency + ';';
+    let rruleString;
+    if (event.recurrenceRule.frequency == 'Daily' || event.recurrenceRule.frequency == 'Weekly') {
+      rruleString = 'FREQ=' + event.recurrenceRule.frequency + ';';
+    } else if (event.recurrenceRule.frequency == 'Monthly by day' || event.recurrenceRule.frequency == 'Monthly by date') {
+      rruleString = 'FREQ=MONTHLY;';
+    } else if (event.recurrenceRule.frequency == 'Yearly by day' || event.recurrenceRule.frequency == 'Yearly by date') {
+      rruleString = 'FREQ=YEARLY;';
+    }
+    
 
-    if (event.interval) {
+    if (event.recurrenceRule.interval) {
       rruleString = rruleString + 'INTERVAL=' + event.recurrenceRule.interval + ';';
     }
 
-    let byDay;
-    if (byDay && byDay.length > 0) {
+    if (event.recurrenceRule.byMonth) {
+      rruleString = rruleString + 'BYMONTH=' + event.recurrenceRule.byMonth + ';';
+    }
+
+    if (event.recurrenceRule.byDay && event.recurrenceRule.byDay.length > 0) {
       let byDayString = '';
       for (let day of event.recurrenceRule.byDay) {
         byDayString = byDayString + day + ',';
@@ -41,8 +52,28 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
       rruleString = rruleString + 'BYDAY=' + byDayString.substring(0, byDayString.length - 1) +';';
     }
 
-    if (event.untilDateTime) {
+    if (event.recurrenceRule.byWeekDayInMonth && event.recurrenceRule.byWeekDayInMonth.length > 0) {
+      let byWeekDayInMonthString = '';
+      for (let day of event.recurrenceRule.byWeekDayInMonth) {
+        byWeekDayInMonthString = byWeekDayInMonthString + day + ',';
+      }
+      rruleString = rruleString + 'BYDAY=' + byWeekDayInMonthString.substring(0, byWeekDayInMonthString.length - 1) +';';
+    }
+
+    if (event.recurrenceRule.byMonthDay && event.recurrenceRule.byMonthDay.length > 0) {
+      let byMonthDayString = '';
+      for (let day of event.recurrenceRule.byMonthDay) {
+        byMonthDayString = byMonthDayString + day + ',';
+      }
+      rruleString = rruleString + 'BYMONTHDAY=' + byMonthDayString.substring(0, byMonthDayString.length - 1) +';';
+    }
+
+    if (event.recurrenceRule.untilDateTime) {
       rruleString = rruleString + 'UNTIL=' + new Date(event.recurrenceRule.untilDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
+    }
+
+    if (event.recurrenceRule.occurrences) {
+      rruleString = rruleString + 'COUNT=' + event.recurrenceRule.occurrences + ';';
     }
 
     rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
@@ -53,7 +84,6 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
 
     let tStart = new Date(startDateTime);
     let tEnd = new Date(endDateTime);
-    console.log(rrule.toString());
 
     let dates = rrule.between(
       datetime(
@@ -97,7 +127,6 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
       foundException = false;
     }
   }
-
   return eventInstances;
 }
 
@@ -124,9 +153,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     startDateTime: {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
-    'recurrenceRule.untilDateTime': {
-      $gte: new Date(req.query.startDateTime).toISOString(),
-    },
+    // 'recurrenceRule.untilDateTime': {
+    //   $gte: new Date(req.query.startDateTime).toISOString(),
+    // },
 
     recurrenceRule: {
       $exists: true
@@ -204,9 +233,6 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     description: req.body.description,
     location: req.body.location,
     timeZone: req.body.timeZone,
-    frequency: req.body.frequency,
-    interval: req.body.interval,
-    untilDateTime: req.body.untilDateTime,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
@@ -250,8 +276,6 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-
-    frequency: "Once"
   }
   let newEvent = await Event.create(eventToCreate);
 
@@ -264,18 +288,17 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
-  let updatedEvent = {};
+  const currentEvent = await Event.findById(req.params.id);
 
-  updatedEvent.untilDateTime = untilDate;
+  currentEvent.recurrenceRule.untilDateTime = untilDate;
 
-  const currentEvent = await Event.findByIdAndUpdate(
+  const updatedCurrentEvent = await Event.findByIdAndUpdate(
     req.params.id,
-    updatedEvent,
+    currentEvent,
     {
       new: true,
       runValidators: true,
-    }
-  );
+    });
 
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
@@ -285,12 +308,10 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
     description: req.body.description,
     location: req.body.location,
 
-    frequency: req.body.frequency,
-    interval: req.body.interval,
-    untilDateTime: req.body.untilDateTime,
-
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
+
+    recurrenceRule: req.body.recurrenceRule
   }
   let newEvent = await Event.create(eventToCreate);
 
@@ -330,6 +351,8 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
+
+    recurrenceRule: req.body.recurrenceRule
   };
 
   const event = await Event.findByIdAndUpdate(
@@ -381,13 +404,13 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
-  let updatedEvent = {
-    untilDateTime: untilDate,
-  };
+  const currentEvent = await Event.findById(req.params.id);
+
+  currentEvent.recurrenceRule.untilDateTime = untilDate;
 
   const event = await Event.findByIdAndUpdate(
     req.params.id,
-    updatedEvent,
+    currentEvent,
     {
       new: true,
       runValidators: true,

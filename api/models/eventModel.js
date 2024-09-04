@@ -8,7 +8,7 @@ const recurrenceRuleSchema = new Schema({
     enum: ['Daily', 'Weekly', 'Monthly by day', 'Monthly by date', 'Yearly by day', 'Yearly by date'],
   },
 
-  //Used with Weekly, Monthly by day, Yearly by day
+  //Used with Weekly
   byDay: {
     type: [String],
     enum: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
