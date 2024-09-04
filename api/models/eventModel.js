@@ -6,7 +6,6 @@ const recurrenceRuleSchema = new Schema({
   frequency: {
     type: String,
     enum: ['Daily', 'Weekly', 'Monthly by day', 'Monthly by date', 'Yearly by day', 'Yearly by date'],
-    required: true
   },
 
   //Used with Weekly, Monthly by day, Yearly by day
@@ -79,7 +78,8 @@ const eventSchema = new Schema({
   },
 
   recurrenceRule: {
-    child: recurrenceRuleSchema
+    type: Object
+    //child: recurrenceRuleSchema
   },
 
   createdDateTime: {
@@ -95,7 +95,5 @@ const eventSchema = new Schema({
 });
 
 const Event = mongoose.model('event', eventSchema);
-const RecurrenceRule = mongoose.model('recurrenceRule', recurrenceRuleSchema);
 
 module.exports = Event;
-module.exports = RecurrenceRule;

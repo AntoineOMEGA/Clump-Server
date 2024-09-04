@@ -53,6 +53,7 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
 
     let tStart = new Date(startDateTime);
     let tEnd = new Date(endDateTime);
+    console.log(rrule.toString());
 
     let dates = rrule.between(
       datetime(
@@ -89,9 +90,7 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
           timeZone: event.timeZone,
           startDateTime: date, //adjust for new date
           endDateTime: endDateTime.toISOString(), //adjust for new date
-          frequency: event.frequency,
-          interval: event.interval,
-          untilDateTime: event.untilDateTime
+          recurrenceRule: event.recurrenceRule
         }
         eventInstances.push(eventInstance);
       }
@@ -183,12 +182,10 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     description: req.body.description,
     location: req.body.location,
 
-    frequency: req.body.frequency,
-    interval: req.body.interval,
-    untilDateTime: req.body.untilDateTime,
-
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
+
+    recurrenceRule: req.body.recurrenceRule
   };
 
   let newEvent = await Event.create(eventToCreate);
@@ -213,6 +210,8 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
+
+    recurrenceRule: req.body.recurrenceRule
   };
 
   const event = await Event.findByIdAndUpdate(
