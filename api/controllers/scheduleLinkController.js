@@ -15,7 +15,7 @@ const ical = require('ical-generator');
 exports.generateICal = catchAsync(async (req, res, next) => {
   console.log("hi");
   const schedule = await Schedule.findById(req.params.id);
-  const calendar = ical({ name: schedule.title });
+  const calendar = new ical.ICalCalendar({ name: schedule.title });
 
   let eventQuery = {
     scheduleID: req.params.id
@@ -41,7 +41,7 @@ exports.generateICal = catchAsync(async (req, res, next) => {
 
   console.log(calendar.toString());
   res.setHeader('Content-Type', 'text/calendar');
-  res.send(icsContent);
+  res.send(calendar);
 });
 
 exports.getScheduleLinks = catchAsync(async (req, res, next) => {
