@@ -13,10 +13,33 @@ const utc = require('dayjs/plugin/utc');
 const ical = require('ical-generator');
 
 exports.generateICal = catchAsync(async (req, res, next) => {
+  console.log("hi");
   const schedule = await Schedule.findById(req.params.id);
+  const calendar = ical({ name: schedule.title });
 
-  const icsContent = ical({ name: 'Test Cal' });
+  let eventQuery = {
+    scheduleID: req.params.id
+  };
 
+  const events = await Event.find(eventQuery);
+
+  for (let event of events) {
+    let tempEvent = calendar.createEvent({
+      summary: event.title,
+      description: event.description,
+      location: event.location,
+      timezone: event.timeZone,
+      start: event.startDateTime,
+      end: event.endDateTime,
+
+      created: event.createdDateTime,
+      lastModified: event.modifiedDateTime
+    })
+  }
+
+  
+
+  console.log(calendar.toString());
   res.setHeader('Content-Type', 'text/calendar');
   res.send(icsContent);
 });

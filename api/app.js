@@ -58,7 +58,7 @@ app.use(express.static(path));
 // Data Sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
-// Data Sanitizatoin against XSS
+// Data Sanitization against XSS
 app.use(xss());
 
 //Prevent parameter pollution
