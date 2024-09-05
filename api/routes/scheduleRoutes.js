@@ -11,7 +11,7 @@ router
   .get(scheduleLinkController.generateICal);
 
 router
-  .route('/:id/scheduleLinks/')
+  .route('/:id/scheduleLinks')
   .get(
     authController.protect,
     scheduleLinkController.getScheduleLinks

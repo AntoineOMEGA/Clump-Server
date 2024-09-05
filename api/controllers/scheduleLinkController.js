@@ -34,21 +34,26 @@ exports.getScheduleLinks = catchAsync(async (req, res, next) => {
 });
 
 exports.createScheduleLink = catchAsync(async (req, res, next) => {
-  let scheduleLinks = [];
+  //let scheduleLinks = [];
 
-  for (recipient in req.body.recipients) {
-    let newScheduleLink = await ScheduleLink.create({
-      scheduleID: req.params.id,
-      recipient: recipient
-    });
+  // for (recipient in req.body.recipients) {
+  //   let newScheduleLink = await ScheduleLink.create({
+  //     scheduleID: req.params.id,
+  //     recipient: recipient
+  //   });
 
-    scheduleLinks.push(newScheduleLink);
-  }
+  //   scheduleLinks.push(newScheduleLink);
+  // }
+
+  let newScheduleLink = await ScheduleLink.create({
+    scheduleID: req.params.id,
+    recipient: req.body.recipient
+  });
 
   res.status(201).json({
     status: 'success',
     data: {
-      scheduleLinks: scheduleLinks,
+      scheduleLink: newScheduleLink,
     },
   });
 });
