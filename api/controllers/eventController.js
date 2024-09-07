@@ -113,14 +113,14 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
           isInstance: true,
 
           scheduleID: event.scheduleID,
-          parentEventID: event.parentEventID,
           title: event.title,
           description: event.description,
           location: event.location,
           timeZone: event.timeZone,
           startDateTime: date, //adjust for new date
           endDateTime: endDateTime.toISOString(), //adjust for new date
-          recurrenceRule: event.recurrenceRule
+          recurrenceRule: event.recurrenceRule,
+          maxAttendees: event.maxAttendees
         }
         eventInstances.push(eventInstance);
       }
@@ -214,7 +214,8 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
 
-    recurrenceRule: req.body.recurrenceRule
+    recurrenceRule: req.body.recurrenceRule,
+    maxAttendees: req.body.maxAttendees,
   };
 
   let newEvent = await Event.create(eventToCreate);
@@ -227,7 +228,6 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 exports.updateEvent = catchAsync(async (req, res, next) => {
   let updatedEvent = {
     scheduleID: req.body.scheduleID,
-    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
@@ -237,7 +237,8 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
 
-    recurrenceRule: req.body.recurrenceRule
+    recurrenceRule: req.body.recurrenceRule,
+    maxAttendees: req.body.maxAttendees,
   };
 
   const event = await Event.findByIdAndUpdate(
@@ -268,7 +269,6 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
 
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
-    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
@@ -276,6 +276,7 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
+    maxAttendees: req.body.maxAttendees,
   }
   let newEvent = await Event.create(eventToCreate);
 
@@ -302,7 +303,6 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
 
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
-    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
@@ -311,7 +311,8 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
 
-    recurrenceRule: req.body.recurrenceRule
+    recurrenceRule: req.body.recurrenceRule,
+    maxAttendees: req.body.maxAttendees,
   }
   let newEvent = await Event.create(eventToCreate);
 
@@ -339,7 +340,6 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
 
   let updatedEvent = {
     scheduleID: req.body.scheduleID,
-    parentEventID: req.body.parentEventID,
 
     title: req.body.title,
     description: req.body.description,
@@ -352,7 +352,8 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
 
-    recurrenceRule: req.body.recurrenceRule
+    recurrenceRule: req.body.recurrenceRule,
+    maxAttendees: req.body.maxAttendees,
   };
 
   const event = await Event.findByIdAndUpdate(

@@ -51,9 +51,6 @@ const eventSchema = new Schema({
     type: ObjectId,
     required: true,
   },
-  parentEventID: {
-    type: ObjectId
-  },
 
   title: {
     type: String,
@@ -92,6 +89,10 @@ const eventSchema = new Schema({
     required: true,
     default: new Date()
   },
+
+  maxAttendees: {
+    type: Number
+  }
 });
 
 const Event = mongoose.model('event', eventSchema);

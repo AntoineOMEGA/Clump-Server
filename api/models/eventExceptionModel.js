@@ -12,6 +12,7 @@ const eventExceptionSchema = new Schema({
     type: ObjectId,
     required: true,
   },
+  //And Event Attendee ???
 
   startDateTime: {
     type: Date,
