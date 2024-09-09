@@ -54,6 +54,7 @@ const eventSchema = new Schema({
 
   title: {
     type: String,
+    required: true,
     trim: true,
   },
   description: {
@@ -66,12 +67,15 @@ const eventSchema = new Schema({
   },
   timeZone: {
     type: String,
+    required: true,
   },
   startDateTime: {
     type: Date,
+    required: true,
   },
   endDateTime: {
     type: Date,
+    required: true,
   },
 
   recurrenceRule: {

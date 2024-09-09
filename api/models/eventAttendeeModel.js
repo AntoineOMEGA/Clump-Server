@@ -7,8 +7,9 @@ const eventAttendeeSchema = new Schema({
     type: ObjectId,
     required: true,
   },
-  parentEventID: {
-    type: ObjectId
+  eventID: {
+    type: ObjectId,
+    required: true,
   },
 
   startDateTime: {
