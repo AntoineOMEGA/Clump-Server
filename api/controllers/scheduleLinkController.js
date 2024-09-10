@@ -4,6 +4,7 @@ const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Event = require('../models/eventModel');
+const EventException = require('../models/eventExceptionModel');
 
 const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
@@ -36,6 +37,11 @@ exports.generateICal = catchAsync(async (req, res, next) => {
     })
 
     const recurringEventExceptions = await EventException.find({eventID: event._id});
+    let exceptions = [];
+
+    for (exception of recurringEventExceptions) {
+      exceptions.push(exception.startDateTime);
+    }
 
     if (event.recurrenceRule) {
       let tempEventFrequency;
@@ -64,8 +70,9 @@ exports.generateICal = catchAsync(async (req, res, next) => {
         }()),
         byMonthDay: event.recurrenceRule.byMonthDay,
         until: event.recurrenceRule.untilDateTime,
-        count: event.recurrenceRule.occurrences
+        count: event.recurrenceRule.occurrences,
         //TODO: DEAL WITH EVENT EXCEPTIONS
+        exclude: exceptions
       })
     }
 
