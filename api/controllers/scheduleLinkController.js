@@ -38,7 +38,6 @@ exports.generateICal = catchAsync(async (req, res, next) => {
 
     const recurringEventExceptions = await EventException.find({eventID: event._id});
     let exceptions = [];
-
     for (exception of recurringEventExceptions) {
       exceptions.push(exception.startDateTime);
     }
@@ -75,8 +74,6 @@ exports.generateICal = catchAsync(async (req, res, next) => {
         exclude: exceptions
       })
     }
-
-    
   }
 
   res.setHeader('Content-Type', 'text/calendar');
