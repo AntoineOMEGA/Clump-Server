@@ -34,8 +34,42 @@ exports.generateICal = catchAsync(async (req, res, next) => {
       created: event.createdDateTime,
       lastModified: event.modifiedDateTime
     })
+
+    if (event.recurrenceRule) {
+      let tempEventFrequency;
+
+      if (event.recurrenceRule.frequency == 'Daily' || event.recurrenceRule.frequency == 'Weekly') {
+        tempEventFrequency = event.recurrenceRule.frequency.toUpperCase();
+      } else if (event.recurrenceRule.frequency == 'Monthly by day' || event.recurrenceRule.frequency == 'Monthly by date') {
+        tempEventFrequency = 'MONTHLY';
+      } else if (event.recurrenceRule.frequency == 'Yearly by day' || event.recurrenceRule.frequency == 'Yearly by date') {
+        tempEventFrequency = 'YEARLY';
+      }
+  
+      tempEvent.repeating({
+        freq: tempEventFrequency,
+        count: event.recurrenceRule.occurrences,
+        interval: event.recurrenceRule.interval,
+        byMonth: event.recurrenceRule.byMonth,
+        byDay: (function(){
+          if (event.recurrenceRule.byDay && event.recurrenceRule.byDay.length > 0) {
+            return event.recurrenceRule.byDay;
+          } else if (event.recurrenceRule.byWeekDayInMonth && event.recurrenceRule.byWeekDayInMonth.length > 0) {
+            return event.recurrenceRule.byWeekDayInMonth;
+          } else {
+            return;
+          }
+        }()),
+        byMonthDay: event.recurrenceRule.byMonthDay,
+        until: event.recurrenceRule.untilDateTime,
+        count: event.recurrenceRule.occurrences
+      })
+    }
+
+    
   }
 
+  console.log(calendar.toString());
   res.setHeader('Content-Type', 'text/calendar');
   res.send(calendar.toString());
 });
