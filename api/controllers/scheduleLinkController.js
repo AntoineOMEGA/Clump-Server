@@ -22,7 +22,7 @@ exports.generateICal = catchAsync(async (req, res, next) => {
 
   const events = await Event.find(eventQuery);
 
-  for (let event of events) {
+  for await (let event of events) {
     let tempEvent = calendar.createEvent({
       summary: event.title,
       description: event.description,
@@ -34,6 +34,8 @@ exports.generateICal = catchAsync(async (req, res, next) => {
       created: event.createdDateTime,
       lastModified: event.modifiedDateTime
     })
+
+    const recurringEventExceptions = await EventException.find({eventID: event._id});
 
     if (event.recurrenceRule) {
       let tempEventFrequency;
@@ -63,6 +65,7 @@ exports.generateICal = catchAsync(async (req, res, next) => {
         byMonthDay: event.recurrenceRule.byMonthDay,
         until: event.recurrenceRule.untilDateTime,
         count: event.recurrenceRule.occurrences
+        //TODO: DEAL WITH EVENT EXCEPTIONS
       })
     }
 
