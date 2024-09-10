@@ -69,7 +69,6 @@ exports.generateICal = catchAsync(async (req, res, next) => {
     
   }
 
-  console.log(calendar.toString());
   res.setHeader('Content-Type', 'text/calendar');
   res.send(calendar.toString());
 });
