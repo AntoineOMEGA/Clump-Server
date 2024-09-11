@@ -151,9 +151,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/users/resetPassword/${resetToken}`;
+  //const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+  const resetURL = `https://clump.app/api/v1/users/resetPassword/${resetToken}`;
 
   const message = `Forgot your password? Submit a new password to ${resetURL}. Otherwise ignore this email.`;
 

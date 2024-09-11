@@ -5,6 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Event = require('../models/eventModel');
 const EventException = require('../models/eventExceptionModel');
+const sendEmail = require('./../utils/email');
 
 const RRuleLib = require('rrule');
 const RRule = RRuleLib.RRule;
@@ -108,6 +109,32 @@ exports.createScheduleLink = catchAsync(async (req, res, next) => {
     scheduleID: req.params.id,
     recipient: req.body.recipient
   });
+
+  let schedule = await Schedule.findById(newScheduleLink.scheduleID);
+
+  const addToGoogleLink = `https://calendar.google.com/calendar/u/0/r?cid=webcal://clump.app/api/v1/schedules/${newScheduleLink.scheduleID}/exportSchedule/${newScheduleLink._id}`
+  const message = `Add ${schedule.title} Schedule to Google Calendar ${addToGoogleLink}.`;
+
+  try {
+    await sendEmail({
+      email: newScheduleLink.recipient,
+      subject: 'Add this Schedule to Google Calendar',
+      message,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Email Sent to Recipient.',
+    });
+  } catch (err) {
+    console.log(err);
+    return next(
+      new AppError(
+        'There was an error sending the email. Please try again later.',
+        500
+      )
+    );
+  }
 
   res.status(201).json({
     status: 'success',

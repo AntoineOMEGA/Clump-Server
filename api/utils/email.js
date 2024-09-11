@@ -1,15 +1,12 @@
 const nodemailer = require('nodemailer');
+const nodemailerSendgrid = require('nodemailer-sendgrid');
 
 const sendEmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_HOST,
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-    
-  });
+  const transporter = nodemailer.createTransport(
+    nodemailerSendgrid({
+      apiKey: process.env.SENDGRID_API_KEY,
+    })
+  );
 
   const mailOptions = {
     from: 'Clump App <noreply@clump.app>',
