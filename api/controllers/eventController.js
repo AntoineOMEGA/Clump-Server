@@ -94,6 +94,10 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
+    if (!dates.includes(event.startDateTime)) {
+      dates.push(event.startDateTime);
+    }
+
     for (let date of dates) {
       let foundException = false;
       eventExceptions.forEach(function(eventException) {
