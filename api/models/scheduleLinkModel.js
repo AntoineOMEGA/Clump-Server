@@ -17,6 +17,8 @@ const scheduleLinkSchema = new Schema({
   }
 });
 
+//TODO: Make Combination Unique so you can only send an email once to a particular email per schedule
+
 const ScheduleLink = mongoose.model('ScheduleLink', scheduleLinkSchema);
 
 module.exports = ScheduleLink;
