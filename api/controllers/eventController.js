@@ -94,11 +94,26 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
-    if (!dates.includes(event.startDateTime)) {
-      dates.push(event.startDateTime);
+    if (event.endDateTime >= new Date(startDateTime) && event.startDateTime <= new Date(endDateTime)) {
+      let found = false;
+      for (let date of dates) {
+        if (date.toISOString() == event.startDateTime.toISOString().split('.')[0] + '.000Z') {
+          found = true;
+          console.log('Found');
+        }
+      }
+
+      if (!found) {
+        let originDate = event.startDateTime;
+        console.log(originDate.getUTCDate())
+        dates.unshift(
+          new Date(event.startDateTime.toISOString().split('.')[0] + '.000Z')
+        )
+      }
     }
 
     for (let date of dates) {
+      console.log(date);
       let foundException = false;
       eventExceptions.forEach(function(eventException) {
         if (eventException.eventID == event._id.toString(), new Date(eventException.startDateTime).toISOString() == new Date(date).toISOString()) {
@@ -121,7 +136,7 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
           description: event.description,
           location: event.location,
           timeZone: event.timeZone,
-          startDateTime: date, //adjust for new date
+          startDateTime: date.toISOString(), //adjust for new date
           endDateTime: endDateTime.toISOString(), //adjust for new date
           recurrenceRule: event.recurrenceRule,
           maxAttendees: event.maxAttendees
@@ -208,6 +223,14 @@ exports.getEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.createEvent = catchAsync(async (req, res, next) => {
+  if (req.body.endDateTime <= req.body.startDateTime) {
+    return next(new AppError('End Date is not After Start Date', 404));
+  }
+
+  if (req.body.untilDateTime <= req.body.endDateTime) {
+    return next(new AppError('Until Date is not After End Date', 404));
+  }
+
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
 
@@ -231,6 +254,19 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
+  let currentEvent = await Event.findById(req.params.id);
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  }
+
+  if (req.body.endDateTime <= req.body.startDateTime) {
+    return next(new AppError('End Date is not After Start Date.', 404));
+  }
+
+  if (req.body.untilDateTime <= req.body.endDateTime) {
+    return next(new AppError('Until Date is not After End Date.', 404));
+  }
+
   let updatedEvent = {
     scheduleID: req.body.scheduleID,
 
@@ -242,8 +278,10 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
 
-    recurrenceRule: req.body.recurrenceRule,
+    //recurrenceRule: req.body.recurrenceRule,
     maxAttendees: req.body.maxAttendees,
+
+    modifiedDateTime: new Date(),
   };
 
   const event = await Event.findByIdAndUpdate(
@@ -265,6 +303,19 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
 });
 
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
+  let currentEvent = await Event.findById(req.params.id);
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  }
+
+  if (req.body.endDateTime <= req.body.startDateTime) {
+    return next(new AppError('End Date is not After Start Date', 404));
+  }
+
+  if (req.body.untilDateTime <= req.body.endDateTime) {
+    return next(new AppError('Until Date is not After End Date', 404));
+  }
+
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.params.id,
@@ -294,7 +345,10 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
-  const currentEvent = await Event.findById(req.params.id);
+  let currentEvent = await Event.findById(req.params.id);
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  }
 
   currentEvent.recurrenceRule.untilDateTime = untilDate;
 
@@ -305,6 +359,14 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
       new: true,
       runValidators: true,
     });
+  
+  if (req.body.endDateTime <= req.body.startDateTime) {
+    return next(new AppError('End Date is not After Start Date', 404));
+  }
+  
+  if (req.body.untilDateTime <= req.body.endDateTime) {
+    return next(new AppError('Until Date is not After End Date', 404));
+  }
 
   let eventToCreate = {
     scheduleID: req.body.scheduleID,
@@ -342,6 +404,17 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
 
 exports.updateAllEvents = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  }
+
+  if (req.body.endDateTime <= req.body.startDateTime) {
+    return next(new AppError('End Date is not After Start Date', 404));
+  }
+
+  if (req.body.untilDateTime <= req.body.endDateTime) {
+    return next(new AppError('Until Date is not After End Date', 404));
+  }
 
   let updatedEvent = {
     scheduleID: req.body.scheduleID,

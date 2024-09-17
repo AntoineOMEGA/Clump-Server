@@ -202,6 +202,9 @@ exports.updateSchedule = catchAsync(async (req, res, next) => {
 
 exports.deleteSchedule = catchAsync(async (req, res, next) => {
   const schedule = await Schedule.findByIdAndDelete(req.params.id);
+  const events = await Event.deleteMany(
+    {scheduleID: req.params.id}
+  )
 
   if (!schedule) {
     return next(new AppError('No schedule found with that ID', 404));
