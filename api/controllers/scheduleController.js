@@ -120,8 +120,6 @@ exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
-    console.log(dates);
-
     if (dates.length > 0) {
       events.push(event);
     }
@@ -158,7 +156,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
       tagIDs: req.body.tagIDs,
 
       title: req.body.title,
-      timeZone: 'America/Denver',
+      color: req.body.color,
+      timeZone: req.body.timeZone,
 
       startDate: req.body.startDate,
       endDate: req.body.endDate,
@@ -175,6 +174,8 @@ exports.createSchedule = catchAsync(async (req, res, next) => {
 exports.updateSchedule = catchAsync(async (req, res, next) => {
   let updatedSchedule = {
     title: req.body.title,
+    color: req.body.color,
+    timeZone: req.body.timeZone,
     tagIDs: req.body.tagIDs,
   };
 

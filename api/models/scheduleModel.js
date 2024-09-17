@@ -16,6 +16,11 @@ const scheduleSchema = new Schema({
     required: true,
     trim: true,
   },
+  color: {
+    type: String,
+    required: true,
+    default: '#ffffff'
+  },
   timeZone: {
     type: String,
     required: true
