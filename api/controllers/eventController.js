@@ -214,6 +214,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     title: req.body.title,
     description: req.body.description,
     location: req.body.location,
+    timeZone: req.body.timeZone,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
