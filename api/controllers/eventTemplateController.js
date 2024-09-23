@@ -5,124 +5,6 @@ const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
-exports.aliasCombineSchedules = catchAsync(async (req, res, next) => {
-
-  const eventTemplates = await EventTemplate.find({
-    clumpID: req.cookies.currentClumpID,
-  });
-
-  let singleEventQuery = {
-    startDateTime: {
-      $gte: new Date(req.query.startDate).toISOString(),
-      $lt: new Date(req.query.endDate).toISOString(),
-    },
-    eventTemplateID: {
-      $equals: req.params.id,
-    },
-    until: {
-      $exists: false,
-    },
-  };
-
-  let recurringEventQuery = {
-    startDateTime: {
-      $lt: new Date(req.query.startDate).toISOString(),
-    },
-    until: {
-      $gte: new Date(req.query.endDate).toISOString(),
-    },
-    eventTemplateID: {
-      $equals: req.params.id,
-    },
-    until: {
-      $exists: true,
-    },
-  };
-  
-  const events = await Event.find(singleEventQuery);
-  const rEvents = await Event.find(recurringEventQuery);
-
-  let fEvents = [];
-
-  fEvents = events;
-
-  for (let event of rEvents) {
-    let rruleString = '';
-    if (event.recurrence.frequency != 'Once') {
-      rruleString = rruleString + 'FREQ=' + event.recurrence.frequency + ';';
-    }
-
-    if (event.recurrence.interval) {
-      rruleString = rruleString + 'INTERVAL=' + event.recurrence.interval + ';';
-    }
-
-    if (event.recurrence.byMonth) {
-      rruleString = rruleString + 'BYMONTH=' + event.recurrence.byMonth + ';';
-    }
-
-    if (event.recurrence.byDay && event.recurrence.byDay.length > 0) {
-      let byDayString = '';
-      for (let day of event.recurrence.byDay) {
-        byDayString = byDayString + day + ',';
-      }
-      rruleString =
-        rruleString +
-        'BYDAY=' +
-        byDayString.substring(0, byDayString.length - 1) +
-        ';';
-    }
-
-    if (event.recurrence.byMonthDay && event.recurrence.byMonthDay.length > 0) {
-      let byMonthDayString = '';
-      for (let day of event.recurrence.byMonthDay) {
-        byMonthDayString = byMonthDayString + day + ',';
-      }
-      rruleString =
-        rruleString +
-        'BYMONTHDAY=' +
-        byMonthDayString.substring(0, byMonthDayString.length - 1) +
-        ';';
-    }
-
-    if (event.until) {
-      rruleString = rruleString + 'UNTIL=' + new Date(event.until).toISOString().replaceAll('-', '').replaceAll(':', '').replace('.000', '') + ';';
-    }
-    console.log(rruleString);
-
-    const rrule = RRule.fromString(
-      rruleString.substring(0, rruleString.length - 1)
-    );
-
-    let tStart = new Date(req.query.startDate);
-    let tEnd = new Date(req.query.endDate);
-
-    let dates = rrule.between(
-      datetime(
-        tStart.getUTCFullYear(),
-        tStart.getUTCMonth() + 1,
-        tStart.getUTCDate()
-      ),
-      datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
-    );
-
-    console.log(dates);
-
-    for (let date of dates) {
-      fEvents.push(event);
-    }
-  }
-
-  res.status(200).json({
-    status: 'success',
-    results: fEvents.length,
-    data: {
-      scheduleCategories: scheduleCategories,
-      schedules: schedules,
-      eventTemplates: eventTemplates,
-      events: fEvents,
-    },
-  });
-});
 
 exports.getEventTemplates = catchAsync(async (req, res, next) => {
   const eventTemplates = await EventTemplate.find({clumpID: req.cookies.currentClumpID});
@@ -152,19 +34,12 @@ exports.getEventTemplate = catchAsync(async (req, res, next) => {
 });
 
 exports.createEventTemplate = catchAsync(async (req, res, next) => {
-  let newEventTemplate;
-
-  if (true) {
-    newEventTemplate = await EventTemplate.create({
-      clumpID: req.cookies.currentClumpID,
-      title: req.body.title,
-      description: req.body.description,
-      location: req.body.location,
-      tagIDs: req.body.tagIDs
-    });
-  } else {
-    return next(new AppError('You are not authorized to Create Event Templates', 401));
-  }
+  let newEventTemplate = await EventTemplate.create({
+    clumpID: req.cookies.currentClumpID,
+    title: req.body.title,
+    description: req.body.description,
+    location: req.body.location
+  });
   
 
   res.status(201).json({
@@ -179,8 +54,7 @@ exports.updateEventTemplate = catchAsync(async (req, res, next) => {
   let updatedEventTemplate = {
     title: req.body.title,
     description: req.body.description,
-    location: req.body.location,
-    tagIDs: req.body.tagIDs
+    location: req.body.location
   };
 
   const eventTemplate = await EventTemplate.findByIdAndUpdate(

@@ -19,9 +19,6 @@ const eventTemplateSchema = new Schema({
   location: {
     type: String,
     trim: true,
-  },
-  tagIDs: {
-    type: [ObjectId]
   }
 });
 

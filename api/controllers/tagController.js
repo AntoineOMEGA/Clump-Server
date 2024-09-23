@@ -88,10 +88,10 @@ exports.deleteTag = catchAsync(async (req, res, next) => {
   const tag = await Tag.findByIdAndDelete(req.params.id);
 
   if (tag) {
-    const schedules = await Schedule.find({clumpID: req.cookies.currentClumpID, tagID: req.params.id});
+    const schedules = await Schedule.find({clumpID: req.cookies.currentClumpID, tagIDs: [req.params.id]});
     
     for await (schedule of schedules) {
-      const temp = await Schedule.findByIdAndUpdate(schedule._id, {tagID: ''}, {
+      const temp = await Schedule.findByIdAndUpdate(schedule._id, {tagIDs: []}, {
         new: true,
         runValidators: true,
       });

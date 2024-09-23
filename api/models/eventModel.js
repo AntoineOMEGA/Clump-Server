@@ -88,6 +88,10 @@ const eventSchema = new Schema({
     required: true,
     default: new Date()
   },
+  createdBy: {
+    type: ObjectId
+  },
+
   modifiedDateTime: {
     type: Date,
     required: true,
@@ -96,7 +100,7 @@ const eventSchema = new Schema({
 
   maxAttendees: {
     type: Number
-  }
+  },
 });
 
 const Event = mongoose.model('event', eventSchema);
