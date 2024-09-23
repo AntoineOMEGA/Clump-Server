@@ -15,10 +15,6 @@ const tagSchema = new Schema({
   clumpID: {
     type: ObjectId,
     required: true,
-  },
-  type: {
-    type: String,
-    //TODO: Add ENUM
   }
 });
 
