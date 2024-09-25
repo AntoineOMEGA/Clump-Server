@@ -19,6 +19,7 @@ const scheduleRouter = require('./routes/scheduleRoutes');
 const tagRouter = require('./routes/tagRoutes');
 const eventTemplateRouter = require('./routes/eventTemplateRoutes');
 const eventRouter = require('./routes/eventRoutes');
+const eventAttendeeRouter = require('./routes/eventAttendeeRoutes');
 const noteRouter = require('./routes/noteRoutes');
 
 
@@ -77,6 +78,7 @@ app.use('/api/v1/schedules', scheduleRouter);
 app.use('/api/v1/tags', tagRouter);
 app.use('/api/v1/event-templates', eventTemplateRouter);
 app.use('/api/v1/events', eventRouter);
+app.use('/api/v1/event-attendees', eventAttendeeRouter);
 app.use('/api/v1/notes', noteRouter);
 
 app.all('*', (req, res, next) => {

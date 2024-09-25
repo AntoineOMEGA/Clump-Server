@@ -32,7 +32,7 @@ exports.createEventAttendee = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateEvent = catchAsync(async (req, res, next) => {
+exports.updateEventAttendee = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
   if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
@@ -46,7 +46,7 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     return next(new AppError('Until Date is not After End Date.', 404));
   }
 
-  let updatedEvent = {
+  let updatedEventAttendee = {
     scheduleID: req.body.scheduleID,
     eventID: req.body.eventID,
 
@@ -75,7 +75,7 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateThisEvent = catchAsync(async (req, res, next) => {
+exports.updateThisEventAttendee = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
   if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
@@ -111,7 +111,7 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
+exports.updateThisAndFollowingEventAttendees = catchAsync(async (req, res, next) => {
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
@@ -173,7 +173,7 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateAllEvents = catchAsync(async (req, res, next) => {
+exports.updateAllEventAttendees = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
   if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
@@ -227,7 +227,7 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteEvent = catchAsync(async (req, res, next) => {
+exports.deleteEventAttendee = catchAsync(async (req, res, next) => {
   const event = await Event.findByIdAndDelete(req.params.id);
 
   if (!event) {
@@ -237,7 +237,7 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
   res.status(204).send();
 });
 
-exports.deleteThisEvent = catchAsync(async (req, res, next) => {
+exports.deleteThisEventAttendee = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.params.id,
@@ -250,7 +250,7 @@ exports.deleteThisEvent = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
+exports.deleteThisAndFollowingEventAttendees = catchAsync(async (req, res, next) => {
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
@@ -278,7 +278,7 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteAllEvents = catchAsync(async (req, res, next) => {
+exports.deleteAllEventAttendees = catchAsync(async (req, res, next) => {
   const event = await Event.deleteOne({_id: req.params.id});
   const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
 
