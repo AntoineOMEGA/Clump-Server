@@ -291,19 +291,21 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       });
 
       eventAttendees.forEach(function (attendee) {
+        //TODO: NEED TO DEAL WITH RECURRENCE
         if (attendee.eventID.toString() == event._id.toString()) {
           if (
             new Date(attendee.startDateTime).toISOString() ==
             new Date(date).toISOString()
           ) {
             let eventAttendeeObject = {
+              scheduleID: attendee.scheduleID,
               attendeeID: attendee._id,
               //TODO: Figure out if I need different for INSTANCES
               startDateTime: attendee.startDateTime,
               endDateTime: attendee.endDateTime,
               untilDateTime: attendee.untilDateTime
             }
-            eventInstance.attendees.push(attendee._id);
+            eventInstance.attendees.push(eventAttendeeObject);
 
             eventAttendeeExceptions.forEach(function (eventAttendeeException) {
               if (
