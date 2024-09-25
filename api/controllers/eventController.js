@@ -291,31 +291,70 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       });
 
       eventAttendees.forEach(function (attendee) {
-        //TODO: NEED TO DEAL WITH RECURRENCE
         if (attendee.eventID.toString() == event._id.toString()) {
-          if (
-            new Date(attendee.startDateTime).toISOString() ==
-            new Date(date).toISOString()
-          ) {
-            let eventAttendeeObject = {
-              scheduleID: attendee.scheduleID,
-              attendeeID: attendee._id,
-              //TODO: Figure out if I need different for INSTANCES
-              startDateTime: attendee.startDateTime,
-              endDateTime: attendee.endDateTime,
-              untilDateTime: attendee.untilDateTime
-            }
-            eventInstance.attendees.push(eventAttendeeObject);
+          //TODO: NEED TO DEAL WITH RECURRENCE
+          let attendeeDateRangeParameters = {};
 
-            eventAttendeeExceptions.forEach(function (eventAttendeeException) {
-              if (
-                (eventAttendeeException.eventID == event._id.toString(),
-                new Date(eventAttendeeException.startDateTime).toISOString() ==
-                  new Date(date).toISOString())
-              ) {
-                eventAttendeeObject.status = 'cancelled';
+          if (attendee.startDateTime) {
+            attendeeDateRangeParameters.startDateTime = attendee.startDateTime;
+          } else {
+            attendeeDateRangeParameters.startDateTime = event.startDateTime;
+          }
+
+          if (attendee.endDateTime) {
+            attendeeDateRangeParameters.endDateTime = attendee.endDateTime;
+          } else {
+            attendeeDateRangeParameters.endDateTime = event.endDateTime;
+          }
+
+
+          attendeeDateRangeParameters.recurrenceRule = event.recurrenceRule;
+          if (attendee.untilDateTime) {
+            attendeeDateRangeParameters.recurrenceRule.untilDateTime = attendee.untilDateTime;
+          }
+
+          let attendeeDates = findInstancesInRange(
+            attendeeDateRangeParameters.startDateTime,
+            attendeeDateRangeParameters.endDateTime,
+            attendeeDateRangeParameters.recurrenceRule,
+            req.query.startDateTime,
+            req.query.endDateTime
+          );
+
+
+          if (attendeeDates.includes(new Date(date))) {
+            let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
+            if (
+              new Date(attendee.startDateTime).toISOString() ==
+              new Date(date).toISOString()
+            ) {
+
+              let startDateTimeTemp = dayjs(event.startDateTime);
+              let endDateTimeTemp = dayjs(event.endDateTime);
+              let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
+
+              let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
+
+              let eventAttendeeObject = {
+                scheduleID: attendee.scheduleID,
+                attendeeID: attendee._id,
+                //TODO: Figure out if I need different for INSTANCES
+                startDateTime: date.toISOString(),
+                endDateTime: endDateTime.toISOString(),
+                untilDateTime: attendee.untilDateTime
               }
-            });
+              eventInstance.attendees.push(eventAttendeeObject);
+  
+              eventAttendeeExceptions.forEach(function (eventAttendeeException) {
+                if (
+                  (eventAttendeeException.eventID == event._id.toString(),
+                  new Date(eventAttendeeException.startDateTime).toISOString() ==
+                    new Date(date).toISOString())
+                ) {
+                  eventAttendeeObject.status = 'cancelled';
+                }
+              });
+            }
           }
         }
       });
