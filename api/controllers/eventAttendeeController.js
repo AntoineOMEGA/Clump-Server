@@ -23,9 +23,10 @@ exports.createEventAttendee = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
     untilDateTime: new Date(req.body.untilDateTime),
+    occurrences: req.body.occurrences,
   };
 
-  let newEvent = await Event.create(eventAttendeeToCreate);
+  await Event.create(eventAttendeeToCreate);
 
   res.status(201).json({
     status: 'success'
@@ -33,7 +34,7 @@ exports.createEventAttendee = catchAsync(async (req, res, next) => {
 });
 
 exports.updateEventAttendee = catchAsync(async (req, res, next) => {
-  let currentEvent = await Event.findById(req.params.id);
+  let currentEventAttendee = await EventAttendee.findById(req.params.id);
   if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
   }
@@ -53,11 +54,12 @@ exports.updateEventAttendee = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
     untilDateTime: new Date(req.body.untilDateTime),
+    occurrences: req.body.occurrences,
 
     modifiedDateTime: new Date(),
   };
 
-  const event = await Event.findByIdAndUpdate(
+  const eventAttendee = await EventAttendee.findByIdAndUpdate(
     req.params.id,
     updatedEvent,
     {
@@ -66,7 +68,7 @@ exports.updateEventAttendee = catchAsync(async (req, res, next) => {
     }
   );
 
-  if (!event) {
+  if (!eventAttendee) {
     return next(new AppError('No event found with that ID', 404));
   }
 
@@ -76,7 +78,7 @@ exports.updateEventAttendee = catchAsync(async (req, res, next) => {
 });
 
 exports.updateThisEventAttendee = catchAsync(async (req, res, next) => {
-  let currentEvent = await Event.findById(req.params.id);
+  let currentEventAttendee = await EventAttendee.findById(req.params.id);
   if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
   }
@@ -91,20 +93,22 @@ exports.updateThisEventAttendee = catchAsync(async (req, res, next) => {
 
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
-    eventID: req.params.id,
+    eventAttendeeID: req.params.id,
     startDateTime: req.body.startDateTime
   }
-  let newEventException = await EventException.create(eventExceptionToCreate);
+  await EventException.create(eventExceptionToCreate);
 
-  let eventToCreate = {
+  let eventAttendeeToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.body.eventID,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
     untilDateTime: new Date(req.body.untilDateTime),
+    occurrences: req.body.occurrences,
   }
-  let newEvent = await Event.create(eventToCreate);
+
+  await EventAttendee.create(eventAttendeeToCreate);
 
   res.status(201).json({
     status: 'success'
@@ -115,16 +119,16 @@ exports.updateThisAndFollowingEventAttendees = catchAsync(async (req, res, next)
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
-  let currentEvent = await Event.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+  let currentEventAttendee = await EventAttendee.findById(req.params.id);
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEventAttendee.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
   }
 
-  currentEvent.recurrenceRule.untilDateTime = untilDate;
+  currentEventAttendee.untilDateTime = untilDate;
 
-  const updatedCurrentEvent = await Event.findByIdAndUpdate(
+  const updatedCurrentEventAttendee = await EventAttendee.findByIdAndUpdate(
     req.params.id,
-    currentEvent,
+    currentEventAttendee,
     {
       new: true,
       runValidators: true,
@@ -138,30 +142,25 @@ exports.updateThisAndFollowingEventAttendees = catchAsync(async (req, res, next)
     return next(new AppError('Until Date is not After End Date', 404));
   }
 
-  let eventToCreate = {
+  let eventAttendeeToCreate = {
     scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-    timeZone: req.body.timeZone,
+    eventID: req.body.eventID,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-
-    recurrenceRule: req.body.recurrenceRule,
-    maxAttendees: req.body.maxAttendees,
+    untilDateTime: new Date(req.body.untilDateTime),
+    occurrences: req.body.occurrences,
   }
-  let newEvent = await Event.create(eventToCreate);
+  let newEventAttendee = await EventAttendee.create(eventAttendeeToCreate);
 
   let eventExceptions;
 
-  if (new Date(currentEvent.startDateTime).getDay() != new Date(eventToCreate.startDateTime).getDay()) {
-    eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  if (new Date(currentEventAttendee.startDateTime).getDay() != new Date(eventAttendeeToCreate.startDateTime).getDay()) {
+    eventExceptions = await EventException.deleteMany({eventAttendeeID: {$eq: req.params.id}});
   } else {
     eventExceptions = await EventException.updateMany(
-      {$and: [{eventID:{$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]},  
-      {eventID: newEvent._id}, function (err, eventExceptions) { 
+      {$and: [{eventAttendeeID:{$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]},  
+      {eventAttendeeID: newEventAttendee._id}, function (err, eventExceptions) { 
       if (err){ 
         return next(new AppError('Issue updating Event Exceptions', 400));
       }
@@ -174,8 +173,8 @@ exports.updateThisAndFollowingEventAttendees = catchAsync(async (req, res, next)
 });
 
 exports.updateAllEventAttendees = catchAsync(async (req, res, next) => {
-  let currentEvent = await Event.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+  let currentEventAttendee = await EventAttendee.findById(req.params.id);
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEventAttendee.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
   }
 
@@ -187,39 +186,30 @@ exports.updateAllEventAttendees = catchAsync(async (req, res, next) => {
     return next(new AppError('Until Date is not After End Date', 404));
   }
 
-  let updatedEvent = {
+  let updatedEventAttendee = {
     scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-
-    frequency: req.body.frequency,
-    interval: req.body.interval,
-    untilDateTime: req.body.untilDateTime,
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-
-    recurrenceRule: req.body.recurrenceRule,
-    maxAttendees: req.body.maxAttendees,
+    untilDateTime: new Date(req.body.untilDateTime),
+    occurrences: req.body.occurrences,
   };
 
-  const event = await Event.findByIdAndUpdate(
+  const eventAttendee = await EventAttendee.findByIdAndUpdate(
     req.params.id,
-    updatedEvent,
+    updatedEventAttendee,
     {
       new: true,
       runValidators: true,
     }
   );
 
-  if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+  if (!eventAttendee) {
+    return next(new AppError('No event attendee found with that ID', 404));
   }
 
-  if (new Date(currentEvent.startDateTime).getDay() != new Date(event.startDateTime).getDay()) {
-    const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  if (new Date(currentEventAttendee.startDateTime).getDay() != new Date(eventAttendee.startDateTime).getDay()) {
+    const eventExceptions = await EventException.deleteMany({eventAttendeeID: {$eq: req.params.id}});
   }
 
   res.status(200).json({
@@ -228,10 +218,10 @@ exports.updateAllEventAttendees = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteEventAttendee = catchAsync(async (req, res, next) => {
-  const event = await Event.findByIdAndDelete(req.params.id);
+  const eventAttendee = await EventAttendee.findByIdAndDelete(req.params.id);
 
-  if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+  if (!eventAttendee) {
+    return next(new AppError('No event attendee found with that ID', 404));
   }
 
   res.status(204).send();
@@ -254,23 +244,23 @@ exports.deleteThisAndFollowingEventAttendees = catchAsync(async (req, res, next)
   let untilDate = new Date(req.body.startDateTime);
   untilDate.setDate(untilDate.getDate() - 1);
 
-  const currentEvent = await Event.findById(req.params.id);
+  const currentEventAttendee = await EventAttendee.findById(req.params.id);
 
-  currentEvent.recurrenceRule.untilDateTime = untilDate;
+  currentEventAttendee.untilDateTime = untilDate;
 
-  const event = await Event.findByIdAndUpdate(
+  const eventAttendee = await EventAttendee.findByIdAndUpdate(
     req.params.id,
-    currentEvent,
+    currentEventAttendee,
     {
       new: true,
       runValidators: true,
     }
   );
 
-  let eventExceptions = await EventException.deleteMany({$and: [{eventID: {$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]});
+  let eventExceptions = await EventException.deleteMany({$and: [{eventAttendeeID: {$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]});
 
-  if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+  if (!eventAttendee) {
+    return next(new AppError('No event attendee found with that ID', 404));
   }
 
   res.status(200).json({
@@ -279,11 +269,11 @@ exports.deleteThisAndFollowingEventAttendees = catchAsync(async (req, res, next)
 });
 
 exports.deleteAllEventAttendees = catchAsync(async (req, res, next) => {
-  const event = await Event.deleteOne({_id: req.params.id});
-  const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  const eventAttendee = await EventAttendee.deleteOne({_id: req.params.id});
+  const eventExceptions = await EventException.deleteMany({eventAttendeeID: {$eq: req.params.id}});
 
-  if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+  if (!eventAttendee) {
+    return next(new AppError('No event attendee found with that ID', 404));
   }
 
   res.status(204).send();

@@ -21,6 +21,9 @@ const eventAttendeeSchema = new Schema({
   untilDateTime: {
     type: Date
   },
+  occurrences: {
+    type: Number
+  },
 
   createdDateTime: {
     type: Date,
