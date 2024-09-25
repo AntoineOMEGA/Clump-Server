@@ -1,5 +1,6 @@
 const Event = require('../models/eventModel');
 const EventException = require('../models/eventExceptionModel');
+const EventAttendee = require('../models/eventAttendeeModel');
 const Schedule = require('../models/scheduleModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
@@ -94,18 +95,17 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
       datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
     );
 
+    //ADD Original Start Date Time to Instances (compatibility with ICal calendars elsewhere)
     if (event.endDateTime >= new Date(startDateTime) && event.startDateTime <= new Date(endDateTime)) {
       let found = false;
       for (let date of dates) {
         if (date.toISOString() == event.startDateTime.toISOString().split('.')[0] + '.000Z') {
           found = true;
-          console.log('Found');
         }
       }
 
       if (!found) {
         let originDate = event.startDateTime;
-        console.log(originDate.getUTCDate())
         dates.unshift(
           new Date(event.startDateTime.toISOString().split('.')[0] + '.000Z')
         )
@@ -113,15 +113,6 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
     }
 
     for (let date of dates) {
-      console.log(date);
-      let foundException = false;
-      eventExceptions.forEach(function(eventException) {
-        if (eventException.eventID == event._id.toString(), new Date(eventException.startDateTime).toISOString() == new Date(date).toISOString()) {
-          foundException = true;
-        }
-      })
-
-      if (foundException == false) {
         let startDateTimeTemp = dayjs(event.startDateTime);
         let endDateTimeTemp = dayjs(event.endDateTime);
         let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
@@ -139,13 +130,18 @@ const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTim
           startDateTime: date.toISOString(), //adjust for new date
           endDateTime: endDateTime.toISOString(), //adjust for new date
           recurrenceRule: event.recurrenceRule,
-          maxAttendees: event.maxAttendees
+          maxAttendees: event.maxAttendees,
         }
+
+        eventExceptions.forEach(function(eventException) {
+          if (eventException.eventID == event._id.toString(), new Date(eventException.startDateTime).toISOString() == new Date(date).toISOString()) {
+            eventInstance.status = 'cancelled';
+          }
+        })
+
         eventInstances.push(eventInstance);
       }
-      foundException = false;
     }
-  }
   return eventInstances;
 }
 
@@ -172,10 +168,6 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     startDateTime: {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
-    // 'recurrenceRule.untilDateTime': {
-    //   $gte: new Date(req.query.startDateTime).toISOString(),
-    // },
-
     recurrenceRule: {
       $exists: true
     }
@@ -197,6 +189,31 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   recurringEventInstances.forEach(function (eventInstance) {
     events.push(eventInstance);
   })
+
+  let eventAttendeeEventIDArray = [];
+  for (let event of events) {
+    if (!eventAttendeeEventIDArray.includes(event._id)) {
+      eventAttendeeEventIDArray.push(event._id);
+    }
+  }
+
+  let eventAttendeeQuery = {
+    eventID: {
+      $in: eventAttendeeEventIDArray
+    },
+    startDateTime: {
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    }
+  }
+
+  let eventAttendees = await EventAttendee.find(eventAttendeeQuery);
+  console.log(eventAttendees);
+  for (let event of events) {
+    if (!event.attendees) {
+      event.attendees = [];
+    }
+    event.attendees.push(eventAttendees)
+  }
 
   res.status(200).json({
     status: 'success',
@@ -246,7 +263,7 @@ exports.createEvent = catchAsync(async (req, res, next) => {
     maxAttendees: req.body.maxAttendees,
   };
 
-  let newEvent = await Event.create(eventToCreate);
+  await Event.create(eventToCreate);
 
   res.status(201).json({
     status: 'success'
@@ -381,6 +398,8 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
 
     recurrenceRule: req.body.recurrenceRule,
     maxAttendees: req.body.maxAttendees,
+
+    modifiedDateTime: new Date(),
   }
   let newEvent = await Event.create(eventToCreate);
 
@@ -433,6 +452,8 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
 
     recurrenceRule: req.body.recurrenceRule,
     maxAttendees: req.body.maxAttendees,
+
+    modifiedDateTime: new Date(),
   };
 
   const event = await Event.findByIdAndUpdate(

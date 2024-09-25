@@ -15,6 +15,9 @@ const eventAttendeeSchema = new Schema({
   startDateTime: {
     type: Date,
   },
+  endDateTime: {
+    type: Date,
+  },
   untilDateTime: {
     type: Date
   },

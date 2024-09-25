@@ -97,7 +97,7 @@ const eventSchema = new Schema({
     required: true,
     default: new Date()
   },
-
+  
   maxAttendees: {
     type: Number
   },
