@@ -228,6 +228,26 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
   const eventAttendees = await EventAttendee.find(eventAttendeeQuery);
 
+
+  let eventAttendeeIDArray = [];
+  for (let attendee of eventAttendees) {
+    if (!eventAttendeeIDArray.includes(attendee._id)) {
+      eventAttendeeIDArray.push(attendee._id);
+    }
+  }
+
+  let eventAttendeeExceptionQuery = {
+    eventAttendeeID: {
+      $in: eventAttendeeIDArray
+    },
+    startDateTime: {
+      $gte: new Date(req.query.startDateTime).toISOString(),
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    },
+  };
+
+  const eventAttendeeExceptions = await EventException.find(eventAttendeeExceptionQuery);
+
   for (let event of recurringEvents) {
     let dates = findInstancesInRange(
       event.startDateTime,
@@ -284,6 +304,16 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
               untilDateTime: attendee.untilDateTime
             }
             eventInstance.attendees.push(attendee._id);
+
+            eventAttendeeExceptions.forEach(function (eventAttendeeException) {
+              if (
+                (eventAttendeeException.eventID == event._id.toString(),
+                new Date(eventAttendeeException.startDateTime).toISOString() ==
+                  new Date(date).toISOString())
+              ) {
+                eventAttendeeObject.status = 'cancelled';
+              }
+            });
           }
         }
       });

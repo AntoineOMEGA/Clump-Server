@@ -10,9 +10,10 @@ const eventExceptionSchema = new Schema({
 
   eventID: {
     type: ObjectId,
-    required: true,
   },
-  //And Event Attendee ???
+  eventAttendeeID: {
+    type: ObjectId,
+  },
 
   startDateTime: {
     type: Date,
