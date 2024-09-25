@@ -12,7 +12,7 @@ const datetime = RRuleLib.datetime;
 const dayjs = require('dayjs');
 
 exports.getEvents = catchAsync(async (req, res, next) => {
-  const events = await Event.find({scheduleID: req.body.scheduleID});
+  const events = await Event.find({ scheduleID: req.body.scheduleID });
 
   res.status(200).json({
     status: 'success',
@@ -23,127 +23,145 @@ exports.getEvents = catchAsync(async (req, res, next) => {
   });
 });
 
-const findInstancesInRange = (events, eventExceptions, startDateTime, endDateTime) => {
-  let eventInstances = [];
+const findInstancesInRange = (
+  eventStartDateTime,
+  eventEndDateTime,
+  recurrenceRule,
+  rangeStartDateTime,
+  rangeEndDateTime
+) => {
+  let rruleString;
+  if (
+    recurrenceRule.frequency == 'Daily' ||
+    recurrenceRule.frequency == 'Weekly'
+  ) {
+    rruleString = 'FREQ=' + recurrenceRule.frequency + ';';
+  } else if (
+    recurrenceRule.frequency == 'Monthly by day' ||
+    recurrenceRule.frequency == 'Monthly by date'
+  ) {
+    rruleString = 'FREQ=MONTHLY;';
+  } else if (
+    recurrenceRule.frequency == 'Yearly by day' ||
+    recurrenceRule.frequency == 'Yearly by date'
+  ) {
+    rruleString = 'FREQ=YEARLY;';
+  }
 
-  for (let event of events) {
-    let rruleString;
-    if (event.recurrenceRule.frequency == 'Daily' || event.recurrenceRule.frequency == 'Weekly') {
-      rruleString = 'FREQ=' + event.recurrenceRule.frequency + ';';
-    } else if (event.recurrenceRule.frequency == 'Monthly by day' || event.recurrenceRule.frequency == 'Monthly by date') {
-      rruleString = 'FREQ=MONTHLY;';
-    } else if (event.recurrenceRule.frequency == 'Yearly by day' || event.recurrenceRule.frequency == 'Yearly by date') {
-      rruleString = 'FREQ=YEARLY;';
+  if (recurrenceRule.interval) {
+    rruleString = rruleString + 'INTERVAL=' + recurrenceRule.interval + ';';
+  }
+
+  if (recurrenceRule.byMonth) {
+    rruleString = rruleString + 'BYMONTH=' + recurrenceRule.byMonth + ';';
+  }
+
+  if (recurrenceRule.byDay && recurrenceRule.byDay.length > 0) {
+    let byDayString = '';
+    for (let day of recurrenceRule.byDay) {
+      byDayString = byDayString + day + ',';
     }
-    
+    rruleString =
+      rruleString +
+      'BYDAY=' +
+      byDayString.substring(0, byDayString.length - 1) +
+      ';';
+  }
 
-    if (event.recurrenceRule.interval) {
-      rruleString = rruleString + 'INTERVAL=' + event.recurrenceRule.interval + ';';
+  if (
+    recurrenceRule.byWeekDayInMonth &&
+    recurrenceRule.byWeekDayInMonth.length > 0
+  ) {
+    let byWeekDayInMonthString = '';
+    for (let day of recurrenceRule.byWeekDayInMonth) {
+      byWeekDayInMonthString = byWeekDayInMonthString + day + ',';
     }
+    rruleString =
+      rruleString +
+      'BYDAY=' +
+      byWeekDayInMonthString.substring(0, byWeekDayInMonthString.length - 1) +
+      ';';
+  }
 
-    if (event.recurrenceRule.byMonth) {
-      rruleString = rruleString + 'BYMONTH=' + event.recurrenceRule.byMonth + ';';
+  if (recurrenceRule.byMonthDay && recurrenceRule.byMonthDay.length > 0) {
+    let byMonthDayString = '';
+    for (let day of recurrenceRule.byMonthDay) {
+      byMonthDayString = byMonthDayString + day + ',';
     }
+    rruleString =
+      rruleString +
+      'BYMONTHDAY=' +
+      byMonthDayString.substring(0, byMonthDayString.length - 1) +
+      ';';
+  }
 
-    if (event.recurrenceRule.byDay && event.recurrenceRule.byDay.length > 0) {
-      let byDayString = '';
-      for (let day of event.recurrenceRule.byDay) {
-        byDayString = byDayString + day + ',';
-      }
-      rruleString = rruleString + 'BYDAY=' + byDayString.substring(0, byDayString.length - 1) +';';
-    }
+  if (recurrenceRule.untilDateTime) {
+    rruleString =
+      rruleString +
+      'UNTIL=' +
+      new Date(recurrenceRule.untilDateTime)
+        .toISOString()
+        .replaceAll('-', '')
+        .replaceAll(':', '')
+        .split('.')[0] +
+      ';';
+  }
 
-    if (event.recurrenceRule.byWeekDayInMonth && event.recurrenceRule.byWeekDayInMonth.length > 0) {
-      let byWeekDayInMonthString = '';
-      for (let day of event.recurrenceRule.byWeekDayInMonth) {
-        byWeekDayInMonthString = byWeekDayInMonthString + day + ',';
-      }
-      rruleString = rruleString + 'BYDAY=' + byWeekDayInMonthString.substring(0, byWeekDayInMonthString.length - 1) +';';
-    }
+  if (recurrenceRule.occurrences) {
+    rruleString = rruleString + 'COUNT=' + recurrenceRule.occurrences + ';';
+  }
 
-    if (event.recurrenceRule.byMonthDay && event.recurrenceRule.byMonthDay.length > 0) {
-      let byMonthDayString = '';
-      for (let day of event.recurrenceRule.byMonthDay) {
-        byMonthDayString = byMonthDayString + day + ',';
-      }
-      rruleString = rruleString + 'BYMONTHDAY=' + byMonthDayString.substring(0, byMonthDayString.length - 1) +';';
-    }
+  rruleString =
+    rruleString +
+    'DTSTART=' +
+    new Date(eventStartDateTime)
+      .toISOString()
+      .replaceAll('-', '')
+      .replaceAll(':', '')
+      .split('.')[0] +
+    ';';
 
-    if (event.recurrenceRule.untilDateTime) {
-      rruleString = rruleString + 'UNTIL=' + new Date(event.recurrenceRule.untilDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
-    }
+  const rrule = RRule.fromString(
+    rruleString.substring(0, rruleString.length - 1)
+  );
 
-    if (event.recurrenceRule.occurrences) {
-      rruleString = rruleString + 'COUNT=' + event.recurrenceRule.occurrences + ';';
-    }
+  let tStart = new Date(rangeStartDateTime);
+  let tEnd = new Date(rangeEndDateTime);
 
-    rruleString = rruleString + 'DTSTART=' + new Date(event.startDateTime).toISOString().replaceAll('-', '').replaceAll(':', '').split('.')[0] + ';';
+  let dates = rrule.between(
+    datetime(
+      tStart.getUTCFullYear(),
+      tStart.getUTCMonth() + 1,
+      tStart.getUTCDate()
+    ),
+    datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
+  );
 
-    const rrule = RRule.fromString(
-      rruleString.substring(0, rruleString.length - 1)
-    );
-
-    let tStart = new Date(startDateTime);
-    let tEnd = new Date(endDateTime);
-
-    let dates = rrule.between(
-      datetime(
-        tStart.getUTCFullYear(),
-        tStart.getUTCMonth() + 1,
-        tStart.getUTCDate()
-      ),
-      datetime(tEnd.getUTCFullYear(), tEnd.getUTCMonth() + 1, tEnd.getUTCDate())
-    );
-
-    //ADD Original Start Date Time to Instances (compatibility with ICal calendars elsewhere)
-    if (event.endDateTime >= new Date(startDateTime) && event.startDateTime <= new Date(endDateTime)) {
-      let found = false;
-      for (let date of dates) {
-        if (date.toISOString() == event.startDateTime.toISOString().split('.')[0] + '.000Z') {
-          found = true;
-        }
-      }
-
-      if (!found) {
-        let originDate = event.startDateTime;
-        dates.unshift(
-          new Date(event.startDateTime.toISOString().split('.')[0] + '.000Z')
-        )
-      }
-    }
-
+  //ADD Original Start Date Time to Instances (compatibility with ICal calendars elsewhere)
+  if (
+    eventEndDateTime >= new Date(rangeStartDateTime) &&
+    eventStartDateTime <= new Date(rangeEndDateTime)
+  ) {
+    let found = false;
     for (let date of dates) {
-        let startDateTimeTemp = dayjs(event.startDateTime);
-        let endDateTimeTemp = dayjs(event.endDateTime);
-        let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
-
-        let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
-        let eventInstance = {
-          _id: event._id,
-          isInstance: true,
-
-          scheduleID: event.scheduleID,
-          title: event.title,
-          description: event.description,
-          location: event.location,
-          timeZone: event.timeZone,
-          startDateTime: date.toISOString(), //adjust for new date
-          endDateTime: endDateTime.toISOString(), //adjust for new date
-          recurrenceRule: event.recurrenceRule,
-          maxAttendees: event.maxAttendees,
-        }
-
-        eventExceptions.forEach(function(eventException) {
-          if (eventException.eventID == event._id.toString(), new Date(eventException.startDateTime).toISOString() == new Date(date).toISOString()) {
-            eventInstance.status = 'cancelled';
-          }
-        })
-
-        eventInstances.push(eventInstance);
+      if (
+        date.toISOString() ==
+        eventStartDateTime.toISOString().split('.')[0] + '.000Z'
+      ) {
+        found = true;
       }
     }
-  return eventInstances;
-}
+
+    if (!found) {
+      let originDate = eventStartDateTime;
+      dates.unshift(
+        new Date(eventStartDateTime.toISOString().split('.')[0] + '.000Z')
+      );
+    }
+  }
+
+  return dates;
+};
 
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   let eventQuery = {
@@ -157,8 +175,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
     recurrenceRule: {
-      $exists: false
-    }
+      $exists: false,
+    },
   };
 
   const events = await Event.find(eventQuery);
@@ -169,9 +187,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
     recurrenceRule: {
-      $exists: true
-    }
-  }
+      $exists: true,
+    },
+  };
 
   const recurringEvents = await Event.find(recurringEventQuery);
 
@@ -180,15 +198,12 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     startDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
-    }
+    },
   };
 
-  const recurringEventExceptions = await EventException.find(eventExceptionQuery);
-
-  let recurringEventInstances = findInstancesInRange(recurringEvents, recurringEventExceptions, req.query.startDateTime, req.query.endDateTime);
-  recurringEventInstances.forEach(function (eventInstance) {
-    events.push(eventInstance);
-  })
+  const recurringEventExceptions = await EventException.find(
+    eventExceptionQuery
+  );
 
   let eventAttendeeEventIDArray = [];
   for (let event of events) {
@@ -196,23 +211,85 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       eventAttendeeEventIDArray.push(event._id);
     }
   }
-
-  let eventAttendeeQuery = {
-    eventID: {
-      $in: eventAttendeeEventIDArray
-    },
-    startDateTime: {
-      $lte: new Date(req.query.endDateTime).toISOString(),
+  for (let event of recurringEvents) {
+    if (!eventAttendeeEventIDArray.includes(event._id)) {
+      eventAttendeeEventIDArray.push(event._id);
     }
   }
 
-  let eventAttendees = await EventAttendee.find(eventAttendeeQuery);
-  console.log(eventAttendees);
-  for (let event of events) {
-    if (!event.attendees) {
-      event.attendees = [];
+  let eventAttendeeQuery = {
+    eventID: {
+      $in: eventAttendeeEventIDArray,
+    },
+    startDateTime: {
+      $lte: new Date(req.query.endDateTime).toISOString(),
+    },
+  };
+
+  const eventAttendees = await EventAttendee.find(eventAttendeeQuery);
+
+  for (let event of recurringEvents) {
+    let dates = findInstancesInRange(
+      event.startDateTime,
+      event.endDateTime,
+      event.recurrenceRule,
+      req.query.startDateTime,
+      req.query.endDateTime
+    );
+
+    for (let date of dates) {
+      let startDateTimeTemp = dayjs(event.startDateTime);
+      let endDateTimeTemp = dayjs(event.endDateTime);
+      let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
+
+      let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
+      let eventInstance = {
+        _id: event._id,
+        isInstance: true,
+
+        scheduleID: event.scheduleID,
+        title: event.title,
+        description: event.description,
+        location: event.location,
+        timeZone: event.timeZone,
+        startDateTime: date.toISOString(), //adjust for new date
+        endDateTime: endDateTime.toISOString(), //adjust for new date
+        recurrenceRule: event.recurrenceRule,
+        maxAttendees: event.maxAttendees,
+
+        attendees: [],
+      };
+
+      recurringEventExceptions.forEach(function (eventException) {
+        if (
+          (eventException.eventID == event._id.toString(),
+          new Date(eventException.startDateTime).toISOString() ==
+            new Date(date).toISOString())
+        ) {
+          eventInstance.status = 'cancelled';
+        }
+      });
+
+      eventAttendees.forEach(function (attendee) {
+        if (attendee.eventID.toString() == event._id.toString()) {
+          if (
+            new Date(attendee.startDateTime).toISOString() ==
+            new Date(date).toISOString()
+          ) {
+            let eventAttendeeObject = {
+              attendeeID: attendee._id,
+              //TODO: Figure out if I need different for INSTANCES
+              startDateTime: attendee.startDateTime,
+              endDateTime: attendee.endDateTime,
+              untilDateTime: attendee.untilDateTime
+            }
+            eventInstance.attendees.push(attendee._id);
+          }
+        }
+      });
+
+      events.push(eventInstance);
     }
-    event.attendees.push(eventAttendees)
   }
 
   res.status(200).json({
@@ -222,7 +299,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       events,
     },
   });
-})
+});
 
 exports.getEvent = catchAsync(async (req, res, next) => {
   const event = await Event.findById(req.params.id);
@@ -266,14 +343,22 @@ exports.createEvent = catchAsync(async (req, res, next) => {
   await Event.create(eventToCreate);
 
   res.status(201).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
-    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  if (
+    new Date(req.body.modifiedDateTime) <
+    new Date(currentEvent.modifiedDateTime)
+  ) {
+    return next(
+      new AppError(
+        'Failed. This update has been modified and you must refresh before updating it again.',
+        404
+      )
+    );
   }
 
   if (req.body.endDateTime <= req.body.startDateTime) {
@@ -301,28 +386,32 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     modifiedDateTime: new Date(),
   };
 
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    updatedEvent,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const event = await Event.findByIdAndUpdate(req.params.id, updatedEvent, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));
   }
 
   res.status(200).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
-    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  if (
+    new Date(req.body.modifiedDateTime) <
+    new Date(currentEvent.modifiedDateTime)
+  ) {
+    return next(
+      new AppError(
+        'Failed. This update has been modified and you must refresh before updating it again.',
+        404
+      )
+    );
   }
 
   if (req.body.endDateTime <= req.body.startDateTime) {
@@ -336,8 +425,8 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.params.id,
-    startDateTime: req.body.startDateTime
-  }
+    startDateTime: req.body.startDateTime,
+  };
   let newEventException = await EventException.create(eventExceptionToCreate);
 
   let eventToCreate = {
@@ -350,11 +439,11 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
     maxAttendees: req.body.maxAttendees,
-  }
+  };
   let newEvent = await Event.create(eventToCreate);
 
   res.status(201).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
@@ -363,8 +452,16 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
   untilDate.setDate(untilDate.getDate() - 1);
 
   let currentEvent = await Event.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
-    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  if (
+    new Date(req.body.modifiedDateTime) <
+    new Date(currentEvent.modifiedDateTime)
+  ) {
+    return next(
+      new AppError(
+        'Failed. This update has been modified and you must refresh before updating it again.',
+        404
+      )
+    );
   }
 
   currentEvent.recurrenceRule.untilDateTime = untilDate;
@@ -375,12 +472,13 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
     {
       new: true,
       runValidators: true,
-    });
-  
+    }
+  );
+
   if (req.body.endDateTime <= req.body.startDateTime) {
     return next(new AppError('End Date is not After Start Date', 404));
   }
-  
+
   if (req.body.untilDateTime <= req.body.endDateTime) {
     return next(new AppError('Until Date is not After End Date', 404));
   }
@@ -400,32 +498,52 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
     maxAttendees: req.body.maxAttendees,
 
     modifiedDateTime: new Date(),
-  }
+  };
   let newEvent = await Event.create(eventToCreate);
 
   let eventExceptions;
 
-  if (new Date(currentEvent.startDateTime).getDay() != new Date(eventToCreate.startDateTime).getDay()) {
-    eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  if (
+    new Date(currentEvent.startDateTime).getDay() !=
+    new Date(eventToCreate.startDateTime).getDay()
+  ) {
+    eventExceptions = await EventException.deleteMany({
+      eventID: { $eq: req.params.id },
+    });
   } else {
     eventExceptions = await EventException.updateMany(
-      {$and: [{eventID:{$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]},  
-      {eventID: newEvent._id}, function (err, eventExceptions) { 
-      if (err){ 
-        return next(new AppError('Issue updating Event Exceptions', 400));
+      {
+        $and: [
+          { eventID: { $eq: req.params.id } },
+          { startDateTime: { $gte: req.body.startDateTime } },
+        ],
+      },
+      { eventID: newEvent._id },
+      function (err, eventExceptions) {
+        if (err) {
+          return next(new AppError('Issue updating Event Exceptions', 400));
+        }
       }
-    });
+    );
   }
 
   res.status(201).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
 exports.updateAllEvents = catchAsync(async (req, res, next) => {
   let currentEvent = await Event.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
-    return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
+  if (
+    new Date(req.body.modifiedDateTime) <
+    new Date(currentEvent.modifiedDateTime)
+  ) {
+    return next(
+      new AppError(
+        'Failed. This update has been modified and you must refresh before updating it again.',
+        404
+      )
+    );
   }
 
   if (req.body.endDateTime <= req.body.startDateTime) {
@@ -456,25 +574,26 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
     modifiedDateTime: new Date(),
   };
 
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    updatedEvent,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const event = await Event.findByIdAndUpdate(req.params.id, updatedEvent, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));
   }
 
-  if (new Date(currentEvent.startDateTime).getDay() != new Date(event.startDateTime).getDay()) {
-    const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  if (
+    new Date(currentEvent.startDateTime).getDay() !=
+    new Date(event.startDateTime).getDay()
+  ) {
+    const eventExceptions = await EventException.deleteMany({
+      eventID: { $eq: req.params.id },
+    });
   }
 
   res.status(200).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
@@ -492,12 +611,12 @@ exports.deleteThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.params.id,
-    startDateTime: req.body.startDateTime
-  }
+    startDateTime: req.body.startDateTime,
+  };
   let eventException = await EventException.create(eventExceptionToCreate);
 
   res.status(201).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
@@ -509,29 +628,32 @@ exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
 
   currentEvent.recurrenceRule.untilDateTime = untilDate;
 
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    currentEvent,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const event = await Event.findByIdAndUpdate(req.params.id, currentEvent, {
+    new: true,
+    runValidators: true,
+  });
 
-  let eventExceptions = await EventException.deleteMany({$and: [{eventID: {$eq: req.params.id}}, {startDateTime: {$gte: req.body.startDateTime}}]});
+  let eventExceptions = await EventException.deleteMany({
+    $and: [
+      { eventID: { $eq: req.params.id } },
+      { startDateTime: { $gte: req.body.startDateTime } },
+    ],
+  });
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));
   }
 
   res.status(200).json({
-    status: 'success'
+    status: 'success',
   });
 });
 
 exports.deleteAllEvents = catchAsync(async (req, res, next) => {
-  const event = await Event.deleteOne({_id: req.params.id});
-  const eventExceptions = await EventException.deleteMany({eventID: {$eq: req.params.id}});
+  const event = await Event.deleteOne({ _id: req.params.id });
+  const eventExceptions = await EventException.deleteMany({
+    eventID: { $eq: req.params.id },
+  });
 
   if (!event) {
     return next(new AppError('No event found with that ID', 404));
