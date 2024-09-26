@@ -18,11 +18,8 @@ const eventAttendeeSchema = new Schema({
   endDateTime: {
     type: Date,
   },
-  untilDateTime: {
-    type: Date
-  },
-  occurrences: {
-    type: Number
+  recurrenceRule: {
+    type: ObjectId
   },
 
   createdDateTime: {

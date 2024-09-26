@@ -164,210 +164,178 @@ const findInstancesInRange = (
 };
 
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
+  //Get All Events Owned by the ScheduleID(req.params.id)
   let eventQuery = {
     scheduleID: req.params.id,
-    startDateTime: {
-      $gte: new Date(req.query.startDateTime).toISOString(),
-      $lte: new Date(req.query.endDateTime).toISOString(),
-    },
-    endDateTime: {
-      $gte: new Date(req.query.startDateTime).toISOString(),
-      $lte: new Date(req.query.endDateTime).toISOString(),
-    },
-    recurrenceRule: {
-      $exists: false,
-    },
+    $or: [
+      //SINGLE EVENTS
+      {
+        startDateTime: {
+          $gte: new Date(req.query.startDateTime).toISOString(),
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        endDateTime: {
+          $gte: new Date(req.query.startDateTime).toISOString(),
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        recurrenceRule: {
+          $exists: false
+        }
+      },
+      //RECURRING EVENTS
+      //TODO: Add $cond to filter results out of date range when possible
+      {
+        startDateTime: {
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        recurrenceRule: {
+          $exists: true
+        }
+      }
+    ]
   };
 
-  const events = await Event.find(eventQuery);
+  let events = await Event.find(eventQuery);
 
-  let recurringEventQuery = {
-    scheduleID: req.params.id,
-    startDateTime: {
-      $lte: new Date(req.query.endDateTime).toISOString(),
-    },
-    recurrenceRule: {
-      $exists: true,
-    },
-  };
 
-  const recurringEvents = await Event.find(recurringEventQuery);
-
-  let eventExceptionQuery = {
-    scheduleID: req.params.id,
-    startDateTime: {
-      $gte: new Date(req.query.startDateTime).toISOString(),
-      $lte: new Date(req.query.endDateTime).toISOString(),
-    },
-  };
-
-  const recurringEventExceptions = await EventException.find(
-    eventExceptionQuery
-  );
-
-  let eventAttendeeEventIDArray = [];
+  //Get Attendees attending Events Owned by the ScheduleID(req.params.id)
+  let eventIDs = [];
   for (let event of events) {
-    if (!eventAttendeeEventIDArray.includes(event._id)) {
-      eventAttendeeEventIDArray.push(event._id);
+    if (!eventIDs.includes(event._id)) {
+      eventIDs.push(event._id);
     }
   }
-  for (let event of recurringEvents) {
-    if (!eventAttendeeEventIDArray.includes(event._id)) {
-      eventAttendeeEventIDArray.push(event._id);
-    }
-  }
-
-  let eventAttendeeQuery = {
-    eventID: {
-      $in: eventAttendeeEventIDArray,
-    },
-    startDateTime: {
-      $lte: new Date(req.query.endDateTime).toISOString(),
-    },
-  };
-
-  const eventAttendees = await EventAttendee.find(eventAttendeeQuery);
-
-
-  let eventAttendeeIDArray = [];
-  for (let attendee of eventAttendees) {
-    if (!eventAttendeeIDArray.includes(attendee._id)) {
-      eventAttendeeIDArray.push(attendee._id);
-    }
-  }
-
-  let eventAttendeeExceptionQuery = {
+  let attendeeQuery = {
     eventAttendeeID: {
       $in: eventAttendeeIDArray
     },
+    $or: [
+      //SINGLE EVENTS
+      {
+        startDateTime: {
+          $gte: new Date(req.query.startDateTime).toISOString(),
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        endDateTime: {
+          $gte: new Date(req.query.startDateTime).toISOString(),
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        recurrenceRule: {
+          $exists: false
+        }
+      },
+      //RECURRING EVENTS
+      //TODO: Add $cond to filter results out of date range when possible
+      {
+        startDateTime: {
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        recurrenceRule: {
+          $exists: true
+        }
+      }
+    ]
+  };
+  let attendees = await EventAttendee.find(attendeeQuery);
+
+
+  //Get All Attendees where ScheduleID(req.params.id) attends another Schedule's event
+  let attendantQuery = {
+    scheduleID: req.params.id,
+    $or: [
+      //SINGLE EVENTS
+      {
+        startDateTime: {
+          $gte: new Date(req.query.startDateTime).toISOString(),
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        endDateTime: {
+          $gte: new Date(req.query.startDateTime).toISOString(),
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        recurrenceRule: {
+          $exists: false
+        }
+      },
+      //RECURRING EVENTS
+      //TODO: Add $cond to filter results out of date range when possible
+      {
+        startDateTime: {
+          $lte: new Date(req.query.endDateTime).toISOString(),
+        },
+        recurrenceRule: {
+          $exists: true
+        }
+      }
+    ]
+  };
+  let attendeesOfOtherSchedules = await EventAttendee.find(attendantQuery);
+
+
+  //Get All Events that ScheduleID(req.params.id) is attending
+  let attendingEventIDs = [];
+  for (let attendee of attendeesOfOtherSchedules) {
+    if (!attendingEventIDs.includes(attendee.eventID)) {
+      attendingEventIDs.push(attendee.eventID);
+    }
+  }
+  let attendingEventsQuery = {
+    _id: {
+      $in: attendingEventIDs
+    }
+    //DO NOT NEED TO SPECIFY DATES
+    //The Attendee Query did this and it can be assumed that this query will only get relevant events
+  };
+  let attendingEvents = await Event.find(attendingEventsQuery);
+
+  //Get All Event Exceptions for Recurring Events & Recurring Event Attendees
+  let eventExceptionQuery = {
+    $or: [
+      //Gets Exceptions for Events this Schedule Owns and for Events this Schedule Attends
+      {
+        scheduleID: req.params.id,
+        
+      },
+      //Gets Exceptions for Attendees that Attend Events owned by this Schedule
+      {
+        eventID: {
+          $in: attendingEventIDs
+        }
+      }
+    ],
     startDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
-  };
-
-  const eventAttendeeExceptions = await EventException.find(eventAttendeeExceptionQuery);
-
-  for (let event of recurringEvents) {
-    let dates = findInstancesInRange(
-      event.startDateTime,
-      event.endDateTime,
-      event.recurrenceRule,
-      req.query.startDateTime,
-      req.query.endDateTime
-    );
-
-    for (let date of dates) {
-      let startDateTimeTemp = dayjs(event.startDateTime);
-      let endDateTimeTemp = dayjs(event.endDateTime);
-      let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
-
-      let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
-      let eventInstance = {
-        _id: event._id,
-        isInstance: true,
-
-        scheduleID: event.scheduleID,
-        title: event.title,
-        description: event.description,
-        location: event.location,
-        timeZone: event.timeZone,
-        startDateTime: date.toISOString(), //adjust for new date
-        endDateTime: endDateTime.toISOString(), //adjust for new date
-        recurrenceRule: event.recurrenceRule,
-        maxAttendees: event.maxAttendees,
-
-        attendees: [],
-      };
-
-      recurringEventExceptions.forEach(function (eventException) {
-        if (
-          (eventException.eventID == event._id.toString(),
-          new Date(eventException.startDateTime).toISOString() ==
-            new Date(date).toISOString())
-        ) {
-          eventInstance.status = 'cancelled';
-        }
-      });
-
-      eventAttendees.forEach(function (attendee) {
-        if (attendee.eventID.toString() == event._id.toString()) {
-          //TODO: NEED TO DEAL WITH RECURRENCE
-          let attendeeDateRangeParameters = {};
-
-          if (attendee.startDateTime) {
-            attendeeDateRangeParameters.startDateTime = attendee.startDateTime;
-          } else {
-            attendeeDateRangeParameters.startDateTime = event.startDateTime;
-          }
-
-          if (attendee.endDateTime) {
-            attendeeDateRangeParameters.endDateTime = attendee.endDateTime;
-          } else {
-            attendeeDateRangeParameters.endDateTime = event.endDateTime;
-          }
+  }
+  let eventExceptions = await EventException.find(eventExceptionQuery);
 
 
-          attendeeDateRangeParameters.recurrenceRule = event.recurrenceRule;
-          if (attendee.untilDateTime) {
-            attendeeDateRangeParameters.recurrenceRule.untilDateTime = attendee.untilDateTime;
-          }
+  //Refined Results
+  //Go through ALL the requested Data and Prepare it for Client's Display
+  let refinedEvents = [];
 
-          let attendeeDates = findInstancesInRange(
-            attendeeDateRangeParameters.startDateTime,
-            attendeeDateRangeParameters.endDateTime,
-            attendeeDateRangeParameters.recurrenceRule,
-            req.query.startDateTime,
-            req.query.endDateTime
-          );
+  for (let event of events) {
+    if (event.hasOwnProperty('recurrenceRule')) {
+      let dates = findInstancesInRange(
+        event.startDateTime,
+        event.endDateTime,
+        event.recurrenceRule,
+        req.query.startDateTime,
+        req.query.endDateTime
+      );
 
-
-          if (attendeeDates.includes(new Date(date))) {
-            let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
-            if (
-              new Date(attendee.startDateTime).toISOString() ==
-              new Date(date).toISOString()
-            ) {
-
-              let startDateTimeTemp = dayjs(event.startDateTime);
-              let endDateTimeTemp = dayjs(event.endDateTime);
-              let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
-
-              let endDateTime = dayjs(date).add(timeBetweenStartAndEnd, 'millisecond');
-
-              let eventAttendeeObject = {
-                scheduleID: attendee.scheduleID,
-                attendeeID: attendee._id,
-                //TODO: Figure out if I need different for INSTANCES
-                startDateTime: date.toISOString(),
-                endDateTime: endDateTime.toISOString(),
-                untilDateTime: attendee.untilDateTime
-              }
-              eventInstance.attendees.push(eventAttendeeObject);
-  
-              eventAttendeeExceptions.forEach(function (eventAttendeeException) {
-                if (
-                  (eventAttendeeException.eventID == event._id.toString(),
-                  new Date(eventAttendeeException.startDateTime).toISOString() ==
-                    new Date(date).toISOString())
-                ) {
-                  eventAttendeeObject.status = 'cancelled';
-                }
-              });
-            }
-          }
-        }
-      });
-
-      events.push(eventInstance);
+      
+    } else {
+      
     }
   }
 
   res.status(200).json({
     status: 'success',
-    results: events.length,
+    results: refinedEvents.length,
     data: {
-      events,
+      refinedEvents,
     },
   });
 });

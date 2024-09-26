@@ -23,10 +23,10 @@ exports.createEventAttendee = catchAsync(async (req, res, next) => {
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
     untilDateTime: new Date(req.body.untilDateTime),
-    occurrences: req.body.occurrences,
+    //occurrences: req.body.occurrences,
   };
 
-  await Event.create(eventAttendeeToCreate);
+  await EventAttendee.create(eventAttendeeToCreate);
 
   res.status(201).json({
     status: 'success'
@@ -35,7 +35,7 @@ exports.createEventAttendee = catchAsync(async (req, res, next) => {
 
 exports.updateEventAttendee = catchAsync(async (req, res, next) => {
   let currentEventAttendee = await EventAttendee.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEventAttendee.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
   }
 
@@ -79,7 +79,7 @@ exports.updateEventAttendee = catchAsync(async (req, res, next) => {
 
 exports.updateThisEventAttendee = catchAsync(async (req, res, next) => {
   let currentEventAttendee = await EventAttendee.findById(req.params.id);
-  if (new Date(req.body.modifiedDateTime) < new Date(currentEvent.modifiedDateTime)) {
+  if (new Date(req.body.modifiedDateTime) < new Date(currentEventAttendee.modifiedDateTime)) {
     return next(new AppError('Failed. This update has been modified and you must refresh before updating it again.', 404));
   }
 
