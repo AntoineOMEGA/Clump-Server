@@ -179,8 +179,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           $lte: new Date(req.query.endDateTime).toISOString(),
         },
         recurrenceRule: {
-          $exists: false
-        }
+          $exists: false,
+        },
       },
       //RECURRING EVENTS
       //TODO: Add $cond to filter results out of date range when possible
@@ -189,14 +189,13 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           $lte: new Date(req.query.endDateTime).toISOString(),
         },
         recurrenceRule: {
-          $exists: true
-        }
-      }
-    ]
+          $exists: true,
+        },
+      },
+    ],
   };
 
   let events = await Event.find(eventQuery);
-
 
   //Get Attendees attending Events Owned by the ScheduleID(req.params.id)
   let eventIDs = [];
@@ -206,9 +205,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     }
   }
   let attendeeQuery = {
-    eventAttendeeID: {
-      $in: eventAttendeeIDArray
-    },
+    /*eventAttendeeID: {
+      $in: eventAttendeeIDArray,
+    },*/
     $or: [
       //SINGLE EVENTS
       {
@@ -221,8 +220,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           $lte: new Date(req.query.endDateTime).toISOString(),
         },
         recurrenceRule: {
-          $exists: false
-        }
+          $exists: false,
+        },
       },
       //RECURRING EVENTS
       //TODO: Add $cond to filter results out of date range when possible
@@ -231,13 +230,12 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           $lte: new Date(req.query.endDateTime).toISOString(),
         },
         recurrenceRule: {
-          $exists: true
-        }
-      }
-    ]
+          $exists: true,
+        },
+      },
+    ],
   };
   let attendees = await EventAttendee.find(attendeeQuery);
-
 
   //Get All Attendees where ScheduleID(req.params.id) attends another Schedule's event
   let attendantQuery = {
@@ -254,8 +252,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           $lte: new Date(req.query.endDateTime).toISOString(),
         },
         recurrenceRule: {
-          $exists: false
-        }
+          $exists: false,
+        },
       },
       //RECURRING EVENTS
       //TODO: Add $cond to filter results out of date range when possible
@@ -264,13 +262,12 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           $lte: new Date(req.query.endDateTime).toISOString(),
         },
         recurrenceRule: {
-          $exists: true
-        }
-      }
-    ]
+          $exists: true,
+        },
+      },
+    ],
   };
   let attendeesOfOtherSchedules = await EventAttendee.find(attendantQuery);
-
 
   //Get All Events that ScheduleID(req.params.id) is attending
   let attendingEventIDs = [];
@@ -281,8 +278,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   }
   let attendingEventsQuery = {
     _id: {
-      $in: attendingEventIDs
-    }
+      $in: attendingEventIDs,
+    },
     //DO NOT NEED TO SPECIFY DATES
     //The Attendee Query did this and it can be assumed that this query will only get relevant events
   };
@@ -294,22 +291,20 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       //Gets Exceptions for Events this Schedule Owns and for Events this Schedule Attends
       {
         scheduleID: req.params.id,
-        
       },
       //Gets Exceptions for Attendees that Attend Events owned by this Schedule
       {
         eventID: {
-          $in: attendingEventIDs
-        }
-      }
+          $in: attendingEventIDs,
+        },
+      },
     ],
     startDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
-  }
+  };
   let eventExceptions = await EventException.find(eventExceptionQuery);
-
 
   //Refined Results
   //Go through ALL the requested Data and Prepare it for Client's Display
@@ -325,11 +320,178 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         req.query.endDateTime
       );
 
-      
+      for (let date of dates) {
+        let startDateTimeTemp = dayjs(event.startDateTime);
+        let endDateTimeTemp = dayjs(event.endDateTime);
+        let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
+
+        let endDateTime = dayjs(date).add(
+          timeBetweenStartAndEnd,
+          'millisecond'
+        );
+        let eventInstance = {
+          _id: event._id,
+          isInstance: true,
+
+          scheduleID: event.scheduleID,
+          title: event.title,
+          description: event.description,
+          location: event.location,
+          timeZone: event.timeZone,
+          startDateTime: date.toISOString(), //adjust for new date
+          endDateTime: endDateTime.toISOString(), //adjust for new date
+          recurrenceRule: event.recurrenceRule,
+          maxAttendees: event.maxAttendees,
+
+          attendees: [],
+        };
+
+        eventExceptions.forEach(function (eventException) {
+          if (
+            (eventException.eventID == event._id.toString(),
+            new Date(eventException.startDateTime).toISOString() ==
+              new Date(date).toISOString())
+          ) {
+            eventInstance.status = 'cancelled';
+          }
+        });
+
+        eventAttendees.forEach(function (attendee) {
+          if (attendee.eventID.toString() == event._id.toString()) {
+            //TODO: NEED TO DEAL WITH RECURRENCE
+            let attendeeDateRangeParameters = {};
+
+            if (attendee.startDateTime) {
+              attendeeDateRangeParameters.startDateTime =
+                attendee.startDateTime;
+            } else {
+              attendeeDateRangeParameters.startDateTime = event.startDateTime;
+            }
+
+            if (attendee.endDateTime) {
+              attendeeDateRangeParameters.endDateTime = attendee.endDateTime;
+            } else {
+              attendeeDateRangeParameters.endDateTime = event.endDateTime;
+            }
+
+            attendeeDateRangeParameters.recurrenceRule = event.recurrenceRule;
+            if (attendee.untilDateTime) {
+              attendeeDateRangeParameters.recurrenceRule.untilDateTime =
+                attendee.untilDateTime;
+            }
+
+            let attendeeDates = findInstancesInRange(
+              attendeeDateRangeParameters.startDateTime,
+              attendeeDateRangeParameters.endDateTime,
+              attendeeDateRangeParameters.recurrenceRule,
+              req.query.startDateTime,
+              req.query.endDateTime
+            );
+
+            if (attendeeDates.includes(new Date(date))) {
+              let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
+              if (
+                new Date(attendee.startDateTime).toISOString() ==
+                new Date(date).toISOString()
+              ) {
+                let startDateTimeTemp = dayjs(event.startDateTime);
+                let endDateTimeTemp = dayjs(event.endDateTime);
+                let timeBetweenStartAndEnd =
+                  endDateTimeTemp.diff(startDateTimeTemp);
+
+                let endDateTime = dayjs(date).add(
+                  timeBetweenStartAndEnd,
+                  'millisecond'
+                );
+
+                let eventAttendeeObject = {
+                  scheduleID: attendee.scheduleID,
+                  attendeeID: attendee._id,
+                  //TODO: Figure out if I need different for INSTANCES
+                  startDateTime: date.toISOString(),
+                  endDateTime: endDateTime.toISOString(),
+                  untilDateTime: attendee.untilDateTime,
+                };
+                eventInstance.attendees.push(eventAttendeeObject);
+
+                eventAttendeeExceptions.forEach(function (
+                  eventAttendeeException
+                ) {
+                  if (
+                    (eventAttendeeException.eventID == event._id.toString(),
+                    new Date(
+                      eventAttendeeException.startDateTime
+                    ).toISOString() == new Date(date).toISOString())
+                  ) {
+                    eventAttendeeObject.status = 'cancelled';
+                  }
+                });
+              }
+            }
+          }
+        });
+        refinedEvents.push(eventInstance);
+      }
     } else {
-      
+      //TODO: Add Attendees
+      refinedEvents.push(event);
     }
   }
+
+  for (let attendeeEvent of attendingEvents) {
+    if (attendeeEvent.hasOwnProperty('recurrenceRule')) {
+      let dates = findInstancesInRange(
+        attendeeEvent.startDateTime,
+        attendeeEvent.endDateTime,
+        attendeeEvent.recurrenceRule,
+        req.query.startDateTime,
+        req.query.endDateTime
+      );
+
+      for (let date of dates) {
+        let startDateTimeTemp = dayjs(attendeeEvent.startDateTime);
+        let endDateTimeTemp = dayjs(attendeeEvent.endDateTime);
+        let timeBetweenStartAndEnd = endDateTimeTemp.diff(startDateTimeTemp);
+
+        let endDateTime = dayjs(date).add(
+          timeBetweenStartAndEnd,
+          'millisecond'
+        );
+        let attendeeEventInstance = {
+          _id: attendeeEvent._id,
+          isInstance: true,
+
+          scheduleID: attendeeEvent.scheduleID,
+          title: attendeeEvent.title,
+          description: attendeeEvent.description,
+          location: attendeeEvent.location,
+          timeZone: attendeeEvent.timeZone,
+          startDateTime: date.toISOString(), //adjust for new date
+          endDateTime: endDateTime.toISOString(), //adjust for new date
+          recurrenceRule: attendeeEvent.recurrenceRule,
+          maxAttendees: attendeeEvent.maxAttendees,
+
+          attendees: [],
+        };
+
+        eventExceptions.forEach(function (eventException) {
+          if (
+            (eventException.eventID == attendeeEvent._id.toString(),
+            new Date(eventException.startDateTime).toISOString() ==
+              new Date(date).toISOString())
+          ) {
+            attendeeEventInstance.status = 'cancelled';
+          }
+        });
+        refinedEvents.push(eventInstance);
+      }
+    } else {
+      attendeeEvent.isAttending = true;
+      refinedEvents.push(attendeeEvent);
+    }
+  }
+
+  console.log(refinedEvents);
 
   res.status(200).json({
     status: 'success',
