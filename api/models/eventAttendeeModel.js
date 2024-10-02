@@ -19,12 +19,11 @@ const eventAttendeeSchema = new Schema({
     type: Date,
   },
   recurrenceRule: {
-    type: ObjectId
+    type: Object
   },
 
   createdDateTime: {
     type: Date,
-    required: true,
     default: new Date()
   },
   modifiedDateTime: {

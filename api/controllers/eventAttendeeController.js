@@ -22,8 +22,7 @@ exports.createEventAttendee = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-    untilDateTime: new Date(req.body.untilDateTime),
-    //occurrences: req.body.occurrences,
+    recurrenceRule: req.body.recurrenceRule
   };
 
   await EventAttendee.create(eventAttendeeToCreate);
@@ -53,8 +52,7 @@ exports.updateEventAttendee = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-    untilDateTime: new Date(req.body.untilDateTime),
-    occurrences: req.body.occurrences,
+    recurrenceRule: req.body.recurrenceRule,
 
     modifiedDateTime: new Date(),
   };
@@ -104,8 +102,7 @@ exports.updateThisEventAttendee = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-    untilDateTime: new Date(req.body.untilDateTime),
-    occurrences: req.body.occurrences,
+    recurrenceRule: req.body.recurrenceRule
   }
 
   await EventAttendee.create(eventAttendeeToCreate);
@@ -148,8 +145,7 @@ exports.updateThisAndFollowingEventAttendees = catchAsync(async (req, res, next)
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-    untilDateTime: new Date(req.body.untilDateTime),
-    occurrences: req.body.occurrences,
+    recurrenceRule: req.body.recurrenceRule
   }
   let newEventAttendee = await EventAttendee.create(eventAttendeeToCreate);
 
@@ -191,8 +187,7 @@ exports.updateAllEventAttendees = catchAsync(async (req, res, next) => {
 
     startDateTime: new Date(req.body.startDateTime),
     endDateTime: new Date(req.body.endDateTime),
-    untilDateTime: new Date(req.body.untilDateTime),
-    occurrences: req.body.occurrences,
+    recurrenceRule: req.body.recurrenceRule
   };
 
   const eventAttendee = await EventAttendee.findByIdAndUpdate(

@@ -311,7 +311,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   let refinedEvents = [];
 
   for (let event of events) {
-    if (event.hasOwnProperty('recurrenceRule')) {
+    if (event.recurrenceRule) {
       let dates = findInstancesInRange(
         event.startDateTime,
         event.endDateTime,
@@ -356,7 +356,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
           }
         });
 
-        eventAttendees.forEach(function (attendee) {
+        attendees.forEach(function (attendee) {
           if (attendee.eventID.toString() == event._id.toString()) {
             //TODO: NEED TO DEAL WITH RECURRENCE
             let attendeeDateRangeParameters = {};
@@ -439,7 +439,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   }
 
   for (let attendeeEvent of attendingEvents) {
-    if (attendeeEvent.hasOwnProperty('recurrenceRule')) {
+    if (attendeeEvent.recurrenceRule) {
       let dates = findInstancesInRange(
         attendeeEvent.startDateTime,
         attendeeEvent.endDateTime,
@@ -460,6 +460,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         let attendeeEventInstance = {
           _id: attendeeEvent._id,
           isInstance: true,
+          isAttending: true,
 
           scheduleID: attendeeEvent.scheduleID,
           title: attendeeEvent.title,
@@ -483,7 +484,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
             attendeeEventInstance.status = 'cancelled';
           }
         });
-        refinedEvents.push(eventInstance);
+        refinedEvents.push(attendeeEventInstance);
       }
     } else {
       attendeeEvent.isAttending = true;
@@ -491,13 +492,11 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     }
   }
 
-  console.log(refinedEvents);
-
   res.status(200).json({
     status: 'success',
     results: refinedEvents.length,
     data: {
-      refinedEvents,
+      events: refinedEvents,
     },
   });
 });
