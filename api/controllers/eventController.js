@@ -388,12 +388,21 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
               req.query.endDateTime
             );
 
-            if (attendeeDates.includes(new Date(date))) {
+            console.log(attendeeDateRangeParameters.startDateTime,
+              attendeeDateRangeParameters.endDateTime,
+              attendeeDateRangeParameters.recurrenceRule,
+              req.query.startDateTime,
+              req.query.endDateTime)
+
+            console.log(attendeeDates, date, new Date(date));
+            //TODO: If attendee Date falls within Time of Event
+            //if (attendeeDates.includes(new Date(date))) {
               let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
-              if (
+              /* if (
                 new Date(attendee.startDateTime).toISOString() ==
                 new Date(date).toISOString()
-              ) {
+              ) { */
+                console.log("Hi");
                 let startDateTimeTemp = dayjs(event.startDateTime);
                 let endDateTimeTemp = dayjs(event.endDateTime);
                 let timeBetweenStartAndEnd =
@@ -414,7 +423,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                 };
                 eventInstance.attendees.push(eventAttendeeObject);
 
-                eventAttendeeExceptions.forEach(function (
+                eventExceptions.forEach(function (
                   eventAttendeeException
                 ) {
                   if (
@@ -426,8 +435,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                     eventAttendeeObject.status = 'cancelled';
                   }
                 });
-              }
-            }
+              //}
+            //}
           }
         });
         refinedEvents.push(eventInstance);
