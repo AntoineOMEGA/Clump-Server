@@ -375,9 +375,13 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
             }
 
             attendeeDateRangeParameters.recurrenceRule = event.recurrenceRule;
-            if (attendee.untilDateTime) {
+            if (attendee.recurrenceRule.untilDateTime) {
               attendeeDateRangeParameters.recurrenceRule.untilDateTime =
-                attendee.untilDateTime;
+                attendee.recurrenceRule.untilDateTime;
+            }
+            if (attendee.recurrenceRule.occurrences) {
+              attendeeDateRangeParameters.recurrenceRule.occurrences =
+                attendee.recurrenceRule.occurrences;
             }
 
             let attendeeDates = findInstancesInRange(
@@ -388,21 +392,14 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
               req.query.endDateTime
             );
 
-            console.log(attendeeDateRangeParameters.startDateTime,
-              attendeeDateRangeParameters.endDateTime,
-              attendeeDateRangeParameters.recurrenceRule,
-              req.query.startDateTime,
-              req.query.endDateTime)
-
-            console.log(attendeeDates, date, new Date(date));
             //TODO: If attendee Date falls within Time of Event
-            //if (attendeeDates.includes(new Date(date))) {
-              let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
-              /* if (
-                new Date(attendee.startDateTime).toISOString() ==
-                new Date(date).toISOString()
-              ) { */
-                console.log("Hi");
+            for (let attendeeDate of attendeeDates) {
+              if (attendeeDate >= date && attendeeDate <= endDateTime) {
+                let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
+                /* if (
+                    new Date(attendee.startDateTime).toISOString() ==
+                    new Date(date).toISOString()
+                  ) { */
                 let startDateTimeTemp = dayjs(event.startDateTime);
                 let endDateTimeTemp = dayjs(event.endDateTime);
                 let timeBetweenStartAndEnd =
@@ -423,9 +420,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                 };
                 eventInstance.attendees.push(eventAttendeeObject);
 
-                eventExceptions.forEach(function (
-                  eventAttendeeException
-                ) {
+                eventExceptions.forEach(function (eventAttendeeException) {
                   if (
                     (eventAttendeeException.eventID == event._id.toString(),
                     new Date(
@@ -435,8 +430,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                     eventAttendeeObject.status = 'cancelled';
                   }
                 });
-              //}
-            //}
+                //}
+              }
+            }
           }
         });
         refinedEvents.push(eventInstance);
