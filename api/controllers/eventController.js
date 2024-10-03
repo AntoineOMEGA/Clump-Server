@@ -358,7 +358,6 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
         attendees.forEach(function (attendee) {
           if (attendee.eventID.toString() == event._id.toString()) {
-            //TODO: NEED TO DEAL WITH RECURRENCE
             let attendeeDateRangeParameters = {};
 
             if (attendee.startDateTime) {
@@ -392,14 +391,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
               req.query.endDateTime
             );
 
-            //TODO: If attendee Date falls within Time of Event
             for (let attendeeDate of attendeeDates) {
               if (attendeeDate >= date && attendeeDate <= endDateTime) {
-                let indexOfAttendeeDate = attendeeDates.indexOf(new Date(date));
-                /* if (
-                    new Date(attendee.startDateTime).toISOString() ==
-                    new Date(date).toISOString()
-                  ) { */
                 let startDateTimeTemp = dayjs(event.startDateTime);
                 let endDateTimeTemp = dayjs(event.endDateTime);
                 let timeBetweenStartAndEnd =
@@ -413,7 +406,6 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                 let eventAttendeeObject = {
                   scheduleID: attendee.scheduleID,
                   attendeeID: attendee._id,
-                  //TODO: Figure out if I need different for INSTANCES
                   startDateTime: date.toISOString(),
                   endDateTime: endDateTime.toISOString(),
                   untilDateTime: attendee.untilDateTime,
@@ -430,7 +422,6 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                     eventAttendeeObject.status = 'cancelled';
                   }
                 });
-                //}
               }
             }
           }
