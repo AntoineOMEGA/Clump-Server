@@ -429,8 +429,40 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         refinedEvents.push(eventInstance);
       }
     } else {
-      //TODO: Add Attendees
-      refinedEvents.push(event);
+      if (event.endDateTime >= new Date(req.query.startDateTime) && event.startDateTime <= new Date(req.query.endDateTime)) {
+        console.log(event);
+        let eventInstance = {
+          _id: event._id,
+          isInstance: false,
+
+          scheduleID: event.scheduleID,
+          title: event.title,
+          description: event.description,
+          location: event.location,
+          timeZone: event.timeZone,
+          startDateTime: event.startDateTime, //adjust for new date
+          endDateTime: event.endDateTime, //adjust for new date
+          maxAttendees: event.maxAttendees,
+
+          attendees: [],
+        };
+
+        attendees.forEach(function (attendee) {
+          //TODO: No attendee date validation
+          if (attendee.eventID.toString() == event._id.toString()) {
+            let eventAttendeeObject = {
+              scheduleID: attendee.scheduleID,
+              attendeeID: attendee._id,
+              startDateTime: attendee.startDateTime,
+              endDateTime: attendee.endDateTime,
+              untilDateTime: attendee.untilDateTime,
+            };
+            eventInstance.attendees.push(eventAttendeeObject);
+          }
+        });
+
+        refinedEvents.push(eventInstance);
+      }
     }
   }
 
@@ -483,8 +515,20 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         refinedEvents.push(attendeeEventInstance);
       }
     } else {
-      attendeeEvent.isAttending = true;
-      refinedEvents.push(attendeeEvent);
+      let attendeeEventInstance = {
+        _id: attendeeEvent._id,
+        isAttending: true,
+
+        scheduleID: attendeeEvent.scheduleID,
+        title: attendeeEvent.title,
+        description: attendeeEvent.description,
+        location: attendeeEvent.location,
+        timeZone: attendeeEvent.timeZone,
+        startDateTime: attendeeEvent.startDateTime,
+        endDateTime: attendeeEvent.endDateTime,
+        maxAttendees: attendeeEvent.maxAttendees,
+      };
+      refinedEvents.push(attendeeEventInstance);
     }
   }
 
