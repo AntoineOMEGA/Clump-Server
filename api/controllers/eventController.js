@@ -421,7 +421,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                     ).toISOString() == new Date(date).toISOString())
                   ) {
                     eventAttendeeObject.status = 'cancelled';
-                    eventAttendeeObject.exception = eventException._id;
+                    eventAttendeeObject.exception = eventAttendeeException._id;
                   }
                 });
               }
