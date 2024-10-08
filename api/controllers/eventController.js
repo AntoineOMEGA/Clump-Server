@@ -353,6 +353,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
               new Date(date).toISOString())
           ) {
             eventInstance.status = 'cancelled';
+            eventInstance.exception = eventException._id;
           }
         });
 
@@ -420,6 +421,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                     ).toISOString() == new Date(date).toISOString())
                   ) {
                     eventAttendeeObject.status = 'cancelled';
+                    eventAttendeeObject.exception = eventException._id;
                   }
                 });
               }
@@ -510,6 +512,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
               new Date(date).toISOString())
           ) {
             attendeeEventInstance.status = 'cancelled';
+            attendeeEventInstance.exception = eventException._id;
           }
         });
         refinedEvents.push(attendeeEventInstance);
