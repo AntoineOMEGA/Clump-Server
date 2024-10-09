@@ -415,10 +415,11 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
                 eventExceptions.forEach(function (eventAttendeeException) {
                   if (
-                    (eventAttendeeException.eventID == event._id.toString(),
+                    eventAttendeeException.eventID == event._id.toString() &&
                     new Date(
                       eventAttendeeException.startDateTime
-                    ).toISOString() == new Date(date).toISOString())
+                    ).toISOString() == new Date(date).toISOString()
+                    //TODO:Something Odd is going on with exceptions on attendees
                   ) {
                     eventAttendeeObject.status = 'cancelled';
                     eventAttendeeObject.exception = eventAttendeeException._id;
@@ -431,8 +432,10 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         refinedEvents.push(eventInstance);
       }
     } else {
-      if (event.endDateTime >= new Date(req.query.startDateTime) && event.startDateTime <= new Date(req.query.endDateTime)) {
-        console.log(event);
+      if (
+        event.endDateTime >= new Date(req.query.startDateTime) &&
+        event.startDateTime <= new Date(req.query.endDateTime)
+      ) {
         let eventInstance = {
           _id: event._id,
           isInstance: false,
@@ -507,9 +510,10 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
         eventExceptions.forEach(function (eventException) {
           if (
-            (eventException.eventID == attendeeEvent._id.toString(),
+            (eventException.eventID == attendeeEvent._id.toString() &&
             new Date(eventException.startDateTime).toISOString() ==
               new Date(date).toISOString())
+              //TODO:Something Odd is going on with exceptions on attendees
           ) {
             attendeeEventInstance.status = 'cancelled';
             attendeeEventInstance.exception = eventException._id;
