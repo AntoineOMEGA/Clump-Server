@@ -420,6 +420,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
                       eventAttendeeException.startDateTime
                     ).toISOString() == new Date(date).toISOString()
                     //TODO:Something Odd is going on with exceptions on attendees
+                    //TODO:Exception until Date does not seem to work
+                    //TODO:Events with Different Start and End Dates do not display correctly (hasn't been implemented)
                   ) {
                     eventAttendeeObject.status = 'cancelled';
                     eventAttendeeObject.exception = eventAttendeeException._id;
