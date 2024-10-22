@@ -22,6 +22,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   //Get All Events Owned by the ScheduleID(req.params.id)
   let eventQuery = {
     scheduleID: req.params.id,
+    /*
     $or: [
       //SINGLE EVENTS
       {
@@ -48,6 +49,7 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         },
       },
     ],
+    */
   };
 
   let events = await Event.find(eventQuery);
@@ -60,9 +62,12 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     }
   }
   let attendeeQuery = {
-    /*eventAttendeeID: {
+    eventAttendeeID: {
       $in: eventAttendeeIDArray,
-    },*/
+      //TODO: THIS WAS COMMENTED OUT FIX IT
+    },
+
+    /*
     $or: [
       //SINGLE EVENTS
       {
@@ -89,12 +94,15 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         },
       },
     ],
+    */
   };
   let attendees = await EventAttendee.find(attendeeQuery);
 
   //Get All Attendees where ScheduleID(req.params.id) attends another Schedule's event
   let attendantQuery = {
     scheduleID: req.params.id,
+
+    /*
     $or: [
       //SINGLE EVENTS
       {
@@ -121,8 +129,10 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         },
       },
     ],
+    */
   };
   let attendeesOfOtherSchedules = await EventAttendee.find(attendantQuery);
+  //TODO: SHOULD YOU ONLY HAVE ONE REQUEST TO THE EVENTATTENDEE TABLE
 
   //Get All Events that ScheduleID(req.params.id) is attending
   let attendingEventIDs = [];
@@ -154,10 +164,12 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
         },
       },
     ],
+    /*
     startDateTime: {
       $gte: new Date(req.query.startDateTime).toISOString(),
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
+    */
   };
   let eventExceptions = await EventException.find(eventExceptionQuery);
 
@@ -165,7 +177,9 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     status: 'success',
     results: refinedEvents.length,
     data: {
-      events: refinedEvents,
+      events: events,
+      eventAttendees: eventAttendees,
+      eventExceptions: eventExceptions,
     },
   });
 });
