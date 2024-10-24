@@ -62,8 +62,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
     }
   }
   let attendeeQuery = {
-    eventAttendeeID: {
-      $in: eventAttendeeIDArray,
+    eventID: {
+      $in: eventIDs,
       //TODO: THIS WAS COMMENTED OUT FIX IT
     },
 
@@ -175,10 +175,11 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    results: refinedEvents.length,
+    results: events.length,
     data: {
       events: events,
-      eventAttendees: eventAttendees,
+      attendingEvents: attendingEvents,
+      eventAttendees: attendees.concat(attendeesOfOtherSchedules),
       eventExceptions: eventExceptions,
     },
   });
