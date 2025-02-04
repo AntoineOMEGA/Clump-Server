@@ -1,22 +1,34 @@
-const Event = require('../models/eventModel');
-const EventException = require('../models/eventExceptionModel');
-const EventAttendee = require('../models/eventAttendeeModel');
-const Schedule = require('../models/scheduleModel');
-const APIFeatures = require('./../utils/apiFeatures');
-const catchAsync = require('./../utils/catchAsync');
-const AppError = require('./../utils/appError');
+const Event = require('../models/eventModel')
+const EventException = require('../models/eventExceptionModel')
+const EventAttendee = require('../models/eventAttendeeModel')
+const Schedule = require('../models/scheduleModel')
+const APIFeatures = require('./../utils/apiFeatures')
+const catchAsync = require('./../utils/catchAsync')
+const AppError = require('./../utils/appError')
 
-exports.getEvents = catchAsync(async (req, res, next) => {
-  const events = await Event.find({ scheduleID: req.body.scheduleID });
+// Helper function to validate dates
+const validateDates = (startDateTime, endDateTime, untilDateTime) => {
+  if (endDateTime <= startDateTime) {
+    throw new AppError('End Date is not After Start Date', 400)
+  }
+  if (untilDateTime && untilDateTime <= endDateTime) {
+    throw new AppError('Until Date is not After End Date', 400)
+  }
+}
 
-  res.status(200).json({
-    status: 'success',
-    results: events.length,
-    data: {
-      events,
-    },
-  });
-});
+// Helper function to create event object
+const createEventObject = (body) => ({
+  scheduleID: body.scheduleID,
+  title: body.title,
+  description: body.description,
+  location: body.location,
+  timeZone: body.timeZone,
+  startDateTime: new Date(body.startDateTime),
+  endDateTime: new Date(body.endDateTime),
+  recurrenceRule: body.recurrenceRule,
+  maxAttendees: body.maxAttendees,
+  modifiedDateTime: new Date(),
+})
 
 exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
   //Get All Events Owned by the ScheduleID(req.params.id)
@@ -50,21 +62,15 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       },
     ],
     */
-  };
+  }
 
-  let events = await Event.find(eventQuery);
+  let events = await Event.find(eventQuery)
 
   //Get Attendees attending Events Owned by the ScheduleID(req.params.id)
-  let eventIDs = [];
-  for (let event of events) {
-    if (!eventIDs.includes(event._id)) {
-      eventIDs.push(event._id);
-    }
-  }
+  const eventIDs = events.map((event) => event._id)
   let attendeeQuery = {
     eventID: {
       $in: eventIDs,
-      //TODO: THIS WAS COMMENTED OUT FIX IT
     },
 
     /*
@@ -95,8 +101,8 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       },
     ],
     */
-  };
-  let attendees = await EventAttendee.find(attendeeQuery);
+  }
+  let attendees = await EventAttendee.find(attendeeQuery)
 
   //Get All Attendees where ScheduleID(req.params.id) attends another Schedule's event
   let attendantQuery = {
@@ -130,39 +136,30 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       },
     ],
     */
-  };
-  let attendeesOfOtherSchedules = await EventAttendee.find(attendantQuery);
+  }
+  let attendeesOfOtherSchedules = await EventAttendee.find(attendantQuery)
   //TODO: SHOULD YOU ONLY HAVE ONE REQUEST TO THE EVENTATTENDEE TABLE
 
   //Get All Events that ScheduleID(req.params.id) is attending
-  let attendingEventIDs = [];
-  for (let attendee of attendeesOfOtherSchedules) {
-    if (!attendingEventIDs.includes(attendee.eventID)) {
-      attendingEventIDs.push(attendee.eventID);
-    }
-  }
+  const attendingEventIDs = attendeesOfOtherSchedules.map(
+    (attendee) => attendee.eventID
+  )
   let attendingEventsQuery = {
     _id: {
       $in: attendingEventIDs,
     },
     //DO NOT NEED TO SPECIFY DATES
     //The Attendee Query did this and it can be assumed that this query will only get relevant events
-  };
-  let attendingEvents = await Event.find(attendingEventsQuery);
+  }
+  let attendingEvents = await Event.find(attendingEventsQuery)
 
   //Get All Event Exceptions for Recurring Events & Recurring Event Attendees
   let eventExceptionQuery = {
     $or: [
       //Gets Exceptions for Events this Schedule Owns and for Events this Schedule Attends
-      {
-        scheduleID: req.params.id,
-      },
+      { scheduleID: req.params.id },
       //Gets Exceptions for Attendees that Attend Events owned by this Schedule
-      {
-        eventID: {
-          $in: attendingEventIDs,
-        },
-      },
+      { eventID: { $in: attendingEventIDs } },
     ],
     /*
     startDateTime: {
@@ -170,69 +167,50 @@ exports.getEventsOnSchedule = catchAsync(async (req, res, next) => {
       $lte: new Date(req.query.endDateTime).toISOString(),
     },
     */
-  };
-  let eventExceptions = await EventException.find(eventExceptionQuery);
+  }
+  let eventExceptions = await EventException.find(eventExceptionQuery)
 
   res.status(200).json({
     status: 'success',
     results: events.length,
     data: {
-      events: events,
-      attendingEvents: attendingEvents,
+      events,
+      attendingEvents,
       eventAttendees: attendees.concat(attendeesOfOtherSchedules),
-      eventExceptions: eventExceptions,
+      eventExceptions,
     },
-  });
-});
+  })
+})
 
 exports.getEvent = catchAsync(async (req, res, next) => {
-  const event = await Event.findById(req.params.id);
+  const event = await Event.findById(req.params.id)
 
   if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+    return next(new AppError('No event found with that ID', 404))
   }
 
   res.status(200).json({
     status: 'success',
-    data: {
-      event,
-    },
-  });
-});
+    data: { event },
+  })
+})
 
 exports.createEvent = catchAsync(async (req, res, next) => {
-  if (req.body.endDateTime <= req.body.startDateTime) {
-    return next(new AppError('End Date is not After Start Date', 404));
-  }
-
-  if (req.body.untilDateTime <= req.body.endDateTime) {
-    return next(new AppError('Until Date is not After End Date', 404));
-  }
-
-  let eventToCreate = {
-    scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-    timeZone: req.body.timeZone,
-
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
-
-    recurrenceRule: req.body.recurrenceRule,
-    maxAttendees: req.body.maxAttendees,
-  };
-
-  await Event.create(eventToCreate);
+  validateDates(
+    req.body.startDateTime,
+    req.body.endDateTime,
+    req.body.untilDateTime
+  )
+  const eventToCreate = createEventObject(req.body)
+  await Event.create(eventToCreate)
 
   res.status(201).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.updateEvent = catchAsync(async (req, res, next) => {
-  let currentEvent = await Event.findById(req.params.id);
+  let currentEvent = await Event.findById(req.params.id)
   if (
     new Date(req.body.modifiedDateTime) <
     new Date(currentEvent.modifiedDateTime)
@@ -242,50 +220,32 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
         'Failed. This update has been modified and you must refresh before updating it again.',
         404
       )
-    );
+    )
   }
 
-  if (req.body.endDateTime <= req.body.startDateTime) {
-    return next(new AppError('End Date is not After Start Date.', 404));
-  }
-
-  if (req.body.untilDateTime <= req.body.endDateTime) {
-    return next(new AppError('Until Date is not After End Date.', 404));
-  }
-
-  let updatedEvent = {
-    scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-    timeZone: req.body.timeZone,
-
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
-
-    //recurrenceRule: req.body.recurrenceRule,
-    maxAttendees: req.body.maxAttendees,
-
-    modifiedDateTime: new Date(),
-  };
+  validateDates(
+    req.body.startDateTime,
+    req.body.endDateTime,
+    req.body.untilDateTime
+  )
+  const updatedEvent = createEventObject(req.body)
 
   const event = await Event.findByIdAndUpdate(req.params.id, updatedEvent, {
     new: true,
     runValidators: true,
-  });
+  })
 
   if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+    return next(new AppError('No event found with that ID', 404))
   }
 
   res.status(200).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.updateThisEvent = catchAsync(async (req, res, next) => {
-  let currentEvent = await Event.findById(req.params.id);
+  let currentEvent = await Event.findById(req.params.id)
   if (
     new Date(req.body.modifiedDateTime) <
     new Date(currentEvent.modifiedDateTime)
@@ -295,47 +255,35 @@ exports.updateThisEvent = catchAsync(async (req, res, next) => {
         'Failed. This update has been modified and you must refresh before updating it again.',
         404
       )
-    );
+    )
   }
 
-  if (req.body.endDateTime <= req.body.startDateTime) {
-    return next(new AppError('End Date is not After Start Date', 404));
-  }
-
-  if (req.body.untilDateTime <= req.body.endDateTime) {
-    return next(new AppError('Until Date is not After End Date', 404));
-  }
+  validateDates(
+    req.body.startDateTime,
+    req.body.endDateTime,
+    req.body.untilDateTime
+  )
 
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.params.id,
     startDateTime: req.body.startDateTime,
-  };
-  let newEventException = await EventException.create(eventExceptionToCreate);
+  }
+  await EventException.create(eventExceptionToCreate)
 
-  let eventToCreate = {
-    scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
-    maxAttendees: req.body.maxAttendees,
-  };
-  let newEvent = await Event.create(eventToCreate);
+  const eventToCreate = createEventObject(req.body)
+  await Event.create(eventToCreate)
 
   res.status(201).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
-  let untilDate = new Date(req.body.startDateTime);
-  untilDate.setDate(untilDate.getDate() - 1);
+  let untilDate = new Date(req.body.startDateTime)
+  untilDate.setDate(untilDate.getDate() - 1)
 
-  let currentEvent = await Event.findById(req.params.id);
+  let currentEvent = await Event.findById(req.params.id)
   if (
     new Date(req.body.modifiedDateTime) <
     new Date(currentEvent.modifiedDateTime)
@@ -345,79 +293,46 @@ exports.updateThisAndFollowingEvents = catchAsync(async (req, res, next) => {
         'Failed. This update has been modified and you must refresh before updating it again.',
         404
       )
-    );
+    )
   }
 
-  currentEvent.recurrenceRule.untilDateTime = untilDate;
+  currentEvent.recurrenceRule.untilDateTime = untilDate
 
-  const updatedCurrentEvent = await Event.findByIdAndUpdate(
-    req.params.id,
-    currentEvent,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  await Event.findByIdAndUpdate(req.params.id, currentEvent, {
+    new: true,
+    runValidators: true,
+  })
 
-  if (req.body.endDateTime <= req.body.startDateTime) {
-    return next(new AppError('End Date is not After Start Date', 404));
-  }
-
-  if (req.body.untilDateTime <= req.body.endDateTime) {
-    return next(new AppError('Until Date is not After End Date', 404));
-  }
-
-  let eventToCreate = {
-    scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-    timeZone: req.body.timeZone,
-
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
-
-    recurrenceRule: req.body.recurrenceRule,
-    maxAttendees: req.body.maxAttendees,
-
-    modifiedDateTime: new Date(),
-  };
-  let newEvent = await Event.create(eventToCreate);
-
-  let eventExceptions;
+  validateDates(
+    req.body.startDateTime,
+    req.body.endDateTime,
+    req.body.untilDateTime
+  )
+  const eventToCreate = createEventObject(req.body)
+  let newEvent = await Event.create(eventToCreate)
 
   if (
-    new Date(currentEvent.startDateTime).getDay() !=
+    new Date(currentEvent.startDateTime).getDay() !==
     new Date(eventToCreate.startDateTime).getDay()
   ) {
-    eventExceptions = await EventException.deleteMany({
-      eventID: { $eq: req.params.id },
-    });
+    await EventException.deleteMany({ eventID: req.params.id })
   } else {
-    eventExceptions = await EventException.updateMany(
+    await EventException.updateMany(
       {
-        $and: [
-          { eventID: { $eq: req.params.id } },
-          { startDateTime: { $gte: req.body.startDateTime } },
-        ],
+        eventID: req.params.id,
+        startDateTime: { $gte: req.body.startDateTime },
       },
-      { eventID: newEvent._id },
-      function (err, eventExceptions) {
-        if (err) {
-          return next(new AppError('Issue updating Event Exceptions', 400));
-        }
-      }
-    );
+      { eventID: newEvent._id }
+    )
   }
 
   res.status(201).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.updateAllEvents = catchAsync(async (req, res, next) => {
-  let currentEvent = await Event.findById(req.params.id);
+  let currentEvent = await Event.findById(req.params.id)
   if (
     new Date(req.body.modifiedDateTime) <
     new Date(currentEvent.modifiedDateTime)
@@ -427,44 +342,23 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
         'Failed. This update has been modified and you must refresh before updating it again.',
         404
       )
-    );
+    )
   }
 
-  if (req.body.endDateTime <= req.body.startDateTime) {
-    return next(new AppError('End Date is not After Start Date', 404));
-  }
-
-  if (req.body.untilDateTime <= req.body.endDateTime) {
-    return next(new AppError('Until Date is not After End Date', 404));
-  }
-
-  let updatedEvent = {
-    scheduleID: req.body.scheduleID,
-
-    title: req.body.title,
-    description: req.body.description,
-    location: req.body.location,
-
-    frequency: req.body.frequency,
-    interval: req.body.interval,
-    untilDateTime: req.body.untilDateTime,
-
-    startDateTime: new Date(req.body.startDateTime),
-    endDateTime: new Date(req.body.endDateTime),
-
-    recurrenceRule: req.body.recurrenceRule,
-    maxAttendees: req.body.maxAttendees,
-
-    modifiedDateTime: new Date(),
-  };
+  validateDates(
+    req.body.startDateTime,
+    req.body.endDateTime,
+    req.body.untilDateTime
+  )
+  const updatedEvent = createEventObject(req.body)
 
   const event = await Event.findByIdAndUpdate(req.params.id, updatedEvent, {
     new: true,
     runValidators: true,
-  });
+  })
 
   if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+    return next(new AppError('No event found with that ID', 404))
   }
 
   if (
@@ -473,75 +367,69 @@ exports.updateAllEvents = catchAsync(async (req, res, next) => {
   ) {
     const eventExceptions = await EventException.deleteMany({
       eventID: { $eq: req.params.id },
-    });
+    })
   }
 
   res.status(200).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.deleteEvent = catchAsync(async (req, res, next) => {
-  const event = await Event.findByIdAndDelete(req.params.id);
+  const event = await Event.findByIdAndDelete(req.params.id)
 
   if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+    return next(new AppError('No event found with that ID', 404))
   }
 
-  res.status(204).send();
-});
+  res.status(204).send()
+})
 
 exports.deleteThisEvent = catchAsync(async (req, res, next) => {
   let eventExceptionToCreate = {
     scheduleID: req.body.scheduleID,
     eventID: req.params.id,
     startDateTime: req.body.startDateTime,
-  };
-  let eventException = await EventException.create(eventExceptionToCreate);
+  }
+  await EventException.create(eventExceptionToCreate)
 
   res.status(201).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.deleteThisAndFollowingEvents = catchAsync(async (req, res, next) => {
-  let untilDate = new Date(req.body.startDateTime);
-  untilDate.setDate(untilDate.getDate() - 1);
+  let untilDate = new Date(req.body.startDateTime)
+  untilDate.setDate(untilDate.getDate() - 1)
 
-  const currentEvent = await Event.findById(req.params.id);
+  const currentEvent = await Event.findById(req.params.id)
 
-  currentEvent.recurrenceRule.untilDateTime = untilDate;
+  currentEvent.recurrenceRule.untilDateTime = untilDate
 
-  const event = await Event.findByIdAndUpdate(req.params.id, currentEvent, {
+  await Event.findByIdAndUpdate(req.params.id, currentEvent, {
     new: true,
     runValidators: true,
-  });
+  })
 
-  let eventExceptions = await EventException.deleteMany({
-    $and: [
-      { eventID: { $eq: req.params.id } },
-      { startDateTime: { $gte: req.body.startDateTime } },
-    ],
-  });
-
-  if (!event) {
-    return next(new AppError('No event found with that ID', 404));
-  }
+  await EventException.deleteMany({
+    eventID: req.params.id,
+    startDateTime: { $gte: req.body.startDateTime },
+  })
 
   res.status(200).json({
     status: 'success',
-  });
-});
+  })
+})
 
 exports.deleteAllEvents = catchAsync(async (req, res, next) => {
-  const event = await Event.deleteOne({ _id: req.params.id });
-  const eventExceptions = await EventException.deleteMany({
-    eventID: { $eq: req.params.id },
-  });
+  const event = await Event.deleteOne({ _id: req.params.id })
+  await EventException.deleteMany({
+    eventID: req.params.id,
+  })
 
   if (!event) {
-    return next(new AppError('No event found with that ID', 404));
+    return next(new AppError('No event found with that ID', 404))
   }
 
-  res.status(204).send();
-});
+  res.status(204).send()
+})

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const roleSchema = new Schema({
   title: {
@@ -51,8 +51,8 @@ const roleSchema = new Schema({
     required: true,
     default: true,
   },
-});
+})
 
-const Role = mongoose.model('Role', roleSchema);
+const Role = mongoose.model('Role', roleSchema)
 
-module.exports = Role;
+module.exports = Role

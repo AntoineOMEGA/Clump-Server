@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const noteSchema = new Schema({
   clumpID: {
@@ -18,10 +18,10 @@ const noteSchema = new Schema({
     trim: true,
   },
   tagIDs: {
-    type: [ObjectId]
+    type: [ObjectId],
   },
-});
+})
 
-const Note = mongoose.model('note', noteSchema);
+const Note = mongoose.model('note', noteSchema)
 
-module.exports = Note;
+module.exports = Note

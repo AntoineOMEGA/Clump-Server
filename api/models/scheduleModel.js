@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const scheduleSchema = new Schema({
   clumpID: {
@@ -8,9 +8,9 @@ const scheduleSchema = new Schema({
     required: true,
   },
   tagIDs: {
-    type: [ObjectId]
+    type: [ObjectId],
   },
-  
+
   title: {
     type: String,
     required: true,
@@ -19,13 +19,13 @@ const scheduleSchema = new Schema({
   color: {
     type: String,
     required: true,
-    default: '#ffffff'
+    default: '#ffffff',
   },
   timeZone: {
     type: String,
-    required: true
+    required: true,
   },
-  
+
   startDate: {
     type: Date,
     required: true,
@@ -33,9 +33,9 @@ const scheduleSchema = new Schema({
   endDate: {
     type: Date,
     required: true,
-  }
-});
+  },
+})
 
-const Schedule = mongoose.model('schedule', scheduleSchema);
+const Schedule = mongoose.model('schedule', scheduleSchema)
 
-module.exports = Schedule;
+module.exports = Schedule

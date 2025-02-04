@@ -79,23 +79,28 @@ const eventSchema = new Schema({
   },
 
   recurrenceRule: {
-    type: Object
-    //child: recurrenceRuleSchema
+    type: recurrenceRuleSchema
   },
 
   createdDateTime: {
     type: Date,
     required: true,
-    default: new Date()
+    default: Date.now
   },
   createdBy: {
-    type: ObjectId
+    type: ObjectId,
+    required: true,
+    ref: 'User'
   },
 
   modifiedDateTime: {
     type: Date,
     required: true,
-    default: new Date()
+    default: Date.now
+  },
+  modifiedBy: {
+    type: ObjectId,
+    ref: 'User'
   },
   
   maxAttendees: {

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const eventExceptionSchema = new Schema({
   scheduleID: {
@@ -17,11 +17,10 @@ const eventExceptionSchema = new Schema({
 
   startDateTime: {
     type: Date,
-    required: true
+    required: true,
   },
+})
 
-});
+const EventException = mongoose.model('eventException', eventExceptionSchema)
 
-const EventException = mongoose.model('eventException', eventExceptionSchema);
-
-module.exports = EventException;
+module.exports = EventException

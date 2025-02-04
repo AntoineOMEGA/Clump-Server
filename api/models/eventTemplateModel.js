@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const eventTemplateSchema = new Schema({
   clumpID: {
@@ -19,9 +19,9 @@ const eventTemplateSchema = new Schema({
   location: {
     type: String,
     trim: true,
-  }
-});
+  },
+})
 
-const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema);
+const EventTemplate = mongoose.model('eventTemplate', eventTemplateSchema)
 
-module.exports = EventTemplate;
+module.exports = EventTemplate

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const memberSchema = new Schema({
   clumpID: {
@@ -14,9 +14,9 @@ const memberSchema = new Schema({
   roleID: {
     type: ObjectId,
     required: true,
-  }
-});
+  },
+})
 
-const Member = mongoose.model('Member', memberSchema);
+const Member = mongoose.model('Member', memberSchema)
 
-module.exports = Member;
+module.exports = Member
