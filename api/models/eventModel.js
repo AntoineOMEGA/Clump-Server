@@ -1,37 +1,87 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 
 const recurrenceRuleSchema = new Schema({
   frequency: {
     type: String,
-    enum: ['Daily', 'Weekly', 'Monthly by day', 'Monthly by date', 'Yearly by day', 'Yearly by date'],
+    enum: [
+      'Daily',
+      'Weekly',
+      'Monthly by day',
+      'Monthly by date',
+      'Yearly by day',
+      'Yearly by date',
+    ],
   },
 
   //Used with Weekly
   byDay: {
     type: [String],
-    enum: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
+    enum: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
   },
 
   //Used with Monthly by day, Yearly by day
   byWeekDayInMonth: {
     type: [String],
-    enum: ['1SU', '2SU', '3SU', '4SU', '5SU', '-1SU', '1MO', '2MO', '3MO', '4MO', '5MO', '-1MO', '1TU', '2TU', '3TU', '4TU', '5TU', '-1TU', '1WE', '2WE', '3WE', '4WE', '5WE', '-1WE', '1TH', '2TH', '3TH', '4TH', '5TH', '-1TH', '1FR', '2FR', '3FR', '4FR', '5FR', '-1FR', '1SA', '2SA', '3SA', '4SA', '5SA', '-1SA']
+    enum: [
+      '1SU',
+      '2SU',
+      '3SU',
+      '4SU',
+      '5SU',
+      '-1SU',
+      '1MO',
+      '2MO',
+      '3MO',
+      '4MO',
+      '5MO',
+      '-1MO',
+      '1TU',
+      '2TU',
+      '3TU',
+      '4TU',
+      '5TU',
+      '-1TU',
+      '1WE',
+      '2WE',
+      '3WE',
+      '4WE',
+      '5WE',
+      '-1WE',
+      '1TH',
+      '2TH',
+      '3TH',
+      '4TH',
+      '5TH',
+      '-1TH',
+      '1FR',
+      '2FR',
+      '3FR',
+      '4FR',
+      '5FR',
+      '-1FR',
+      '1SA',
+      '2SA',
+      '3SA',
+      '4SA',
+      '5SA',
+      '-1SA',
+    ],
   },
 
   //Used with Monthly by date, Yearly by date
   byMonthDay: {
     type: [Number],
     min: 1,
-    max: 31
+    max: 31,
   },
 
   //Used with Yearly by day, Yearly by date
   byMonth: {
     type: Number,
     min: 1,
-    max: 12
+    max: 12,
   },
 
   interval: {
@@ -39,12 +89,12 @@ const recurrenceRuleSchema = new Schema({
   },
 
   untilDateTime: {
-    type: Date
+    type: Date,
   },
   occurrences: {
-    type: Number
-  }
-});
+    type: Number,
+  },
+})
 
 const eventSchema = new Schema({
   scheduleID: {
@@ -76,38 +126,44 @@ const eventSchema = new Schema({
   endDateTime: {
     type: Date,
     required: true,
+    validate: {
+      validator: function (value) {
+        return value > this.startDateTime
+      },
+      message: 'End date and time must be after start date and time.',
+    },
   },
 
   recurrenceRule: {
-    type: recurrenceRuleSchema
+    type: recurrenceRuleSchema,
   },
 
   createdDateTime: {
     type: Date,
     required: true,
-    default: Date.now
+    default: Date.now,
   },
   createdBy: {
     type: ObjectId,
     required: true,
-    ref: 'User'
+    ref: 'User',
   },
 
   modifiedDateTime: {
     type: Date,
     required: true,
-    default: Date.now
+    default: Date.now,
   },
   modifiedBy: {
     type: ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
-  
+
   maxAttendees: {
-    type: Number
+    type: Number,
   },
-});
+})
 
-const Event = mongoose.model('event', eventSchema);
+const Event = mongoose.model('event', eventSchema)
 
-module.exports = Event;
+module.exports = Event
