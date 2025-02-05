@@ -6,7 +6,6 @@ const eventTemplateSchema = new Schema({
   clumpID: {
     type: ObjectId,
   },
-
   title: {
     type: String,
     required: true,

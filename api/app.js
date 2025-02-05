@@ -6,7 +6,9 @@ const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
 const cookieParser = require('cookie-parser')
+const cors = require('cors')
 var history = require('connect-history-api-fallback')
+require('dotenv').config()
 
 const AppError = require('./utils/appError')
 const globalErrorHandler = require('./controllers/errorController')
@@ -31,8 +33,11 @@ app.use(
   })
 )
 
-//Set HTTP Security Headers
+// Set HTTP Security Headers
 app.use(helmet())
+
+// Enable CORS
+app.use(cors())
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
@@ -41,11 +46,11 @@ if (process.env.NODE_ENV === 'development') {
 const limiter = rateLimit({
   max: 1000,
   windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP.',
+  message: 'Too many requests from this IP, please try again after an hour.',
 })
 app.use('/api', limiter)
 
-//Body parser and limit data size for requests
+// Body parser and limit data size for requests
 app.use(
   express.json({
     limit: '10kb',
@@ -62,8 +67,8 @@ app.use(mongoSanitize())
 // Data Sanitization against XSS
 app.use(xss())
 
-//Prevent parameter pollution
-//white list for parameters you want multiple of
+// Prevent parameter pollution
+// whitelist for parameters you want multiple of
 app.use(
   hpp({
     whitelist: ['duration'],

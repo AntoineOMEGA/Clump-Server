@@ -1,4 +1,5 @@
 const express = require('express')
+const checkPermissions = require('../middleware/checkPermissions')
 
 const scheduleController = require('../controllers/scheduleController')
 const scheduleLinkController = require('../controllers/scheduleLinkController')
@@ -7,16 +8,16 @@ const authController = require('../controllers/authController')
 const router = express.Router()
 
 router
-  .route(`/:id/exportSchedule/:linkId`)
+  .route('/:scheduleId/exportSchedule/:linkId')
   .get(scheduleLinkController.generateICal)
 
 router
-  .route('/:id/scheduleLinks')
+  .route('/:scheduleId/scheduleLinks')
   .get(authController.protect, scheduleLinkController.getScheduleLinks)
   .post(authController.protect, scheduleLinkController.createScheduleLink)
 
 router
-  .route('/:id/scheduleLinks/:linkId')
+  .route('/:scheduleId/scheduleLinks/:linkId')
   .delete(authController.protect, scheduleLinkController.deleteScheduleLink)
 
 router
@@ -25,9 +26,21 @@ router
   .post(authController.protect, scheduleController.createSchedule)
 
 router
-  .route('/:id')
-  .get(authController.protect, scheduleController.getSchedule)
-  .put(authController.protect, scheduleController.updateSchedule)
-  .delete(authController.protect, scheduleController.deleteSchedule)
+  .route('/:scheduleId')
+  .get(
+    authController.protect,
+    checkPermissions('view'),
+    scheduleController.getSchedule
+  )
+  .put(
+    authController.protect,
+    checkPermissions('edit'),
+    scheduleController.updateSchedule
+  )
+  .delete(
+    authController.protect,
+    checkPermissions('admin'),
+    scheduleController.deleteSchedule
+  )
 
 module.exports = router
